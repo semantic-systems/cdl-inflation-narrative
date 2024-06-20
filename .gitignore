@@ -1,4 +1,6 @@
 data/
+!data/.gitkeep
+
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
