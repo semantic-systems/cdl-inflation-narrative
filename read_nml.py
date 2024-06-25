@@ -34,7 +34,7 @@ for year in tqdm(years):
     djn_subject_codes = []
     displaydates = []
     print(year)
-    files = glob.glob(f"./data/{year}*.nml.gz")
+    files = glob.glob(f"./data/DJN/{year}*.nml.gz")
 
     for file in files:
         with gzip.open(file,'rt', encoding="iso-8859-1") as f:
