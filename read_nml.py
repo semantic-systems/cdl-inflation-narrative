@@ -47,14 +47,15 @@ for year in tqdm(years):
                     accession_numbers.append(accession_number)
                 if date_start_strings in line:
                     displaydate = line.split(date_start_strings)[-1].split(date_end_strings)[0]
-                    subject_code = []
+                    subject_code = ""
                 # subject code
                 if djn_subject_start_string in line:
                     save_this_line_as_subject_code = True
                 if save_this_line_as_subject_code:
-                    subject_code.append(line)
+                    subject_code += line
                 if djn_subject_end_string in line:
                     djn_subject_codes.append(subject_code)
+                    save_this_line_as_subject_code = False
                 # headline
                 if headline_end_strings in line:
                     headlines.append(line.split(headline_end_strings)[0])
