@@ -13,7 +13,7 @@ Before extracting information from the data, we need to filter out non-relevant 
    1. en: {"inflation", "prices"}
    2. de: {}
 2. tags
-   1. DJN: {}
+   1. DJN: {"N/DJIB", "N/DJG", "N/GPRW", "N/DJAN", "AWSJ", "WSJE", "N/PREL", "N/NRG", "N/DJBN", "N/AWP", "N/BRNS", "N/JNL", "N/WAL", "N/WLS", "N/WSJ"}
    2. FAZ: {}
    3. SZ: {}
    4. Handelsblatt: {}
