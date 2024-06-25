@@ -53,7 +53,7 @@ for year in tqdm(years):
                     save_this_line_as_subject_code = True
                 if save_this_line_as_subject_code:
                     subject_code.append(line)
-                if body_end_strings in line:
+                if djn_subject_end_string in line:
                     djn_subject_codes.append(subject_code)
                 # headline
                 if headline_end_strings in line:
