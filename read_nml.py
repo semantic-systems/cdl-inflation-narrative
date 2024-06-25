@@ -39,6 +39,7 @@ for year in tqdm(years):
     for file in files:
         with gzip.open(file,'rt', encoding="iso-8859-1") as f:
             save_this_line_as_body = False
+            save_this_line_as_subject_code = False
             for line in f:
                 # meta
                 if accession_number_start_strings in line:
