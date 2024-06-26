@@ -1,6 +1,5 @@
 import pandas as pd
 import requests
-from tqdm import tqdm
 from pathlib import Path
 from vllm import LLM, SamplingParams
 
@@ -41,10 +40,10 @@ def annotate_event_type(df, year, prompt, forced=False):
 
 def run_llama3_vllm():
     llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct", tensor_parallel_size=2)
-    sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
+    sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"./prompts/has_cause.txt", "r")
     prompt = file.read()
-    for year in tqdm([2023, 2018, 2019, 2020, 2021, 2022]):
+    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
         df_path = Path(f"./data/DJN/inflation_mentioned_news_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
