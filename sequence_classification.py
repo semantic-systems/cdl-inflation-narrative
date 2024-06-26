@@ -40,7 +40,7 @@ def annotate_event_type(df, year, prompt, forced=False):
         return df
 
 def run_llama3_vllm():
-    llm = LLM(model="meta-llama/Meta-Llama-3-70B-Instruct", tensor_parallel_size=2)
+    llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct", tensor_parallel_size=2)
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95)
     file = open(f"./prompts/has_cause.txt", "r")
     prompt = file.read()
