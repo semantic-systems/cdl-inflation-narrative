@@ -51,12 +51,10 @@ def run_llama3_vllm():
         print(f"Number of articles: {len(df)}")
         df = df.drop_duplicates(subset=['body'])
         print(f"Number of articles (deduplicated): {len(df)}")
-        predictions = []
         prompts = [f"{prompt}\n{snippet}\nanswer:\n" for snippet in df["body"].values]
         outputs = llm.generate(prompts, sampling_params)
         generated_texts = [output.outputs[0].text for output in outputs]
-        predictions.append(generated_texts)
-        df[prediction_col] = predictions
+        df[prediction_col] = generated_texts
         df.to_csv(Path(f"./outputs/llama3/has_cause_{year}.csv"), index=False)
         return df
 
