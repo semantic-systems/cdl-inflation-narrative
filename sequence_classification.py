@@ -55,7 +55,6 @@ def run_llama3_vllm():
         generated_texts = [output.outputs[0].text for output in outputs]
         df[prediction_col] = generated_texts
         df.to_csv(Path(f"./outputs/llama3/has_cause_{year}.csv"), index=False)
-        return df
 
 if __name__ == "__main__":
     run_llama3_vllm()
