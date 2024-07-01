@@ -16,7 +16,7 @@ for i, name in enumerate(file_names):
     stats.append({"Year": year, "Type": "#has_cause", "Count": len(yes_df)})
     stats.append({"Year": year, "Type": "#no_cause", "Count": len(no_df)})
     stats.append({"Year": year, "Type": "#na", "Count": len(na_df)})
-    print(f"Year: {year} - #new: {len(df)} - #has_cause: {len(yes_df)} - #no_cause: {len(no_df)} - #na: {len(na_df)}")
+    print(f"Year: {year} - #articles: {len(df)} - #has_cause: {len(yes_df)} - #no_cause: {len(no_df)} - #na: {len(na_df)}")
     df_has_cause.append(yes_df)
 
 stats_df = pd.DataFrame(stats)

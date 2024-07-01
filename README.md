@@ -17,9 +17,7 @@ Before extracting information from the data, we need to filter out non-relevant 
    2. FAZ: {}
    3. SZ: {}
    4. Handelsblatt: {}
-3. descriptive statistics
-   1. duplicated articles
-      
+
 | Year | #Articles | #Articles (deduplicated) | #Articles mentioning inflation cause |
 |------|-----------|--------------------------|--------------------------------------|
 | 2018 | 153600    | 152698                   | 16114                                | 
