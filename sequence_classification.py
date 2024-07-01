@@ -112,4 +112,14 @@ def run_llama3_vllm_change_in_prices_2_2():
 
 
 if __name__ == "__main__":
-    run_llama3_vllm_inflation_1_1()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("exp", help="inflation/deflation/change_of_prices/direction_of_change")
+    args = parser.parse_args()
+    if args.exp == "inflation":
+        run_llama3_vllm_inflation_1_1()
+    if args.exp == "deflation":
+        run_llama3_vllm_deflation_1_2()
+    if args.exp == "change_of_prices":
+        run_llama3_vllm_change_in_prices_2_1()
+    if args.exp == "direction_of_change":
+        run_llama3_vllm_change_in_prices_2_2()
