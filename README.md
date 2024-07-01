@@ -52,8 +52,8 @@ Resulting articles mentioning the cause of inflation are considered to be a filt
       1. Methodology validation: Dow Jones Newswires (en) <-> Andre et al. 
       2. Generalization: FAZ, SZ, Handelsblatt (de) <-> Ontology from Uli and Max survey
    2. Filtering
-      1. Regex (inflation, price**s**)
-      2. Article tags (quite aggressive, but do not know the inner mechanism. DJN has it, not sure about FAZ, SZ and Handelsblatt)
+      ~~1. Regex (inflation, price**s**)~~
+      ~~2. Article tags (quite aggressive, but do not know the inner mechanism. DJN has it, not sure about FAZ, SZ and Handelsblatt)~~
    3. Annotation
       1. 500 news articles for each dataset
       2. For DJN, we follow Andre et al., ontology to build DAG 
@@ -63,3 +63,6 @@ Resulting articles mentioning the cause of inflation are considered to be a filt
    1. Has causes?
    2. What causes?
    3. Sentiment analysis (document level) -> should be generalizable from public corpora 
+3. prompts
+   1. consider direction (inflation and deflation)
+   2. compare inflation and rise of prices, deflation and drop of prices

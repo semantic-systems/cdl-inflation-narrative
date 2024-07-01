@@ -79,7 +79,7 @@ for year in tqdm(years):
     inflation_mentioned_subject_codes = []
 
     for i, body in enumerate(bodies):
-        if ("inflation" in body) or ("prices" in body) or ("inflation" in headlines[i]) or ("prices" in headlines[i]):
+        if ("deflation" in body) or ("inflation" in body) or ("prices" in body) or ("deflation" in headlines[i]) or ("inflation" in headlines[i]) or ("prices" in headlines[i]):
             inflation_mentioned_dates.append(displaydates[i])
             inflation_mentioned_headlines.append(headlines[i])
             inflation_mentioned_bodies.append(bodies[i])
@@ -92,4 +92,4 @@ for year in tqdm(years):
                                 "headline": inflation_mentioned_headlines,
                                 "body": inflation_mentioned_bodies}
     df = pd.DataFrame.from_dict(inflation_mentioned_news)
-    df.to_csv(f'./data/inflation_mentioned_news_{year}.csv')
+    df.to_csv(f'./data/DJN/inflation_deflation_prices_{year}.csv')

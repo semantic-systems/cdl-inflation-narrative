@@ -1,0 +1,37 @@
+Please read carefully through
+(1) the following three broader factors (Demand, Supply and Miscellaneous), and their fine-grained categories in the table below,
+(2) and the above news snippet carefully again.
+
+Factor 1: Demand
+Category|Explanation|Example
+Government spending|Increases in government spending (e.g., stimulus payments).|“[...] Stimulus checks were given to all middle income families; A second round of stimulus checks were also given to all families by the new administration [...]”
+Monetary policy|Loose monetary policy by the Federal Reserve.|“[...] The Federal Reserve increasing the amount of money in the economy [...]”
+Pent-up demand|Reopening of the economy and the associated higher incomes, new spending opportunities, and optimism about the future.|“[...] now that the lockdowns have ended, the demand is there and more people are trying to get their lives back to normal.”
+Demand shift|Shift of demand across sectors (particularly increases in durables).|“[...] Shifts in what people are buying due to the pandemic - more goods, especially durables, fewer services. [...]” (taken from the expert sample)
+Demand (residual)|Increase in demand that cannot be attributed to the other demand channels.|“That people are buying a lot more products [...]”
+
+Factor 2: Supply
+Category|Explanation|Example
+Supply chain issues|Disruption of global supply chains.|“[...] containers sitting at docks waiting for pick up [...]”
+Labor shortage|Shortage of workers, e.g., due to some workers dropping out of the labor force, and higher wage costs.|“[...] People are less motivated to work currently, causing businesses to hike up rates, and offer a higher wage to attract employees. [...]”
+Energy crisis|The global energy crisis, leading to shortages of, e.g., oil and natural gas and higher energy prices.|“I think the rising cost of gas has caused the inflation rate to rise on other products. [...]”
+Supply (residual)|Negative supply effects other than labor shortage, supply chain issues, energy crisis.|“[...] less production in goods [...]” “[...] business shutdowns [...]”
+
+Factor 3: Miscellaneous
+Category|Explanation|Example
+Pandemic|The COVID-19 pandemic, the global pandemic recession, lockdowns, and other policy measures.|“The pandemic was the beginning factor, it caused the economy to shut down and thus caused the beginning of inflation. [...]”
+Government mismanagement|Policy failure, mismanagement by policymakers, policymakers are blamed|“I think Joe Biden and the Democratic Party are at fault for the inflation increasing so rapidly. [...]”
+Russia-Ukraine war|The Russian invasion of Ukraine, the international economic, political, and military response.|“[...] the war in Ukraine has a lot to do with the inflation rate as well because of the sanctions with Russia. [...]” (taken from March 2022 household sample)
+Inflation expectations|Expectations about high inflation in the coming years, making firms preemptively increase prices and workers bargain for higher wages.|“[...] Producers may raise prices to cover the expected increase in wages for workers willing to meet the rising cost of living [...]”
+Base effect|Mentions that inflation is high due to a base effect, i.e., a very low inflation rate during the pandemic, leading almost mechanically to high inflation rates now.|“The first reason inflation is as high as 6.2% at an annual rate is a base effect due to low levels of inflation during the COVID-19 crisis [...]” (taken from the expert sample)
+Government debt||High level of government debt.|“[...] With the debt as high as it is, the only recourse is for inflation increase. [...]”
+Tax increases|Tax increases, such as VAT hikes.|“[...] Our prices rise because of the tax increase.”
+Price-gouging|Greedy companies exploit opportunities to increase profits. Companies are trying to make up for the money they lost during the pandemic.|“I think that companies used the Covid pandemic to increase their profits so they could make up for lost profit during the shut down. [...]”
+
+Now, what are the causes of inflation/rise in prices? In your answer, you should enumerate all mentioned causes and their categories, in this format (mention: category). Be precise!
+
+For example:
+* Higher costs of energy: Energy crisis
+* Higher costs of transportation: Supply chain issues
+* Higher costs of labor: Labor shortage
+* The Federal Reserve is expected to raise interest rates: Monetary policy
