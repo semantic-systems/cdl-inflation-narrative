@@ -1,8 +1,8 @@
 import pandas as pd
 import plotly.express as px
 
-file_names = ["./has_cause_2018.csv", "./has_cause_2019.csv", "./has_cause_2020.csv", "./has_cause_2021.csv",
-              "./has_cause_2022.csv", "./has_cause_2023.csv"]
+file_names = ["./llama3/has_cause_2018.csv", "./llama3/has_cause_2019.csv", "./llama3/has_cause_2020.csv", "./llama3/has_cause_2021.csv",
+              "./llama3/has_cause_2022.csv", "./llama3/has_cause_2023.csv"]
 
 stats = []
 df_has_cause = []
@@ -21,16 +21,16 @@ for i, name in enumerate(file_names):
 
 stats_df = pd.DataFrame(stats)
 df_has_cause = pd.concat(df_has_cause)
-df_has_cause.to_csv("./outputs/has_cause_df.csv")
+df_has_cause.to_csv("./outputs/llama3/has_cause_df.csv")
 
 fig = px.bar(stats_df, x="Year", y="Count", color="Type",
              title="Zero-shot classification with Vicuna 1.5 \n (whether or not the cause of inflation is mentioned)")
-fig.write_image("./outputs/stats_classification_has_cause.png")
+fig.write_image("./outputs/llama3/stats_classification_has_cause.png")
 
 stats_has_cause_df = stats_df.loc[stats_df["Type"] == "#has_cause"]
 fig = px.bar(stats_has_cause_df, x="Year", y="Count",
              title="Distribution of articles mentioning inflation causes")
-fig.write_image("./outputs/has_cause_distribution.png")
+fig.write_image("./outputs/llama3/has_cause_distribution.png")
 
 
 

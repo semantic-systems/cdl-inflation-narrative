@@ -17,6 +17,17 @@ Before extracting information from the data, we need to filter out non-relevant 
    2. FAZ: {}
    3. SZ: {}
    4. Handelsblatt: {}
+3. descriptive statistics
+   1. duplicated articles
+      
+| Year | #Articles | #Articles (deduplicated) | #Articles mentioning inflation cause |
+|------|-----------|--------------------------|--------------------------------------|
+| 2018 | 153600    | 152698                   |                                      | 
+| 2019 | 139939    | 139529                   |                                      |   
+| 2020 | 133093    | 132722                   |                                      |   
+| 2021 | 145854    | 144772                   |                                      |   
+| 2022 | 187663    | 186971                   |                                      |   
+| 2023 | 13762     | 13701                    |                                      |   
 
 
 ### 3 Tasks
