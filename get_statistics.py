@@ -1,8 +1,8 @@
 import pandas as pd
 import plotly.express as px
 
-file_names = ["./llama3/has_cause_2018.csv", "./llama3/has_cause_2019.csv", "./llama3/has_cause_2020.csv", "./llama3/has_cause_2021.csv",
-              "./llama3/has_cause_2022.csv", "./llama3/has_cause_2023.csv"]
+file_names = ["./outputs/llama3/has_cause_2018.csv", "./outputs/llama3/has_cause_2019.csv", "./outputs/llama3/has_cause_2020.csv", "./outputs/llama3/has_cause_2021.csv",
+              "./outputs/llama3/has_cause_2022.csv", "./outputs/llama3/has_cause_2023.csv"]
 
 stats = []
 df_has_cause = []
