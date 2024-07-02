@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 from pathlib import Path
 from vllm import LLM, SamplingParams
+import argparse
 
 
 prediction_col = "response"
