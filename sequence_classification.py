@@ -118,7 +118,7 @@ def run_llama3_vllm_change_in_prices_2_2():
 def run_llama3_vllm_one_hop_dag_3_1():
     llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct", tensor_parallel_size=2)
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
-    file = open(f"prompts/3.1.one_hop_dag.txt", "r")
+    file = open(f"prompts/3.1.one_hop_dag.txt", "rb", encoding="utf-8")
     prompt = file.read()
     prev_file = open(f"prompts/1.1.inflation_has_cause.txt", "r")
     prev_prompt = prev_file.read()
