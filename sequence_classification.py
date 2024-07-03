@@ -64,7 +64,7 @@ def run_llama3_vllm_deflation_1_2():
     file = open(f"prompts/1.2.deflation_has_cause.txt", "r")
     prompt = file.read()
     for year in [2023, 2018, 2019, 2020, 2021, 2022]:
-        df_path = Path(f"./data/DJN/deflation_mentioned_news_{year}.csv")
+        df_path = Path(f"./data/DJN/deflation_prices_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
         print(f"Number of articles: {len(df)}")

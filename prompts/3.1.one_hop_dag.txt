@@ -31,7 +31,7 @@ Price-gouging|Greedy companies exploit opportunities to increase profits. Compan
 Now, what are the causes of inflation/rise in prices? In your answer, you should enumerate all mentioned causes and their categories, in this format (mention: category). Be precise!
 
 For example:
-* Higher costs of energy: Energy crisis
-* Higher costs of transportation: Supply chain issues
-* Higher costs of labor: Labor shortage
-* The Federal Reserve is expected to raise interest rates: Monetary policy
+- Higher costs of energy: Energy crisis
+- Higher costs of transportation: Supply chain issues
+- Higher costs of labor: Labor shortage
+- The Federal Reserve is expected to raise interest rates: Monetary policy
