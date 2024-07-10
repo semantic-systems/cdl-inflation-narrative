@@ -106,7 +106,7 @@ def run_llama3_vllm_change_in_prices_2_2():
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
         print(f"Number of articles: {len(df)}")
-        df = df.loc[df[prediction_col].str.startswith("Yes")]
+        df = df.loc[df["answer_change_in_prices"].str.startswith("Yes")]
         df["prompts"] = 'User: ' + df['prompts'] + '\nSystem: ' + df['answer_change_in_prices']
         prompts = [f"{prompt_history}\nUser: {prompt}\n\nSystem: " for prompt_history in df["prompts"].values]
         outputs = llm.generate(prompts, sampling_params)
