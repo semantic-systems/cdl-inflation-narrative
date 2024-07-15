@@ -148,7 +148,7 @@ def run_llama3_vllm_one_hop_dag_3_2():
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
         print(f"Number of articles: {len(df)}")
-        prompts = [f"{prompt_history}\n\nSystem: {df["answer_one_hop_dag"].values[i]}\n\nUser: {prompt}\n\nSystem: " for i, prompt_history in enumerate(df["prompts"].values)]
+        prompts = [f"{prompt_history}\n\nSystem: {df['answer_one_hop_dag'].values[i]}\n\nUser: {prompt}\n\nSystem: " for i, prompt_history in enumerate(df["prompts"].values)]
         outputs = llm.generate(prompts, sampling_params)
         generated_texts = [output.outputs[0].text for output in outputs]
         df["prompts"] = prompts
