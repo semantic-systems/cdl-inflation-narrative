@@ -1,0 +1,9 @@
+Please take your time and think about it again. Answer only factors mentioned in the news snippets.
+
+Format:
+- Higher costs of energy: Energy crisis
+- Higher costs of transportation: Supply chain issues
+- Higher costs of labor: Labor shortage
+- The Federal Reserve is expected to raise interest rates: Monetary policy
+
+Strictly follow the above format (enumerated by - and separated by :), answer only with enumeration, nothing else.

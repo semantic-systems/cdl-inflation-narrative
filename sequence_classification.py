@@ -138,6 +138,23 @@ def run_llama3_vllm_one_hop_dag_3_1():
         df["answer_one_hop_dag"] = generated_texts
         df.to_csv(Path(f"./outputs/llama3/one_hop_dag/3.1.one_hop_dag_{year}.csv"), index=False)
 
+def run_llama3_vllm_one_hop_dag_3_2():
+    llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct", tensor_parallel_size=2)
+    sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
+    file = open(f"prompts/3.2.one_hop_dag.txt", "r", encoding="utf-8")
+    prompt = file.read()
+    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+        df_path = Path(f"./outputs/llama3/one_hop_dag/3.1.one_hop_dag_{year}.csv")
+        df = pd.read_csv(df_path)
+        print(f"Year: {year}")
+        print(f"Number of articles: {len(df)}")
+        prompts = [f"{prompt_history}\n\nSystem: {df["answer_one_hop_dag"].values[i]}\n\nUser: {prompt}\n\nSystem: " for i, prompt_history in enumerate(df["prompts"].values)]
+        outputs = llm.generate(prompts, sampling_params)
+        generated_texts = [output.outputs[0].text for output in outputs]
+        df["prompts"] = prompts
+        df["answer_one_hop_dag_2"] = generated_texts
+        df.to_csv(Path(f"./outputs/llama3/one_hop_dag/3.2.one_hop_dag_{year}.csv"), index=False)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("exp", help="inflation/deflation/change_of_prices/direction_of_change")
@@ -152,3 +169,5 @@ if __name__ == "__main__":
         run_llama3_vllm_change_in_prices_2_2()
     if args.exp == "one_hop_dag":
         run_llama3_vllm_one_hop_dag_3_1()
+    if args.exp == "one_hop_dag_2":
+        run_llama3_vllm_one_hop_dag_3_2()
