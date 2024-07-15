@@ -36,9 +36,9 @@ df_has_cause = []
 
 for i, name in enumerate(file_names):
     df = pd.read_csv(name)
-    yes_df = df.loc[df['response'].str.startswith("Yes")]
-    no_df = df.loc[df['response'].str.startswith("No")]
-    na_df = df.loc[df['response'].str.startswith("0")]
+    yes_df = df.loc[df['answer_change_in_prices'].str.startswith("Yes")]
+    no_df = df.loc[df['answer_change_in_prices'].str.startswith("No")]
+    na_df = df.loc[df['answer_change_in_prices'].str.startswith("0")]
     year = name.split(".csv")[0].split("_")[-1]
     stats.append({"Year": year, "Type": "#has_cause", "Count": len(yes_df)})
     stats.append({"Year": year, "Type": "#no_cause", "Count": len(no_df)})
