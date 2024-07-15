@@ -29,7 +29,7 @@ direction_of_change_file_names = ["./outputs/llama3/change_in_prices/2.2.change_
                                   "./outputs/llama3/change_in_prices/2.2.change_direction_2021.csv",
                                   "./outputs/llama3/change_in_prices/2.2.change_direction_2023.csv"]
 
-file_names = inflation_has_cause_file_names
+file_names = deflation_has_cause_file_names
 
 stats = []
 df_has_cause = []
@@ -48,16 +48,16 @@ for i, name in enumerate(file_names):
 
 stats_df = pd.DataFrame(stats)
 df_has_cause = pd.concat(df_has_cause)
-df_has_cause.to_csv("./outputs/llama3/inflation/has_cause_df.csv")
+df_has_cause.to_csv("./outputs/llama3/deflation/has_cause_df.csv")
 
 fig = px.bar(stats_df, x="Year", y="Count", color="Type",
-             title="Zero-shot classification with Llama 3 \n (whether or not the cause of inflation is mentioned)")
-fig.write_image("./outputs/llama3/inflation/stats_classification_has_cause.png")
+             title="Zero-shot classification with Llama 3 \n (whether or not the cause of deflation is mentioned)")
+fig.write_image("./outputs/llama3/deflation/stats_classification_has_cause.png")
 
 stats_has_cause_df = stats_df.loc[stats_df["Type"] == "#has_cause"]
 fig = px.bar(stats_has_cause_df, x="Year", y="Count",
-             title="Distribution of articles mentioning inflation causes")
-fig.write_image("./outputs/llama3/inflation/has_cause_distribution.png")
+             title="Distribution of articles mentioning deflation causes")
+fig.write_image("./outputs/llama3/deflation/has_cause_distribution.png")
 
 
 
