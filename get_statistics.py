@@ -50,7 +50,7 @@ df_has_cause.to_csv("./outputs/llama3/inflation/has_cause_df.csv")
 
 fig = px.bar(stats_df, x="Year", y="Count", color="Type",
              title="Zero-shot classification with Llama 3 <br>(whether or not the cause of inflation is mentioned)")
-fig.write_image("./outputs/llama3/change_in_prices/stats_classification_has_cause.png")
+fig.write_image("./outputs/llama3/inflation/stats_classification_has_cause.png")
 
 stats_has_cause_df = stats_df.loc[stats_df["Type"] == "#has_cause"]
 fig = px.bar(stats_has_cause_df, x="Year", y="Count",
