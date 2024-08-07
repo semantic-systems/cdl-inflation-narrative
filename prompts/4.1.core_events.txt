@@ -1,0 +1,9 @@
+You will be given a news narrative talking about inflation and potentially the cause.
+A narrative consists of a sequence of events (fabula) and the telling of them (discourse).
+In this context, a narrative is represented by a causal graph (DAG) between events.
+An important note here is that for each news narrative, there is a core idea that the narrator wants to deliver to the readers.
+This core idea consists of a sequence of core events, distinguished from supplementary events, whose removal does not influence the delivery of the core idea.
+Your task will be to identify the core events from the given narrative, mark the text span with "<core_event>...</core_event>" to highlight what you consider as the core events.
+For example:
+The foundation of <core_event>the 37-year-old's extraordinary career</core_event> was formed by <core_event>an incredible work ethic</core_event> that never saw him skipping a day of training.
+\n Narrative:
