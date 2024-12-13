@@ -5,8 +5,26 @@ from vllm import LLM, SamplingParams
 import argparse
 
 
-prediction_col = "response"
+prediction_col = "llama31_8b_response"
+years = [1990, 1991, 1999, 2001, 2007, 2008, 2021, 2022, 2023]
 
+def filter_by_tags(df):
+    include_indices = []
+    include_codes = ["DJIB", "DJG", "GPRW", "DJAN", "AWSJ", "WSJE", "PREL", "NRG", "DJBN", "AWP", "BRNS", "JNL", "WAL",
+                     "WLS", "WSJ"]
+    exclude_codes = ["TAB", "TAN", "FTH", "CAL", "PRL"]
+    for i in range(len(df)):
+        include = False
+        for code in include_codes:
+            if code in df["subject_code"].values[i]:
+                include = True
+        for code in exclude_codes:
+            if code in df["subject_code"].values[i]:
+                include = False
+        if include:
+            include_indices.append(i)
+    df_filtered = df.iloc[include_indices]
+    return df_filtered
 
 def llama3_skynet_api(snippet, prompt):
     try:
@@ -40,30 +58,32 @@ def annotate_event_type(df, year, prompt, forced=False):
         return df
 
 def run_llama3_vllm_inflation_1_1():
-    llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct", tensor_parallel_size=2)
+    llm = LLM(model="meta-llama/Llama-3.1-8B-Instruct", tensor_parallel_size=2)
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"prompts/1.1.inflation_has_cause.txt", "r")
     prompt = file.read()
-    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+    for year in years:
         df_path = Path(f"./data/DJN/inflation_mentioned_news_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
         print(f"Number of articles: {len(df)}")
         df = df.drop_duplicates(subset=['body'])
         print(f"Number of articles (deduplicated): {len(df)}")
+        df = filter_by_tags(df)
+        print(f"Number of articles (filtered by tags): {len(df)}")
         prompts = [f"{prompt}\n{snippet}\nanswer:\n" for snippet in df["body"].values]
         outputs = llm.generate(prompts, sampling_params)
         generated_texts = [output.outputs[0].text for output in outputs]
         df["prompts"] = prompts
         df[prediction_col] = generated_texts
-        df.to_csv(Path(f"./outputs/llama3/inflation/1.1.inflation_has_cause_{year}.csv"), index=False)
+        df.to_csv(Path(f"./outputs/llama31/inflation/1.1.inflation_has_cause_{year}.csv"), index=False)
 
 def run_llama3_vllm_deflation_1_2():
     llm = LLM(model="meta-llama/Meta-Llama-3-8B-Instruct", tensor_parallel_size=2)
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"prompts/1.2.deflation_has_cause.txt", "r")
     prompt = file.read()
-    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+    for year in years:
         df_path = Path(f"./data/DJN/deflation_prices_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
@@ -82,7 +102,7 @@ def run_llama3_vllm_change_in_prices_2_1():
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"prompts/2.1.change_in_prices.txt", "r")
     prompt = file.read()
-    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+    for year in years:
         df_path = Path(f"./data/DJN/inflation_deflation_prices_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
@@ -101,7 +121,7 @@ def run_llama3_vllm_change_in_prices_2_2():
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"prompts/2.2.change_direction.txt", "r")
     prompt = file.read()
-    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+    for year in years:
         df_path = Path(f"./outputs/llama3/change_in_prices/2.1.change_in_prices_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
@@ -122,7 +142,7 @@ def run_llama3_vllm_one_hop_dag_3_1():
     prompt = file.read()
     prev_file = open(f"prompts/1.1.inflation_has_cause.txt", "r")
     prev_prompt = prev_file.read()
-    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+    for year in years:
         df_path = Path(f"./outputs/llama3/inflation/1.1.inflation_has_cause_{year}.csv")
         df = pd.read_csv(df_path)
         prev_prompts = [f"{prev_prompt}\n{snippet}\nanswer:\n" for snippet in df["body"].values]
@@ -143,7 +163,7 @@ def run_llama3_vllm_one_hop_dag_3_2():
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"prompts/3.2.one_hop_dag.txt", "r", encoding="utf-8")
     prompt = file.read()
-    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+    for year in years:
         df_path = Path(f"./outputs/llama3/one_hop_dag/3.1.one_hop_dag_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
@@ -161,7 +181,7 @@ def run_llama3_vllm_core_event_4_1():
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"prompts/4.1.core_events.txt", "r")
     prompt = file.read()
-    for year in [2023, 2018, 2019, 2020, 2021, 2022]:
+    for year in years:
         df_path = Path(f"./data/DJN/inflation_mentioned_news_{year}.csv")
         df = pd.read_csv(df_path)
         print(f"Year: {year}")
@@ -174,6 +194,7 @@ def run_llama3_vllm_core_event_4_1():
         df["prompts"] = prompts
         df[prediction_col] = generated_texts
         df.to_csv(Path(f"./outputs/llama3/inflation/4.1.core_events_{year}.csv"), index=False)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
