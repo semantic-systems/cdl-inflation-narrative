@@ -58,7 +58,7 @@ def annotate_event_type(df, year, prompt, forced=False):
         return df
 
 def run_llama3_vllm_inflation_1_1():
-    llm = LLM(model="meta-llama/Llama-3.1-8B-Instruct", tensor_parallel_size=2)
+    llm = LLM(model="meta-llama/Llama-3.1-8B-Instruct", tensor_parallel_size=1, max_seq_len_to_capture=39040)
     sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=500)
     file = open(f"prompts/1.1.inflation_has_cause.txt", "r")
     prompt = file.read()
