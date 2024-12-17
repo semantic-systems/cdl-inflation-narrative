@@ -1,12 +1,10 @@
 import pandas as pd
 import plotly.express as px
 
-inflation_has_cause_file_names = ["./outputs/llama3/inflation/1.1.inflation_has_cause_2018.csv",
-                                  "./outputs/llama3/inflation/1.1.inflation_has_cause_2019.csv",
-                                  "./outputs/llama3/inflation/1.1.inflation_has_cause_2020.csv",
-                                  "./outputs/llama3/inflation/1.1.inflation_has_cause_2021.csv",
-                                  "./outputs/llama3/inflation/1.1.inflation_has_cause_2022.csv",
-                                  "./outputs/llama3/inflation/1.1.inflation_has_cause_2023.csv"]
+
+years = [1990, 1991, 1999, 2001, 2007, 2008, 2021, 2022, 2023]
+
+inflation_has_cause_file_names = [f"./outputs/llama31/inflation/1.1.inflation_has_cause_{year}.csv" for year in years]
 
 deflation_has_cause_file_names = ["./outputs/llama3/deflation/1.2.deflation_has_cause_2018.csv",
                                   "./outputs/llama3/deflation/1.2.deflation_has_cause_2019.csv",
@@ -46,16 +44,16 @@ for i, name in enumerate(file_names):
 
 stats_df = pd.DataFrame(stats)
 df_has_cause = pd.concat(df_has_cause)
-df_has_cause.to_csv("./outputs/llama3/inflation/has_cause_df.csv")
+df_has_cause.to_csv("./outputs/llama31/inflation/has_cause_df.csv")
 
 fig = px.bar(stats_df, x="Year", y="Count", color="Type",
-             title="Zero-shot classification with Llama 3 <br>(whether or not the cause of inflation is mentioned)")
-fig.write_image("./outputs/llama3/inflation/stats_classification_has_cause.png")
+             title="Zero-shot classification with Llama 3.1 8B <br>(whether or not the cause of inflation is mentioned)")
+fig.write_image("./outputs/llama31/inflation/stats_classification_has_cause.png")
 
 stats_has_cause_df = stats_df.loc[stats_df["Type"] == "#has_cause"]
 fig = px.bar(stats_has_cause_df, x="Year", y="Count",
              title="Number of articles mentioning causes for inflation")
-fig.write_image("./outputs/llama3/inflation/has_cause_distribution.png")
+fig.write_image("./outputs/llama31/inflation/has_cause_distribution.png")
 
 
 
