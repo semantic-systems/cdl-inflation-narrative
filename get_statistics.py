@@ -1,7 +1,7 @@
 import pandas as pd
 import plotly.express as px
 
-
+prediction_col = "llama31_8b_response"
 years = [1990, 1991, 1999, 2001, 2007, 2008, 2021, 2022, 2023]
 
 inflation_has_cause_file_names = [f"./outputs/llama31/inflation/1.1.inflation_has_cause_{year}.csv" for year in years]
@@ -34,8 +34,8 @@ df_has_cause = []
 
 for i, name in enumerate(file_names):
     df = pd.read_csv(name)
-    yes_df = df.loc[df['response'].str.startswith("Yes")]
-    no_df = df.loc[df['response'].str.startswith("No")]
+    yes_df = df.loc[df[prediction_col].str.startswith("Yes")]
+    no_df = df.loc[df[prediction_col].str.startswith("No")]
     year = name.split(".csv")[0].split("_")[-1]
     stats.append({"Year": year, "Type": "#has_cause", "Count": len(yes_df)})
     stats.append({"Year": year, "Type": "#no_cause", "Count": len(no_df)})
