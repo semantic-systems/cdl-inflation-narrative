@@ -34,8 +34,8 @@ services:
     environment:
       - DJANGO_DB=default
       - POSTGRE_NAME=postgres
-      - POSTGRE_USER=postgres_ls
-      - POSTGRE_PASSWORD=postgres_ls
+      - POSTGRE_USER=postgres
+      - POSTGRE_PASSWORD=postgres
       - POSTGRE_PORT=5432
       - POSTGRE_HOST=Postgres-LabelStudio
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
@@ -57,9 +57,9 @@ services:
     #      -c ssl_key_file=/var/lib/postgresql/certs/server.key
     environment:
       - POSTGRES_HOST_AUTH_METHOD=false
-      - POSTGRES_USER=postgres_ls
-      - POSTGRES_PASSWORD=postgres_ls
-      - POSTGRES_DB=${PG_DB}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=LabelStudioDB
     volumes:
       - ${POSTGRES_DATA_DIR:-./postgres-data}:/var/lib/postgresql/data
       - ./deploy/pgsql/certs:/var/lib/postgresql/certs:ro
