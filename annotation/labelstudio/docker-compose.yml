@@ -33,8 +33,8 @@ services:
       - db
     environment:
       - DJANGO_DB=default
-      - POSTGRE_NAME=postgres
-      - POSTGRE_USER=postgres
+      - POSTGRE_NAME=postgres_sl
+      - POSTGRE_USER=postgres_sl
       - POSTGRE_PASSWORD=
       - POSTGRE_PORT=5432
       - POSTGRE_HOST=db
