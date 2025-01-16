@@ -4,8 +4,8 @@ services:
     image: heartexlabs/label-studio:latest
     restart: unless-stopped
     ports:
-      - "8090:8085"
-      - "8091:8086"
+      - "8080:8085"
+      - "8081:8086"
     depends_on:
       - app
     environment:
@@ -28,18 +28,19 @@ services:
     image: heartexlabs/label-studio:latest
     restart: unless-stopped
     expose:
-      - "5290"
+      - "8000"
     depends_on:
       - db
     environment:
       - DJANGO_DB=default
       - POSTGRE_NAME=postgres
       - POSTGRE_USER=postgres
-      - POSTGRE_PASSWORD=postgres
+      - POSTGRE_PASSWORD=
       - POSTGRE_PORT=5432
-      - POSTGRE_HOST=Postgres-LabelStudio
+      - POSTGRE_HOST=db
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
-      - LABEL_STUDIO_COPY_STATIC_DATA=true
+      - JSON_LOG=1
+    #      - LOG_LEVEL=DEBUG
     volumes:
       - ./mydata:/label-studio/data:rw
     command: label-studio-uwsgi
@@ -56,10 +57,7 @@ services:
     #      -c ssl_cert_file=/var/lib/postgresql/certs/server.crt
     #      -c ssl_key_file=/var/lib/postgresql/certs/server.key
     environment:
-      - POSTGRES_HOST_AUTH_METHOD=false
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=LabelStudioDB
+      - POSTGRES_HOST_AUTH_METHOD=trust
     volumes:
       - ${POSTGRES_DATA_DIR:-./postgres-data}:/var/lib/postgresql/data
       - ./deploy/pgsql/certs:/var/lib/postgresql/certs:ro
