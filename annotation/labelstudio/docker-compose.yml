@@ -15,7 +15,7 @@ services:
       - POSTGRE_USER=labeluser
       - POSTGRE_PASSWORD=labelpass
       - POSTGRE_HOST=labelstudio-db
-      - POSTGRE_PORT=5433
+      - POSTGRE_PORT=8090
     volumes:
       - ./mydata:/label-studio/data
       - ./myfiles:/label-studio/files
@@ -33,7 +33,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5433:5433"
+      - "8090:8090"
 
 volumes:
   pgdata:
