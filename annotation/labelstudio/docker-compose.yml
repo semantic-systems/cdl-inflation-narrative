@@ -32,32 +32,23 @@ services:
     depends_on:
       - db
     environment:
-      - DJANGO_DB=default
-      - POSTGRE_NAME=postgres
-      - POSTGRE_USER=postgres
-      - POSTGRE_PASSWORD=
-      - POSTGRE_PORT=5432
-      - POSTGRE_HOST=db
-      - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
-      - JSON_LOG=1
-    #      - LOG_LEVEL=DEBUG
+      - DJANGO_DB=mysql
+      - MYSQL_NAME=labelstudio
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=password
+      - MYSQL_PORT=3306
+      - MYSQL_HOST=db
+      - POSTGRE_HOST=
     volumes:
       - ./mydata:/label-studio/data:rw
     command: label-studio-uwsgi
 
   db:
-    image: pgautoupgrade/pgautoupgrade:13-alpine
+    image: mysql:8
     hostname: db
     restart: unless-stopped
-    # Optional: Enable TLS on PostgreSQL
-    # Just drop your server.crt and server.key into folder 'deploy/pgsql/certs'
-    # NOTE: Both files must have permissions u=rw (0600) or less
-    #    command: >
-    #      -c ssl=on
-    #      -c ssl_cert_file=/var/lib/postgresql/certs/server.crt
-    #      -c ssl_key_file=/var/lib/postgresql/certs/server.key
     environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=labelstudio
     volumes:
-      - ${POSTGRES_DATA_DIR:-./postgres-data}:/var/lib/postgresql/data
-      - ./deploy/pgsql/certs:/var/lib/postgresql/certs:ro
+      - ${MYSQL_DATA_DIR:-./mysql-data}:/var/lib/mysql
