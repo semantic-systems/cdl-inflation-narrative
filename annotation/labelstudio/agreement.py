@@ -260,9 +260,10 @@ class InflationNarrative(object):
             decoded_predictions = [id2label_map[label] for label in predicted_labels]
             df_pred = pd.read_csv("./export/task_1_test.csv")
             df_pred["prediction"] = decoded_predictions
-            df_pred.to_csv(f"./logs/prediction_{name}.csv", index=False)
-            with open(f"./logs/{name}.txt", "w") as file:
-                file.write(f"{name} - F1: {predictions.metrics['test_f1']}\n")
+            df_pred.to_csv(f"./logs/{name}/prediction.csv", index=False)
+            with open(f"./logs/{name}/test_metric.txt", "w") as file:
+                file.write(f"F1: {predictions.metrics['test_f1']}\n")
+            model.save_pretrained(f"./logs/{name}/model", from_pt=True)
 
 
 if __name__ == "__main__":
