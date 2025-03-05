@@ -155,9 +155,9 @@ class InflationNarrative(object):
         df_train, df_valid = train_test_split(df, test_size=0.3)
         df_valid, df_test = train_test_split(df_valid, test_size=0.66)
         if save_to_disk:
-            df_train.to_csv("./export/task_1_train.csv")
-            df_valid.to_csv("./export/task_1_valid.csv")
-            df_test.to_csv("./export/task_1_test.csv")
+            df_train.to_csv("./export/task_1_train.csv", index=False)
+            df_valid.to_csv("./export/task_1_valid.csv", index=False)
+            df_test.to_csv("./export/task_1_test.csv", index=False)
         return df_train, df_valid, df_test
 
     def get_majority_vote(self, df):
@@ -182,8 +182,10 @@ class InflationNarrative(object):
 
 
     def train_sequence_classifier(self):
-        model_names = ["distilbert/distilbert-base-uncased", "ProsusAI/finbert",
-                       "microsoft/deberta-v3-base", "FacebookAI/roberta-base"]
+        #"distilbert/distilbert-base-uncased": 64, "ProsusAI/finbert": 64, "microsoft/deberta-v3-base": 4,
+        model_names = {"FacebookAI/roberta-base": 64,
+                       "allenai/longformer-base-4096": 4}
+        data = pd.read_csv("./export/task_1_annotation.csv")
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
         test = pd.read_csv("./export/task_1_test.csv")
@@ -204,7 +206,7 @@ class InflationNarrative(object):
             predictions = np.argmax(logits, axis=-1)
             return metric.compute(predictions=predictions, references=labels, average="weighted")
 
-        for model_name in model_names:
+        for model_name, batch_size in model_names.items():
             name = model_name.split('/')[-1]
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForSequenceClassification.from_pretrained(
@@ -220,12 +222,11 @@ class InflationNarrative(object):
                 output_dir=f"./results/{name}",
                 eval_strategy="epoch",
                 save_strategy="epoch",
-                per_device_train_batch_size=64,
-                per_device_eval_batch_size=64,
+                per_device_train_batch_size=batch_size,
+                per_device_eval_batch_size=batch_size,
                 num_train_epochs=20,
                 weight_decay=0.01,
-                logging_dir=f"./logs/{name}",
-                eval_steps=500,
+                logging_dir=f"./logs/{name}"
             )
             # Setup evaluation
             metric = evaluate.load("f1")
@@ -247,7 +248,16 @@ class InflationNarrative(object):
             # Test model
             model.eval()
             predictions = trainer.predict(tokenized_test)
-            print(predictions.metrics)
+
+            # Extract predicted labels
+            predicted_logits = predictions.predictions
+            predicted_labels = np.argmax(predicted_logits, axis=2)
+
+            # Convert label indices back to label names
+            decoded_predictions = [[id2label_map[label] for label in seq] for seq in predicted_labels]
+            df_pred = data[["inner_id", "text", "label"]]
+            df_pred["prediction"] = decoded_predictions
+            df_pred.to_csv(f"./logs/prediction_{name}.csv", index=False)
             with open(f"./logs/{name}.txt", "w") as file:
                 file.write(f"{name} - F1: {predictions.metrics['test_f1']}\n")
 
