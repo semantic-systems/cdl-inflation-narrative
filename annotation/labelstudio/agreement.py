@@ -179,6 +179,10 @@ class InflationNarrative(object):
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
         test = pd.read_csv("./export/task_1_test.csv")
+        train['label'] = train['label'].replace(self.label2id_map)
+        valid['label'] = valid['label'].replace(self.label2id_map)
+        test['label'] = test['label'].replace(self.label2id_map)
+
         train = Dataset.from_pandas(train)
         valid = Dataset.from_pandas(valid)
         test = Dataset.from_pandas(test)
@@ -227,12 +231,13 @@ class InflationNarrative(object):
             with open(f"./logs/{model_name}.txt", "w") as file:
                 file.write(f"{model_name} - F1: {f1}\n")
 
+
 if __name__ == "__main__":
-    inflation_narrative = InflationNarrative(pull_from_label_studio=True)
+    inflation_narrative = InflationNarrative(pull_from_label_studio=False)
     #inflation_narrative.compute_agreement([5, 7, 8, 9])
-    inflation_narrative.compute_agreement([5, 7])
-    inflation_narrative.compute_agreement([5, 8])
-    inflation_narrative.compute_agreement([7, 8])
+    #inflation_narrative.compute_agreement([5, 7])
+    #inflation_narrative.compute_agreement([5, 8])
+    #inflation_narrative.compute_agreement([7, 8])
     inflation_narrative.compute_agreement([5, 7, 8])
 
     inflation_narrative.create_training_data_from_annotation()
