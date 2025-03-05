@@ -220,7 +220,7 @@ class InflationNarrative(object):
             def compute_metrics(eval_pred):
                 logits, labels = eval_pred
                 predictions = np.argmax(logits, axis=-1)
-                return metric.compute(predictions=predictions, references=labels)
+                return metric.compute(predictions=predictions, references=labels, average="weighted")
 
             # Trainer
             trainer = Trainer(
