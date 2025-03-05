@@ -184,6 +184,10 @@ class InflationNarrative(object):
     def train_sequence_classifier(self):
         #"distilbert/distilbert-base-uncased": 64, "ProsusAI/finbert": 64, "microsoft/deberta-v3-base": 4,
         model_names = {"FacebookAI/roberta-base": 64,
+                       "samchain/EconoBert": 64,
+                       "distilbert/distilbert-base-uncased": 64,
+                       "ProsusAI/finbert": 64,
+                       "microsoft/deberta-v3-base": 4,
                        "allenai/longformer-base-4096": 4}
         data = pd.read_csv("./export/task_1_annotation.csv")
         train = pd.read_csv("./export/task_1_train.csv")
@@ -251,7 +255,7 @@ class InflationNarrative(object):
 
             # Extract predicted labels
             predicted_logits = predictions.predictions
-            predicted_labels = np.argmax(predicted_logits, axis=2)
+            predicted_labels = np.argmax(predicted_logits, axis=-1)
 
             # Convert label indices back to label names
             decoded_predictions = [[id2label_map[label] for label in seq] for seq in predicted_labels]
