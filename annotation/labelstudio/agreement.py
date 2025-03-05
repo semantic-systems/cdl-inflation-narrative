@@ -9,7 +9,8 @@ from sklearn.model_selection import train_test_split
 import krippendorff
 from collections import Counter
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
-from datasets import Dataset, DatasetDict
+from datasets import Dataset
+import evaluate
 
 
 class InflationNarrative(object):
@@ -173,51 +174,69 @@ class InflationNarrative(object):
         return majority_labels
 
     def train_sequence_classifier(self):
-        id2label_map = {value: key for key, value in self.label2id_map.items()}
-        model = AutoModelForSequenceClassification.from_pretrained(
-            "distilbert/distilbert-base-uncased",
-            num_labels=2, id2label=id2label_map, label2id=self.label2id_map)
-        train = pd.read_csv("./export/task_1_train.csv", index_col=0)
-        valid = pd.read_csv("./export/task_1_valid.csv", index_col=0)
-        test = pd.read_csv("./export/task_1_test.csv", index_col=0)
+        model_names = ["distilbert/distilbert-base-uncased", "ProsusAI/finbert",
+                       "microsoft/deberta-v3-base", "FacebookAI/roberta-base"]
+        train = pd.read_csv("./export/task_1_train.csv")
+        valid = pd.read_csv("./export/task_1_valid.csv")
+        test = pd.read_csv("./export/task_1_test.csv")
         train = Dataset.from_pandas(train)
         valid = Dataset.from_pandas(valid)
         test = Dataset.from_pandas(test)
-        ds = DatasetDict()
+        id2label_map = {value: key for key, value in self.label2id_map.items()}
 
-        ds['train'] = train
-        ds['validation'] = valid
-        ds['test'] = test
-        # Training Arguments
-        training_args = TrainingArguments(
-            output_dir="./results",
-            eval_strategy="epoch",
-            save_strategy="epoch",
-            per_device_train_batch_size=8,
-            per_device_eval_batch_size=8,
-            num_train_epochs=100,
-            weight_decay=0.01,
-            logging_dir="./logs",
-            eval_steps=500,
-        )
 
-        """# Trainer
-        trainer = Trainer(
-            model=model,
-            args=training_args,
-            train_dataset=dataset,
-            eval_dataset=eval_dataset,
-            compute_metrics=compute_metrics,
-        )"""
+        for model_name in model_names:
+            model = AutoModelForSequenceClassification.from_pretrained(
+                model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
 
-        # Train Model
-        # trainer.train()
+            # Training Arguments
+            training_args = TrainingArguments(
+                output_dir=f"./results/{model_name}",
+                eval_strategy="epoch",
+                save_strategy="epoch",
+                per_device_train_batch_size=64,
+                per_device_eval_batch_size=64,
+                num_train_epochs=5,
+                weight_decay=0.01,
+                logging_dir=f"./logs/{model_name}",
+                eval_steps=500,
+            )
+            # Setup evaluation
+            metric = evaluate.load("f1")
+
+            def compute_metrics(eval_pred):
+                logits, labels = eval_pred
+                predictions = np.argmax(logits, axis=-1)
+                return metric.compute(predictions=predictions, references=labels)
+
+            # Trainer
+            trainer = Trainer(
+                model=model,
+                args=training_args,
+                train_dataset=train,
+                eval_dataset=valid,
+                compute_metrics=compute_metrics,
+            )
+
+            # Train Model
+            trainer.train()
+
+            predictions = trainer.predict(test)
+            f1 = compute_metrics(predictions)
+            print(f1)
+            with open(f"./logs/{model_name}.txt", "w") as file:
+                file.write(f"{model_name} - F1: {f1}\n")
 
 if __name__ == "__main__":
     inflation_narrative = InflationNarrative(pull_from_label_studio=True)
     #inflation_narrative.compute_agreement([5, 7, 8, 9])
+    inflation_narrative.compute_agreement([5, 7])
+    inflation_narrative.compute_agreement([5, 8])
+    inflation_narrative.compute_agreement([7, 8])
     inflation_narrative.compute_agreement([5, 7, 8])
+
     inflation_narrative.create_training_data_from_annotation()
+    inflation_narrative.train_sequence_classifier()
     #inflation_narrative.compute_agreement([5, 7, 9])
     #inflation_narrative.compute_agreement([5, 8, 9])
     #inflation_narrative.compute_agreement([7, 8, 9])
