@@ -258,7 +258,7 @@ class InflationNarrative(object):
             predicted_labels = np.argmax(predicted_logits, axis=-1)
 
             # Convert label indices back to label names
-            decoded_predictions = [[id2label_map[label] for label in seq] for seq in predicted_labels]
+            decoded_predictions = [[id2label_map[int(label)] for label in seq] for seq in predicted_labels]
             df_pred = data[["inner_id", "text", "label"]]
             df_pred["prediction"] = decoded_predictions
             df_pred.to_csv(f"./logs/prediction_{name}.csv", index=False)
