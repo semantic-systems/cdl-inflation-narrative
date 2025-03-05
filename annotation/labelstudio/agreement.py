@@ -183,13 +183,12 @@ class InflationNarrative(object):
 
     def train_sequence_classifier(self):
         #"distilbert/distilbert-base-uncased": 64, "ProsusAI/finbert": 64, "microsoft/deberta-v3-base": 4,
-        model_names = {"FacebookAI/roberta-base": 64,
-                       "samchain/EconoBert": 64,
-                       "distilbert/distilbert-base-uncased": 64,
+        model_names = {"distilbert/distilbert-base-uncased": 64,
                        "ProsusAI/finbert": 64,
+                       "FacebookAI/roberta-base": 64,
+                       "samchain/EconoBert": 64,
                        "microsoft/deberta-v3-base": 4,
                        "allenai/longformer-base-4096": 4}
-        data = pd.read_csv("./export/task_1_annotation.csv")
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
         test = pd.read_csv("./export/task_1_test.csv")
@@ -258,8 +257,8 @@ class InflationNarrative(object):
             predicted_labels = np.argmax(predicted_logits, axis=-1)
 
             # Convert label indices back to label names
-            decoded_predictions = [[id2label_map[int(label)] for label in seq] for seq in predicted_labels]
-            df_pred = data[["inner_id", "text", "label"]]
+            decoded_predictions = [id2label_map[label] for label in predicted_labels]
+            df_pred = pd.read_csv("./export/task_1_test.csv")
             df_pred["prediction"] = decoded_predictions
             df_pred.to_csv(f"./logs/prediction_{name}.csv", index=False)
             with open(f"./logs/{name}.txt", "w") as file:
