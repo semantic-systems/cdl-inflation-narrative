@@ -260,6 +260,9 @@ class InflationNarrative(object):
             decoded_predictions = [id2label_map[label] for label in predicted_labels]
             df_pred = pd.read_csv("./export/task_1_test.csv")
             df_pred["prediction"] = decoded_predictions
+            path = Path(f"./logs/{name}/")
+            if not path.exists(): 
+                path.mkdir(parents=True)
             df_pred.to_csv(f"./logs/{name}/prediction.csv", index=False)
             with open(f"./logs/{name}/test_metric.txt", "w") as file:
                 file.write(f"F1: {predictions.metrics['test_f1']}\n")
