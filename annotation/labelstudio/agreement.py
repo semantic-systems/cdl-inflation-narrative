@@ -192,6 +192,11 @@ class InflationNarrative(object):
         def preprocess_function(examples):
             return tokenizer(examples["text"], truncation=True)
 
+        def compute_metrics(eval_pred):
+            logits, labels = eval_pred
+            predictions = np.argmax(logits, axis=-1)
+            return metric.compute(predictions=predictions, references=labels, average="weighted")
+
         for model_name in model_names:
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForSequenceClassification.from_pretrained(
@@ -209,18 +214,13 @@ class InflationNarrative(object):
                 save_strategy="epoch",
                 per_device_train_batch_size=64,
                 per_device_eval_batch_size=64,
-                num_train_epochs=5,
+                num_train_epochs=20,
                 weight_decay=0.01,
                 logging_dir=f"./logs/{model_name}",
                 eval_steps=500,
             )
             # Setup evaluation
             metric = evaluate.load("f1")
-
-            def compute_metrics(eval_pred):
-                logits, labels = eval_pred
-                predictions = np.argmax(logits, axis=-1)
-                return metric.compute(predictions=predictions, references=labels, average="weighted")
 
             # Trainer
             trainer = Trainer(
@@ -236,11 +236,12 @@ class InflationNarrative(object):
             # Train Model
             trainer.train()
 
+            # Test model
+            model.eval()
             predictions = trainer.predict(tokenized_test)
-            f1 = compute_metrics(predictions)
-            print(f1)
+            print(predictions.metrics)
             with open(f"./logs/{model_name}.txt", "w") as file:
-                file.write(f"{model_name} - F1: {f1}\n")
+                file.write(f"{model_name} - F1: {predictions.metrics}\n")
 
 
 if __name__ == "__main__":
