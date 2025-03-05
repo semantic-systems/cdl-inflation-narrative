@@ -1,3 +1,4 @@
+import os
 import json
 from pathlib import Path
 
@@ -11,6 +12,8 @@ from collections import Counter
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding
 from datasets import Dataset
 import evaluate
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 
 class InflationNarrative(object):
@@ -261,7 +264,7 @@ class InflationNarrative(object):
             df_pred = pd.read_csv("./export/task_1_test.csv")
             df_pred["prediction"] = decoded_predictions
             path = Path(f"./logs/{name}/")
-            if not path.exists(): 
+            if not path.exists():
                 path.mkdir(parents=True)
             df_pred.to_csv(f"./logs/{name}/prediction.csv", index=False)
             with open(f"./logs/{name}/test_metric.txt", "w") as file:
