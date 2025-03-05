@@ -38,12 +38,19 @@ class InflationNarrative(object):
                 file.write(f"annotator {project_id}: {num_unfinished} document(s) to annotate\n")
                 print(f"annotator {project_id}: {num_unfinished} document(s) to annotate.")
 
+    def setup_directory(self):
+        for folder in ["./logs/", "./exports/"]:
+            path = Path(folder)
+            if not path.exists():  # Check existence
+                path.mkdir(parents=True)
+
     def instantiate(self, pull_from_label_studio=True):
         """
         Instantiation step of the class.
         1) check unfinished documents for each annotator
         2) create df for storing annotated result, and write to disk
         """
+        self.setup_directory()
         self.check_annotation_status()
         response = self.export_project_to_json(project_id=1, write_to_dist=True)
         inner_id = [document["inner_id"] for document in response]
@@ -198,6 +205,7 @@ class InflationNarrative(object):
             return metric.compute(predictions=predictions, references=labels, average="weighted")
 
         for model_name in model_names:
+            name = model_name.split('/')[-1]
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForSequenceClassification.from_pretrained(
                 model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
@@ -209,14 +217,14 @@ class InflationNarrative(object):
 
             # Training Arguments
             training_args = TrainingArguments(
-                output_dir=f"./results/{model_name}",
+                output_dir=f"./results/{name}",
                 eval_strategy="epoch",
                 save_strategy="epoch",
                 per_device_train_batch_size=64,
                 per_device_eval_batch_size=64,
                 num_train_epochs=20,
                 weight_decay=0.01,
-                logging_dir=f"./logs/{model_name}",
+                logging_dir=f"./logs/{name}",
                 eval_steps=500,
             )
             # Setup evaluation
@@ -240,8 +248,8 @@ class InflationNarrative(object):
             model.eval()
             predictions = trainer.predict(tokenized_test)
             print(predictions.metrics)
-            with open(f"./logs/{model_name}.txt", "w") as file:
-                file.write(f"{model_name} - F1: {predictions.metrics}\n")
+            with open(f"./logs/{name}.txt", "w") as file:
+                file.write(f"{name} - F1: {predictions.metrics['test_f1']}\n")
 
 
 if __name__ == "__main__":
