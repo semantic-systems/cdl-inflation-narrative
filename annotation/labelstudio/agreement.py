@@ -198,6 +198,10 @@ class InflationNarrative(object):
                 model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
             data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
+            tokenized_train = train.map(preprocess_function, batched=True)
+            tokenized_valid = valid.map(preprocess_function, batched=True)
+            tokenized_test = test.map(preprocess_function, batched=True)
+
             # Training Arguments
             training_args = TrainingArguments(
                 output_dir=f"./results/{model_name}",
@@ -222,8 +226,8 @@ class InflationNarrative(object):
             trainer = Trainer(
                 model=model,
                 args=training_args,
-                train_dataset=train,
-                eval_dataset=valid,
+                train_dataset=tokenized_train,
+                eval_dataset=tokenized_valid,
                 processing_class=tokenizer,
                 data_collator=data_collator,
                 compute_metrics=compute_metrics,
@@ -232,7 +236,7 @@ class InflationNarrative(object):
             # Train Model
             trainer.train()
 
-            predictions = trainer.predict(test)
+            predictions = trainer.predict(tokenized_test)
             f1 = compute_metrics(predictions)
             print(f1)
             with open(f"./logs/{model_name}.txt", "w") as file:
