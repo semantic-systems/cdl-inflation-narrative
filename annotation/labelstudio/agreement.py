@@ -8,7 +8,7 @@ from label_studio_sdk.client import LabelStudio
 from sklearn.model_selection import train_test_split
 import krippendorff
 from collections import Counter
-from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer
+from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding
 from datasets import Dataset
 import evaluate
 
@@ -173,6 +173,7 @@ class InflationNarrative(object):
 
         return majority_labels
 
+
     def train_sequence_classifier(self):
         model_names = ["distilbert/distilbert-base-uncased", "ProsusAI/finbert",
                        "microsoft/deberta-v3-base", "FacebookAI/roberta-base"]
@@ -188,10 +189,14 @@ class InflationNarrative(object):
         test = Dataset.from_pandas(test)
         id2label_map = {value: key for key, value in self.label2id_map.items()}
 
+        def preprocess_function(examples):
+            return tokenizer(examples["text"], truncation=True)
 
         for model_name in model_names:
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForSequenceClassification.from_pretrained(
                 model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
+            data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
             # Training Arguments
             training_args = TrainingArguments(
@@ -219,6 +224,8 @@ class InflationNarrative(object):
                 args=training_args,
                 train_dataset=train,
                 eval_dataset=valid,
+                processing_class=tokenizer,
+                data_collator=data_collator,
                 compute_metrics=compute_metrics,
             )
 
