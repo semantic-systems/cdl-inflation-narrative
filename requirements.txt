@@ -2,4 +2,9 @@ tqdm
 pandas
 plotly
 kaleido
-vllm
+label-studio-sdk
+krippendorff
+scikit-learn
+torch
+datasets
+transformers
