@@ -14,6 +14,7 @@ from datasets import Dataset
 import evaluate
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
 
 
 class InflationNarrative(object):
