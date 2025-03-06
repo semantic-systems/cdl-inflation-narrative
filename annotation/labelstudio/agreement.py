@@ -191,8 +191,9 @@ class InflationNarrative(object):
                        "FacebookAI/roberta-base": 64,
                        "samchain/EconoBert": 64,
                        "microsoft/deberta-v3-base": 4,
-                       "allenai/longformer-base-4096": 4}"""
-        model_names = {"google-bert/bert-base-uncased": 64,
+                       "allenai/longformer-base-4096": 4,
+                       "google-bert/bert-base-uncased": 64}"""
+        model_names = {
             "allenai/longformer-base-4096": 4}
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
@@ -233,7 +234,7 @@ class InflationNarrative(object):
                 save_strategy="epoch",
                 per_device_train_batch_size=batch_size,
                 per_device_eval_batch_size=batch_size,
-                num_train_epochs=2,
+                num_train_epochs=20,
                 weight_decay=0.01,
                 logging_dir=f"./logs/{name}"
             )
@@ -265,9 +266,7 @@ class InflationNarrative(object):
             decoded_predictions = [id2label_map[label] for label in predicted_labels]
             df_pred = pd.read_csv("./export/task_1_test.csv")
             df_pred["prediction"] = decoded_predictions
-            path = Path(f"./logs/{name}/")
-            if not path.exists():
-                path.mkdir(parents=True)
+
             df_pred.to_csv(f"./logs/{name}/prediction.csv", index=False)
             with open(f"./logs/{name}/test_metric.txt", "w") as file:
                 file.write(f"F1: {predictions.metrics['test_f1']}\n")
@@ -283,7 +282,7 @@ if __name__ == "__main__":
     inflation_narrative.compute_agreement([5, 7, 8])
 
     inflation_narrative.create_training_data_from_annotation()
-    #inflation_narrative.train_sequence_classifier()
+    inflation_narrative.train_sequence_classifier()
     #inflation_narrative.compute_agreement([5, 7, 9])
     #inflation_narrative.compute_agreement([5, 8, 9])
     #inflation_narrative.compute_agreement([7, 8, 9])
