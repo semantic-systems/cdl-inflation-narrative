@@ -9,7 +9,7 @@ from label_studio_sdk.client import LabelStudio
 from sklearn.model_selection import train_test_split
 import krippendorff
 from collections import Counter
-from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding
+from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding, LongformerTokenizerFast, LongformerForTokenClassification
 from datasets import Dataset
 import evaluate
 
@@ -21,7 +21,7 @@ class InflationNarrative(object):
         self.LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
         self.API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
         self.client = LabelStudio(base_url=self.LABEL_STUDIO_URL, api_key=self.API_KEY)
-        self.project_id_list = [5, 7, 8]
+        self.project_id_list = [5, 7, 8, 9]
         self.number_documents = self.client.projects.get(id=5).finished_task_number + int(
             self.client.projects.get(id=5).queue_total)
         self.label2id_map = {"inflation-cause-dominant": 0, "inflation-related": 1, "non-inflation-related": 2}
@@ -185,13 +185,13 @@ class InflationNarrative(object):
 
 
     def train_sequence_classifier(self):
-        #"distilbert/distilbert-base-uncased": 64, "ProsusAI/finbert": 64, "microsoft/deberta-v3-base": 4,
-        model_names = {"distilbert/distilbert-base-uncased": 64,
+        """model_names = {"distilbert/distilbert-base-uncased": 64,
                        "ProsusAI/finbert": 64,
                        "FacebookAI/roberta-base": 64,
                        "samchain/EconoBert": 64,
                        "microsoft/deberta-v3-base": 4,
-                       "allenai/longformer-base-4096": 4}
+                       "allenai/longformer-base-4096": 4}"""
+        model_names = {"allenai/longformer-base-4096": 4}
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
         test = pd.read_csv("./export/task_1_test.csv")
@@ -214,10 +214,10 @@ class InflationNarrative(object):
 
         for model_name, batch_size in model_names.items():
             name = model_name.split('/')[-1]
-            tokenizer = AutoTokenizer.from_pretrained(model_name)
-            model = AutoModelForSequenceClassification.from_pretrained(
+            tokenizer = LongformerTokenizerFast.from_pretrained(model_name)
+            model = LongformerForTokenClassification.from_pretrained(
                 model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
-            model.resize_token_embeddings(len(tokenizer))
+            
 
             data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
@@ -232,7 +232,7 @@ class InflationNarrative(object):
                 save_strategy="epoch",
                 per_device_train_batch_size=batch_size,
                 per_device_eval_batch_size=batch_size,
-                num_train_epochs=20,
+                num_train_epochs=2,
                 weight_decay=0.01,
                 logging_dir=f"./logs/{name}"
             )
