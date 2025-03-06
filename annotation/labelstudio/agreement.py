@@ -21,7 +21,7 @@ class InflationNarrative(object):
         self.LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
         self.API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
         self.client = LabelStudio(base_url=self.LABEL_STUDIO_URL, api_key=self.API_KEY)
-        self.project_id_list = [5, 7, 8, 9]
+        self.project_id_list = [5, 7, 8]
         self.number_documents = self.client.projects.get(id=5).finished_task_number + int(
             self.client.projects.get(id=5).queue_total)
         self.label2id_map = {"inflation-cause-dominant": 0, "inflation-related": 1, "non-inflation-related": 2}
@@ -205,7 +205,7 @@ class InflationNarrative(object):
         id2label_map = {value: key for key, value in self.label2id_map.items()}
 
         def preprocess_function(examples):
-            return tokenizer(examples["text"], truncation=True)
+            return tokenizer(examples["text"], truncation=True, padding=True)
 
         def compute_metrics(eval_pred):
             logits, labels = eval_pred
@@ -214,11 +214,10 @@ class InflationNarrative(object):
 
         for model_name, batch_size in model_names.items():
             name = model_name.split('/')[-1]
-            tokenizer = LongformerTokenizerFast.from_pretrained(model_name)
-            model = LongformerForTokenClassification.from_pretrained(
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            model = AutoModelForSequenceClassification.from_pretrained(
                 model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
-            
-
+            model.resize_token_embeddings(len(tokenizer))
             data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
             tokenized_train = train.map(preprocess_function, batched=True)
@@ -254,7 +253,6 @@ class InflationNarrative(object):
             trainer.train()
 
             # Test model
-            model.eval()
             predictions = trainer.predict(tokenized_test)
 
             # Extract predicted labels
