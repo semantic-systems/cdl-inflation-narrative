@@ -217,6 +217,8 @@ class InflationNarrative(object):
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForSequenceClassification.from_pretrained(
                 model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
+            model.resize_token_embeddings(len(tokenizer))
+
             data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
             tokenized_train = train.map(preprocess_function, batched=True)
