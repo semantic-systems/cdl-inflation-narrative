@@ -22,7 +22,7 @@ class InflationNarrative(object):
         self.LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
         self.API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
         self.client = LabelStudio(base_url=self.LABEL_STUDIO_URL, api_key=self.API_KEY)
-        self.project_id_list = [5, 7, 8]
+        self.project_id_list = [5, 7, 8, 9]
         self.number_documents = self.client.projects.get(id=5).finished_task_number + int(
             self.client.projects.get(id=5).queue_total)
         self.label2id_map = {"inflation-cause-dominant": 0, "inflation-related": 1, "non-inflation-related": 2}
@@ -192,7 +192,8 @@ class InflationNarrative(object):
                        "samchain/EconoBert": 64,
                        "microsoft/deberta-v3-base": 4,
                        "allenai/longformer-base-4096": 4}"""
-        model_names = {"allenai/longformer-base-4096": 4}
+        model_names = {"google-bert/bert-base-uncased": 64,
+            "allenai/longformer-base-4096": 4}
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
         test = pd.read_csv("./export/task_1_test.csv")
@@ -274,15 +275,15 @@ class InflationNarrative(object):
 
 
 if __name__ == "__main__":
-    inflation_narrative = InflationNarrative(pull_from_label_studio=False)
-    #inflation_narrative.compute_agreement([5, 7, 8, 9])
+    inflation_narrative = InflationNarrative(pull_from_label_studio=True)
+    inflation_narrative.compute_agreement([5, 7, 8, 9])
     #inflation_narrative.compute_agreement([5, 7])
     #inflation_narrative.compute_agreement([5, 8])
     #inflation_narrative.compute_agreement([7, 8])
-    inflation_narrative.compute_agreement([5, 7, 8])
+    #inflation_narrative.compute_agreement([5, 7, 8])
 
     inflation_narrative.create_training_data_from_annotation()
-    inflation_narrative.train_sequence_classifier()
+    #inflation_narrative.train_sequence_classifier()
     #inflation_narrative.compute_agreement([5, 7, 9])
     #inflation_narrative.compute_agreement([5, 8, 9])
     #inflation_narrative.compute_agreement([7, 8, 9])
