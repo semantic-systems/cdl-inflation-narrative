@@ -12,6 +12,7 @@ from collections import Counter
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding, LongformerTokenizerFast, LongformerForTokenClassification
 from datasets import Dataset
 import evaluate
+from sklearn.metrics import classification_report
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
@@ -252,6 +253,7 @@ class InflationNarrative(object):
 
             # Train Model
             trainer.train()
+            model.save_pretrained(f"./logs/{name}/model", from_pt=True)
 
             # Test model
             predictions = trainer.predict(tokenized_test)
@@ -266,9 +268,11 @@ class InflationNarrative(object):
             df_pred["prediction"] = decoded_predictions
 
             df_pred.to_csv(f"./logs/{name}/prediction.csv", index=False)
+            target_names = ['inflation-cause-dominant', 'inflation-related', 'non-inflation-related']
+            report = classification_report(df_pred["label"], df_pred["prediction"], target_names=target_names)
             with open(f"./logs/{name}/test_metric.txt", "w") as file:
-                file.write(f"F1: {predictions.metrics['test_f1']}\n")
-            model.save_pretrained(f"./logs/{name}/model", from_pt=True)
+                file.write(report)
+
 
 
 if __name__ == "__main__":
@@ -280,7 +284,7 @@ if __name__ == "__main__":
     #inflation_narrative.compute_agreement([5, 7, 8])
 
     inflation_narrative.create_training_data_from_annotation()
-    #inflation_narrative.train_sequence_classifier()
+    inflation_narrative.train_sequence_classifier()
     #inflation_narrative.compute_agreement([5, 7, 9])
     #inflation_narrative.compute_agreement([5, 8, 9])
     #inflation_narrative.compute_agreement([7, 8, 9])
