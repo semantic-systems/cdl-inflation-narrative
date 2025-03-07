@@ -15,7 +15,7 @@ from label_studio_ml.response import ModelResponse
 
 logger = logging.getLogger(__name__)
 
-GLINER_MODEL_NAME = os.getenv("GLINER_MODEL_NAME", "urchade/gliner_medium-v2.1")
+GLINER_MODEL_NAME = os.getenv("GLINER_MODEL_NAME", "EmergentMethods/gliner_large_news-v2.1")
 
 
 class GLiNERModel(LabelStudioMLBase):
@@ -30,7 +30,7 @@ class GLiNERModel(LabelStudioMLBase):
         self.LABEL_STUDIO_API_KEY = os.getenv('LABEL_STUDIO_API_KEY')
         self.MODEL_DIR = os.getenv("MODEL_DIR", "/data/models")
         self.finetuned_model_path = os.getenv("FINETUNED_MODEL_PATH", f"models/checkpoint-10")
-        self.threshold = float(os.getenv('THRESHOLD', 0.5))
+        self.threshold = float(os.getenv('THRESHOLD', 0.2))
         self.model = None
 
     def lazy_init(self):

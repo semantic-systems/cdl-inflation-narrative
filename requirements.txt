@@ -12,3 +12,4 @@ evaluate
 spacy
 jupyter
 tiktoken
+protobuf
