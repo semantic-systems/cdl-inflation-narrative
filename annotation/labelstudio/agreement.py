@@ -291,7 +291,7 @@ class InflationNarrative(object):
         # gliner
         model = GLiNER.from_pretrained("EmergentMethods/gliner_large_news-v2.1")
 
-        with open(f'../export/annotation_project_4.json', 'r') as f:
+        with open(f'./export/annotation_project_5.json', 'r') as f:
             annotations_json = json.load(f)
 
         target_label = ["GPE", "PERSON", "ORG"]
