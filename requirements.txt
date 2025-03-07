@@ -13,3 +13,4 @@ spacy
 jupyter
 tiktoken
 protobuf
+gliner
