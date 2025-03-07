@@ -336,7 +336,7 @@ class InflationNarrative(object):
                         result = [self.gliner_template(ent["start"], ent["end"], ent["label"], ent["score"], ent["text"]) for
                                   ent in corrected_ner_results]
                         chunk_result.append(result)
-
+                print(chunk_result)
                 gliner_result.append(chunk_result)
             pre_annotations_gliner.append(gliner_result)
 
