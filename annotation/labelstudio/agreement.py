@@ -168,7 +168,7 @@ class InflationNarrative(object):
     def get_majority_vote(self, df):
         col_names = [f"annotator_{i}" for i in self.project_id_list]
         majority_labels = []
-
+        has_winner = 0
         for row in df[col_names].values:
             counter = Counter(row)
             most_common = counter.most_common()
@@ -180,9 +180,10 @@ class InflationNarrative(object):
             # Handle tie-breaks
             if len(top_labels) == 1:
                 majority_labels.append(top_labels[0])  # Clear winner
+                has_winner += 1
             else:
                 majority_labels.append("inflation-related")  # no winner, pick inflation-related
-
+        print(f"{has_winner/len(df)}")
         return majority_labels
 
 
