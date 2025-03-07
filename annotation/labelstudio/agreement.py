@@ -270,6 +270,8 @@ class InflationNarrative(object):
             df_pred.to_csv(f"./logs/{name}/prediction.csv", index=False)
             target_names = ['inflation-cause-dominant', 'inflation-related', 'non-inflation-related']
             report = classification_report(df_pred["label"], df_pred["prediction"], target_names=target_names)
+            print(model_name)
+            print(report)
             with open(f"./logs/{name}/test_metric.txt", "w") as file:
                 file.write(report)
 
