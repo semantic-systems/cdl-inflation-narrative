@@ -36,3 +36,4 @@ services:
       - "5291:9090"
     volumes:
       - "./data/server:/data"
+    restart: unless-stopped
