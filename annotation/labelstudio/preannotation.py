@@ -137,6 +137,12 @@ if __name__ == "__main__":
     ner_predictions = dict(zip(task_id, pre_annotations_ner))
     pos_predictions = dict(zip(task_id, pre_annotations_pos))
     gliner_predictions = dict(zip(task_id, pre_annotations_gliner))
+    with open('./export/gliner_predictions.json', 'w', encoding='utf-8') as f:
+        json.dump(gliner_predictions, f, indent=4)
+
+    LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
+    API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
+    client = LabelStudio(base_url=LABEL_STUDIO_URL, api_key=API_KEY)
 
     for i, tid in enumerate(task_id):
         print(i)
