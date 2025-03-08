@@ -177,7 +177,7 @@ class InflationNarrative(object):
         # Get indices of agreeing rows
         agreeing_indices = df.index[agreement_rows].tolist()
 
-        agreeing_df = df.loc[[agreeing_indices]]
+        agreeing_df = df.loc[agreeing_indices]
         agreeing_df.to_csv("./export/all_agreeing_articles.csv", index=False)
 
         col_names = [f"annotator_{i}" for i in self.project_id_list]
