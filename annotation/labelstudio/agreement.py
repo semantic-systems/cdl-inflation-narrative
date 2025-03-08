@@ -171,16 +171,18 @@ class InflationNarrative(object):
         return df_train, df_valid, df_test
 
     def get_majority_vote(self, df):
+        col_names = [f"annotator_{i}" for i in self.project_id_list]
+        df_annotations = df[col_names]
         # Find rows where all annotators agree
-        agreement_rows = df.eq(df.iloc[:, 0], axis=0).all(axis=1)
+        agreement_rows = df_annotations.eq(df_annotations.iloc[:, 0], axis=0).all(axis=1)
 
         # Get indices of agreeing rows
-        agreeing_indices = df.index[agreement_rows].tolist()
+        agreeing_indices = df_annotations.index[agreement_rows].tolist()
 
         agreeing_df = df.loc[agreeing_indices]
         agreeing_df.to_csv("./export/all_agreeing_articles.csv", index=False)
 
-        col_names = [f"annotator_{i}" for i in self.project_id_list]
+
         majority_labels = []
         has_winner = 0
 

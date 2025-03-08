@@ -4,6 +4,7 @@ from random import randint
 from gliner import GLiNER
 from label_studio_sdk.client import LabelStudio
 from tqdm import tqdm
+import torch
 
 
 def split_text_into_chunks(text):
@@ -86,7 +87,8 @@ if __name__ == "__main__":
     # gliner
     model = GLiNER.from_pretrained("EmergentMethods/gliner_large_news-v2.1")
     print("gliner loaded")
-
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    model = model.to(device)
     with open(f'./export/annotation_project_5.json', 'r') as f:
         annotations_json = json.load(f)
 
@@ -138,6 +140,7 @@ if __name__ == "__main__":
     ner_predictions = dict(zip(task_id, pre_annotations_ner))
     pos_predictions = dict(zip(task_id, pre_annotations_pos))
     gliner_predictions = dict(zip(task_id, pre_annotations_gliner))
+
     with open('./export/gliner_predictions.json', 'w', encoding='utf-8') as f:
         json.dump(gliner_predictions, f, indent=4)
 
@@ -145,6 +148,7 @@ if __name__ == "__main__":
     API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
     client = LabelStudio(base_url=LABEL_STUDIO_URL, api_key=API_KEY)
     li = client.projects.get(id=4).get_label_interface()
+
     for i, tid in enumerate(task_id):
         print(i)
         li.predictions.create(task=tid, result=pre_annotations_gliner[i], model_version="gliner")
