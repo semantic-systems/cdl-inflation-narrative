@@ -3,6 +3,7 @@ import json
 from random import randint
 from gliner import GLiNER
 from label_studio_sdk.client import LabelStudio
+from tqdm import tqdm
 
 
 def split_text_into_chunks(text):
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     pre_annotations_gliner = []
     task_id = []
 
-    for i, annotation in enumerate(annotations_json):
+    for i, annotation in tqdm(enumerate(annotations_json)):
         task_id.append(annotation["id"])
         text = annotation["data"]["text"]
 
@@ -143,9 +144,9 @@ if __name__ == "__main__":
     LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
     API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
     client = LabelStudio(base_url=LABEL_STUDIO_URL, api_key=API_KEY)
-
+    li = client.projects.get(id=4).get_label_interface()
     for i, tid in enumerate(task_id):
         print(i)
-        client.predictions.create(task=tid, result=pre_annotations_gliner[i], model_version="gliner")
-        client.predictions.create(task=tid, result=pre_annotations_ner[i], model_version="ner")
-        client.predictions.create(task=tid, result=pre_annotations_pos[i], model_version="pos")
+        li.predictions.create(task=tid, result=pre_annotations_gliner[i], model_version="gliner")
+        li.predictions.create(task=tid, result=pre_annotations_ner[i], model_version="ner")
+        li.predictions.create(task=tid, result=pre_annotations_pos[i], model_version="pos")
