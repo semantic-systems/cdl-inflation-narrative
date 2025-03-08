@@ -48,7 +48,7 @@ class InflationNarrative(object):
                 print(f"annotator {project_id}: {num_unfinished} document(s) to annotate.")
 
     def setup_directory(self):
-        for folder in ["./logs/", "./exports/"]:
+        for folder in ["./logs/", "./export/"]:
             path = Path(folder)
             if not path.exists():  # Check existence
                 path.mkdir(parents=True)
@@ -130,7 +130,8 @@ class InflationNarrative(object):
             df = df[df[f"annotator_{annotator_id}"].notnull()]
         annotations: list[list] = [df[f"annotator_{annotator_id}"].tolist() for annotator_id in annotator_list]
         annotations_numeric = [[self.label2id_map.get(label, -1) for label in annotation] for annotation in annotations]
-        df["label"] = self.get_majority_vote(df)
+        labels, agreeing_indices = self.get_majority_vote(df)
+        df["label"] = labels
         df.to_csv("./export/task_1_annotation.csv", index=False)
         irr = self.compute_task_1_agreement(annotations_numeric, metric="krippendorff")
         print(irr)
@@ -170,10 +171,18 @@ class InflationNarrative(object):
         return df_train, df_valid, df_test
 
     def get_majority_vote(self, df):
+        # Find rows where all annotators agree
+        agreement_rows = df.eq(df.iloc[:, 0], axis=0).all(axis=1)
+
+        # Get indices of agreeing rows
+        agreeing_indices = df.index[agreement_rows].tolist()
+        agreeing_df = df.loc[[agreement_rows]]
+        agreeing_df.to_csv("./export/all_agreeing_articles.csv", index=False)
         col_names = [f"annotator_{i}" for i in self.project_id_list]
         majority_labels = []
         has_winner = 0
-        for row in df[col_names].values:
+
+        for i, row in enumerate(df[col_names].values):
             counter = Counter(row)
             most_common = counter.most_common()
 
@@ -187,9 +196,8 @@ class InflationNarrative(object):
                 has_winner += 1
             else:
                 majority_labels.append("inflation-related")  # no winner, pick inflation-related
-        print(f"{has_winner/len(df)}")
+        print(f"has winner ratio: {has_winner/len(df)}\nall agreeing count: {len(agreeing_indices)}")
         return majority_labels
-
 
     def train_sequence_classifier(self):
         model_names = {"distilbert/distilbert-base-uncased": 64,
@@ -451,10 +459,10 @@ class InflationNarrative(object):
 
 
 if __name__ == "__main__":
-    inflation_narrative = InflationNarrative(pull_from_label_studio=False)
-    #inflation_narrative.compute_agreement([5, 7, 8, 9])
-    #inflation_narrative.create_training_data_from_annotation()
-    #inflation_narrative.train_sequence_classifier()
+    inflation_narrative = InflationNarrative(pull_from_label_studio=True)
+    inflation_narrative.compute_agreement([5, 7, 8, 9])
     inflation_narrative.create_pre_annotation()
+    inflation_narrative.create_training_data_from_annotation()
+    inflation_narrative.train_sequence_classifier()
 
 
