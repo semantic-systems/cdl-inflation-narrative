@@ -17,6 +17,7 @@ from random import randint
 from gliner import GLiNER
 from transformers import EarlyStoppingCallback
 from sklearn.metrics import f1_score, precision_score, recall_score
+import torch
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
@@ -210,9 +211,9 @@ class InflationNarrative(object):
                        "FacebookAI/roberta-base": 64,
                        "google-bert/bert-base-uncased": 64,
                        "worldbank/econberta-fs": 64, 
-                       "worldbank/econberta": 64}
-        #               "microsoft/deberta-v3-base": 4,
-        #               "allenai/longformer-base-4096": 4}
+                       "worldbank/econberta": 64
+                       "microsoft/deberta-v3-base": 4,
+                       "allenai/longformer-base-4096": 4}
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
         test = pd.read_csv("./export/task_1_test.csv")
