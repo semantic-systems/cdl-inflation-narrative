@@ -211,8 +211,10 @@ class InflationNarrative(object):
                        "FacebookAI/roberta-base": 64,
                        "google-bert/bert-base-uncased": 64,
                        "worldbank/econberta-fs": 64, 
-                       "worldbank/econberta": 64
-                       "microsoft/deberta-v3-base": 4,
+                       "worldbank/econberta": 64,
+                       "mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis": 64,
+                       "MAPAi/InflaBERT": 64,
+                       "google/bigbird-roberta-base": 4,
                        "allenai/longformer-base-4096": 4}
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
