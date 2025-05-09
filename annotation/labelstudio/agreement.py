@@ -17,9 +17,10 @@ from random import randint
 from gliner import GLiNER
 from transformers import EarlyStoppingCallback
 
-os.environ["HF_HOME"] = "./export/huggingface"
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
+
 
 
 class InflationNarrative(object):
@@ -268,7 +269,6 @@ class InflationNarrative(object):
                 processing_class=tokenizer,
                 data_collator=data_collator,
                 compute_metrics=compute_metrics,
-                callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],   # Early stopping callback
             )
 
             # Train Model
