@@ -296,6 +296,10 @@ class InflationNarrative(object):
             print(report)
             with open(f"./logs/{name}/test_metric.txt", "w") as file:
                 file.write(report)
+            
+            del model
+            del trainer
+            torch.cuda.empty_cache()
 
 
 
