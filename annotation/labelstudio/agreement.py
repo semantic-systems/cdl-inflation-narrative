@@ -16,7 +16,7 @@ import spacy
 from random import randint
 from gliner import GLiNER
 from transformers import EarlyStoppingCallback
-
+from sklearn.metrics import f1_score, precision_score, recall_score
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
@@ -231,7 +231,9 @@ class InflationNarrative(object):
         def compute_metrics(eval_pred):
             logits, labels = eval_pred
             predictions = np.argmax(logits, axis=-1)
-            return metric.compute(predictions=predictions, references=labels, average="weighted")
+            f1 = f1_score(labels, predictions, average="weighted")
+            return {'f1_weighted': f1}
+# metric.compute(predictions=predictions, references=labels, average="weighted")
 
         for model_name, batch_size in model_names.items():
             name = model_name.split('/')[-1]
@@ -258,7 +260,7 @@ class InflationNarrative(object):
                 load_best_model_at_end=True, # Load the best model at the end of training
             )
             # Setup evaluation
-            metric = evaluate.load("f1")
+            #metric = evaluate.load("f1")
 
             # Trainer
             trainer = Trainer(
