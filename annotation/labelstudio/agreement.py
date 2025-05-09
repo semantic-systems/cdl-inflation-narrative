@@ -17,7 +17,7 @@ from random import randint
 from gliner import GLiNER
 from transformers import EarlyStoppingCallback
 
-
+os.environ["HF_HOME"] = "./export/huggingface"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
 
@@ -253,7 +253,8 @@ class InflationNarrative(object):
                 per_device_eval_batch_size=batch_size,
                 num_train_epochs=20,
                 weight_decay=0.01,
-                logging_dir=f"./logs/{name}"
+                logging_dir=f"./logs/{name}",
+                load_best_model_at_end=True, # Load the best model at the end of training
             )
             # Setup evaluation
             metric = evaluate.load("f1")
@@ -268,9 +269,6 @@ class InflationNarrative(object):
                 data_collator=data_collator,
                 compute_metrics=compute_metrics,
                 callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],   # Early stopping callback
-                load_best_model_at_end=True, # Load the best model at the end of training
-                metric_for_best_model="f1",  # Use F1 score to determine the best model
-                greater_is_better=True
             )
 
             # Train Model
