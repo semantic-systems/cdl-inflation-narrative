@@ -1,7 +1,6 @@
 import os
 import json
 from pathlib import Path
-
 import pandas as pd
 import requests
 import numpy as np
@@ -16,6 +15,7 @@ from sklearn.metrics import classification_report
 import spacy
 from random import randint
 from gliner import GLiNER
+from transformers import EarlyStoppingCallback
 
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -207,7 +207,6 @@ class InflationNarrative(object):
         model_names = {"distilbert/distilbert-base-uncased": 64,
                        "ProsusAI/finbert": 64,
                        "FacebookAI/roberta-base": 64,
-                       "samchain/EconoBert": 64,
                        "google-bert/bert-base-uncased": 64,
                        "worldbank/econberta-fs": 64, 
                        "worldbank/econberta": 64}
@@ -268,6 +267,10 @@ class InflationNarrative(object):
                 processing_class=tokenizer,
                 data_collator=data_collator,
                 compute_metrics=compute_metrics,
+                callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],   # Early stopping callback
+                load_best_model_at_end=True, # Load the best model at the end of training
+                metric_for_best_model="f1",  # Use F1 score to determine the best model
+                greater_is_better=True
             )
 
             # Train Model
