@@ -206,9 +206,9 @@ class InflationNarrative(object):
         return majority_labels
 
     def train_sequence_classifier(self):
-        model_names = {"distilbert/distilbert-base-uncased": 64,
-                       "ProsusAI/finbert": 64,
-                       "FacebookAI/roberta-base": 64,
+        model_names = {#"distilbert/distilbert-base-uncased": 64,
+                       #"ProsusAI/finbert": 64,
+                       #"FacebookAI/roberta-base": 64,
                        "google-bert/bert-base-uncased": 64,
                        "worldbank/econberta-fs": 64, 
                        "worldbank/econberta": 64,
