@@ -209,7 +209,7 @@ class InflationNarrative(object):
         model_names = {#"distilbert/distilbert-base-uncased": 64,
                        #"ProsusAI/finbert": 64,
                        #"FacebookAI/roberta-base": 64,
-                       "google-bert/bert-base-uncased": 64,
+                       #"google-bert/bert-base-uncased": 64,
                        "worldbank/econberta-fs": 64, 
                        "worldbank/econberta": 64,
                        "mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis": 64,
