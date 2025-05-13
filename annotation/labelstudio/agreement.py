@@ -210,7 +210,7 @@ class InflationNarrative(object):
                        #"ProsusAI/finbert": 64,
                        #"FacebookAI/roberta-base": 64,
                        #"google-bert/bert-base-uncased": 64,
-                       "worldbank/econberta-fs": 8, 
+                       #"worldbank/econberta-fs": 8, 
                        "worldbank/econberta": 8,
                        "mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis": 8,
                        "MAPAi/InflaBERT": 8,
@@ -225,7 +225,7 @@ class InflationNarrative(object):
 
         train = Dataset.from_pandas(train)
         valid = Dataset.from_pandas(valid)
-        test = Dataset.from_pandas(test)
+        test = Dataset.from_pandas(test) 
         id2label_map = {value: key for key, value in self.label2id_map.items()}
 
         def preprocess_function(examples):
