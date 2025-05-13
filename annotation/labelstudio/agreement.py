@@ -302,7 +302,9 @@ class InflationNarrative(object):
             
             del model
             del trainer
+            
             torch.cuda.empty_cache()
+            torch.cuda.reset_peak_memory_stats()
 
 
 
