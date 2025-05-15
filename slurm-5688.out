@@ -1,7 +1,0 @@
-usage: huggingface-cli <command> [<args>] login [-h] [--token TOKEN]
-                                                [--add-to-git-credential]
-huggingface-cli <command> [<args>] login: error: argument --token: expected one argument
-Traceback (most recent call last):
-  File "/storage/weinig/cdl-inflation-narrative/sequence_classification.py", line 4, in <module>
-    from vllm import LLM, SamplingParams
-ModuleNotFoundError: No module named 'vllm'

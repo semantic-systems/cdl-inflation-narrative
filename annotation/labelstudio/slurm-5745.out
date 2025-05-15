@@ -1,762 +1,0 @@
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/utils/hub.py:106: FutureWarning: Using `PYTORCH_PRETRAINED_BERT_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
-  warnings.warn(
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/utils/hub.py:106: FutureWarning: Using `PYTORCH_TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
-  warnings.warn(
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/utils/hub.py:106: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
-  warnings.warn(
-/storage/weinig/cdl-inflation-narrative/annotation/labelstudio/agreement.py:222: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
-  train['label'] = train['label'].replace(self.label2id_map)
-/storage/weinig/cdl-inflation-narrative/annotation/labelstudio/agreement.py:223: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
-  valid['label'] = valid['label'].replace(self.label2id_map)
-/storage/weinig/cdl-inflation-narrative/annotation/labelstudio/agreement.py:224: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
-  test['label'] = test['label'].replace(self.label2id_map)
-Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert/distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-annotator 5: 0 document(s) to annotate.
-annotator 7: 0 document(s) to annotate.
-annotator 8: 0 document(s) to annotate.
-annotator 9: 0 document(s) to annotate.
-inner_id_list 488, annotator_5: 488
-Updated annotation from user 5, result saved in ./export/task_1_annotation.csv
-Task 1 (User 5 - Sviatoslav)
-inner_id_list 488, annotator_7: 488
-Updated annotation from user 7, result saved in ./export/task_1_annotation.csv
-Task 1 (User 6 - Julia)
-inner_id_list 488, annotator_8: 488
-Updated annotation from user 8, result saved in ./export/task_1_annotation.csv
-Task 1 (User 7 - Darian)
-inner_id_list 488, annotator_9: 488
-Updated annotation from user 9, result saved in ./export/task_1_annotation.csv
-Task 1 (User 8 - Kim)
-has winner ratio: 0.8790983606557377
-all agreeing count: 232
-0.6858854912630578
-Map:   0%|          | 0/341 [00:00<?, ? examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 588.97 examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 587.15 examples/s]
-Map:   0%|          | 0/49 [00:00<?, ? examples/s]Map: 100%|██████████| 49/49 [00:00<00:00, 550.94 examples/s]
-Map:   0%|          | 0/98 [00:00<?, ? examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 568.48 examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 565.18 examples/s]
-  0%|          | 0/60 [00:00<?, ?it/s]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  2%|▏         | 1/60 [00:01<01:45,  1.78s/it]  3%|▎         | 2/60 [00:02<01:04,  1.12s/it]  5%|▌         | 3/60 [00:02<00:45,  1.24it/s]
-  0%|          | 0/1 [00:00<?, ?it/s][A                                              
-                                     [A  5%|▌         | 3/60 [00:02<00:45,  1.24it/s]
-100%|██████████| 1/1 [00:00<00:00, 548.42it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  7%|▋         | 4/60 [00:11<03:45,  4.02s/it]  8%|▊         | 5/60 [00:12<02:34,  2.81s/it] 10%|█         | 6/60 [00:12<01:48,  2.00s/it]{'eval_loss': 1.0864462852478027, 'eval_f1_weighted': 0.1434948979591837, 'eval_runtime': 0.11, 'eval_samples_per_second': 445.563, 'eval_steps_per_second': 9.093, 'epoch': 1.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                              
-                                     [A 10%|█         | 6/60 [00:13<01:48,  2.00s/it]
-100%|██████████| 1/1 [00:00<00:00, 616.18it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 12%|█▏        | 7/60 [00:21<03:47,  4.29s/it] 13%|█▎        | 8/60 [00:22<02:43,  3.14s/it] 15%|█▌        | 9/60 [00:23<01:56,  2.29s/it]{'eval_loss': 1.010888934135437, 'eval_f1_weighted': 0.39982073910645344, 'eval_runtime': 0.1106, 'eval_samples_per_second': 443.213, 'eval_steps_per_second': 9.045, 'epoch': 2.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                              
-                                     [A 15%|█▌        | 9/60 [00:23<01:56,  2.29s/it]
-100%|██████████| 1/1 [00:00<00:00, 610.17it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 17%|█▋        | 10/60 [00:31<03:37,  4.35s/it] 18%|█▊        | 11/60 [00:32<02:37,  3.22s/it] 20%|██        | 12/60 [00:33<01:53,  2.37s/it]{'eval_loss': 0.9401440024375916, 'eval_f1_weighted': 0.49772865957014045, 'eval_runtime': 0.1074, 'eval_samples_per_second': 456.181, 'eval_steps_per_second': 9.31, 'epoch': 3.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 20%|██        | 12/60 [00:33<01:53,  2.37s/it]
-100%|██████████| 1/1 [00:00<00:00, 618.45it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 22%|██▏       | 13/60 [00:42<03:26,  4.39s/it] 23%|██▎       | 14/60 [00:42<02:30,  3.27s/it] 25%|██▌       | 15/60 [00:43<01:48,  2.41s/it]{'eval_loss': 0.837221086025238, 'eval_f1_weighted': 0.5227123107307439, 'eval_runtime': 0.1076, 'eval_samples_per_second': 455.569, 'eval_steps_per_second': 9.297, 'epoch': 4.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 25%|██▌       | 15/60 [00:43<01:48,  2.41s/it]
-100%|██████████| 1/1 [00:00<00:00, 619.18it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 27%|██▋       | 16/60 [00:52<03:13,  4.41s/it] 28%|██▊       | 17/60 [00:52<02:20,  3.28s/it] 30%|███       | 18/60 [00:53<01:41,  2.43s/it]{'eval_loss': 0.7891778945922852, 'eval_f1_weighted': 0.5910328417081118, 'eval_runtime': 0.1073, 'eval_samples_per_second': 456.481, 'eval_steps_per_second': 9.316, 'epoch': 5.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 30%|███       | 18/60 [00:53<01:41,  2.43s/it]
-100%|██████████| 1/1 [00:00<00:00, 617.26it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 32%|███▏      | 19/60 [01:02<03:02,  4.44s/it] 33%|███▎      | 20/60 [01:03<02:12,  3.31s/it] 35%|███▌      | 21/60 [01:03<01:35,  2.44s/it]{'eval_loss': 0.7636570334434509, 'eval_f1_weighted': 0.6386728604485272, 'eval_runtime': 0.1085, 'eval_samples_per_second': 451.482, 'eval_steps_per_second': 9.214, 'epoch': 6.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 35%|███▌      | 21/60 [01:03<01:35,  2.44s/it]
-100%|██████████| 1/1 [00:00<00:00, 617.35it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 37%|███▋      | 22/60 [01:12<02:48,  4.43s/it] 38%|███▊      | 23/60 [01:13<02:01,  3.30s/it] 40%|████      | 24/60 [01:13<01:27,  2.44s/it]{'eval_loss': 0.7177744507789612, 'eval_f1_weighted': 0.661668418767283, 'eval_runtime': 0.1109, 'eval_samples_per_second': 441.906, 'eval_steps_per_second': 9.018, 'epoch': 7.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 40%|████      | 24/60 [01:13<01:27,  2.44s/it]
-100%|██████████| 1/1 [00:00<00:00, 617.81it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 42%|████▏     | 25/60 [01:22<02:33,  4.40s/it] 43%|████▎     | 26/60 [01:23<01:51,  3.28s/it] 45%|████▌     | 27/60 [01:23<01:20,  2.43s/it]{'eval_loss': 0.6641330122947693, 'eval_f1_weighted': 0.713265306122449, 'eval_runtime': 0.1105, 'eval_samples_per_second': 443.471, 'eval_steps_per_second': 9.05, 'epoch': 8.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 45%|████▌     | 27/60 [01:23<01:20,  2.43s/it]
-100%|██████████| 1/1 [00:00<00:00, 620.09it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 47%|████▋     | 28/60 [01:32<02:20,  4.39s/it] 48%|████▊     | 29/60 [01:33<01:41,  3.27s/it] 50%|█████     | 30/60 [01:33<01:12,  2.42s/it]{'eval_loss': 0.6485404372215271, 'eval_f1_weighted': 0.6926352619901006, 'eval_runtime': 0.1083, 'eval_samples_per_second': 452.391, 'eval_steps_per_second': 9.232, 'epoch': 9.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 50%|█████     | 30/60 [01:33<01:12,  2.42s/it]
-100%|██████████| 1/1 [00:00<00:00, 614.82it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 52%|█████▏    | 31/60 [01:42<02:07,  4.41s/it] 53%|█████▎    | 32/60 [01:43<01:31,  3.28s/it] 55%|█████▌    | 33/60 [01:44<01:05,  2.43s/it]{'eval_loss': 0.6562897562980652, 'eval_f1_weighted': 0.6790950370295902, 'eval_runtime': 0.1106, 'eval_samples_per_second': 443.194, 'eval_steps_per_second': 9.045, 'epoch': 10.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 55%|█████▌    | 33/60 [01:44<01:05,  2.43s/it]
-100%|██████████| 1/1 [00:00<00:00, 617.26it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 57%|█████▋    | 34/60 [01:53<01:54,  4.42s/it] 58%|█████▊    | 35/60 [01:53<01:22,  3.29s/it] 60%|██████    | 36/60 [01:54<00:58,  2.43s/it]{'eval_loss': 0.665499210357666, 'eval_f1_weighted': 0.6931803777411585, 'eval_runtime': 0.1111, 'eval_samples_per_second': 441.182, 'eval_steps_per_second': 9.004, 'epoch': 11.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 60%|██████    | 36/60 [01:54<00:58,  2.43s/it]
-100%|██████████| 1/1 [00:00<00:00, 622.95it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 62%|██████▏   | 37/60 [02:03<01:41,  4.41s/it] 63%|██████▎   | 38/60 [02:03<01:12,  3.29s/it] 65%|██████▌   | 39/60 [02:04<00:51,  2.43s/it]{'eval_loss': 0.6501316428184509, 'eval_f1_weighted': 0.7300174216027875, 'eval_runtime': 0.1117, 'eval_samples_per_second': 438.609, 'eval_steps_per_second': 8.951, 'epoch': 12.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 65%|██████▌   | 39/60 [02:04<00:51,  2.43s/it]
-100%|██████████| 1/1 [00:00<00:00, 621.84it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 67%|██████▋   | 40/60 [02:13<01:28,  4.45s/it] 68%|██████▊   | 41/60 [02:14<01:02,  3.31s/it] 70%|███████   | 42/60 [02:14<00:44,  2.45s/it]{'eval_loss': 0.6545634865760803, 'eval_f1_weighted': 0.6764055166139404, 'eval_runtime': 0.1102, 'eval_samples_per_second': 444.566, 'eval_steps_per_second': 9.073, 'epoch': 13.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 70%|███████   | 42/60 [02:14<00:44,  2.45s/it]
-100%|██████████| 1/1 [00:00<00:00, 620.37it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 72%|███████▏  | 43/60 [02:23<01:15,  4.43s/it] 73%|███████▎  | 44/60 [02:24<00:52,  3.30s/it] 75%|███████▌  | 45/60 [02:24<00:36,  2.44s/it]{'eval_loss': 0.6621347665786743, 'eval_f1_weighted': 0.6790950370295902, 'eval_runtime': 0.1104, 'eval_samples_per_second': 443.863, 'eval_steps_per_second': 9.058, 'epoch': 14.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 75%|███████▌  | 45/60 [02:24<00:36,  2.44s/it]
-100%|██████████| 1/1 [00:00<00:00, 619.27it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 77%|███████▋  | 46/60 [02:33<01:01,  4.39s/it] 78%|███████▊  | 47/60 [02:34<00:42,  3.27s/it] 80%|████████  | 48/60 [02:34<00:29,  2.42s/it]{'eval_loss': 0.6743265986442566, 'eval_f1_weighted': 0.7193525686136524, 'eval_runtime': 0.1116, 'eval_samples_per_second': 438.892, 'eval_steps_per_second': 8.957, 'epoch': 15.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 80%|████████  | 48/60 [02:34<00:29,  2.42s/it]
-100%|██████████| 1/1 [00:00<00:00, 622.49it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 82%|████████▏ | 49/60 [02:43<00:48,  4.40s/it] 83%|████████▎ | 50/60 [02:44<00:32,  3.28s/it] 85%|████████▌ | 51/60 [02:44<00:21,  2.43s/it]{'eval_loss': 0.6647763252258301, 'eval_f1_weighted': 0.7347143496897193, 'eval_runtime': 0.1103, 'eval_samples_per_second': 444.391, 'eval_steps_per_second': 9.069, 'epoch': 16.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 85%|████████▌ | 51/60 [02:44<00:21,  2.43s/it]
-100%|██████████| 1/1 [00:00<00:00, 614.55it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 87%|████████▋ | 52/60 [02:53<00:35,  4.39s/it] 88%|████████▊ | 53/60 [02:54<00:22,  3.27s/it] 90%|█████████ | 54/60 [02:54<00:14,  2.42s/it]{'eval_loss': 0.6740346550941467, 'eval_f1_weighted': 0.7347143496897193, 'eval_runtime': 0.1104, 'eval_samples_per_second': 443.829, 'eval_steps_per_second': 9.058, 'epoch': 17.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 90%|█████████ | 54/60 [02:55<00:14,  2.42s/it]
-100%|██████████| 1/1 [00:00<00:00, 621.47it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 92%|█████████▏| 55/60 [03:04<00:22,  4.43s/it] 93%|█████████▎| 56/60 [03:04<00:13,  3.30s/it] 95%|█████████▌| 57/60 [03:05<00:07,  2.44s/it]{'eval_loss': 0.6684427261352539, 'eval_f1_weighted': 0.7347143496897193, 'eval_runtime': 0.1097, 'eval_samples_per_second': 446.626, 'eval_steps_per_second': 9.115, 'epoch': 18.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A 95%|█████████▌| 57/60 [03:05<00:07,  2.44s/it]
-100%|██████████| 1/1 [00:00<00:00, 620.73it/s][A
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 97%|█████████▋| 58/60 [03:14<00:08,  4.42s/it] 98%|█████████▊| 59/60 [03:14<00:03,  3.29s/it]100%|██████████| 60/60 [03:15<00:00,  2.43s/it]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 0.6703552603721619, 'eval_f1_weighted': 0.716315074546258, 'eval_runtime': 0.1082, 'eval_samples_per_second': 452.95, 'eval_steps_per_second': 9.244, 'epoch': 19.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A                                               
-                                     [A100%|██████████| 60/60 [03:23<00:00,  2.43s/it]
-100%|██████████| 1/1 [00:00<00:00, 643.99it/s][A
-                                              [A                                               100%|██████████| 60/60 [03:35<00:00,  2.43s/it]100%|██████████| 60/60 [03:35<00:00,  3.59s/it]
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 0.6758885383605957, 'eval_f1_weighted': 0.716315074546258, 'eval_runtime': 0.1165, 'eval_samples_per_second': 420.771, 'eval_steps_per_second': 8.587, 'epoch': 20.0}
-{'train_runtime': 215.6728, 'train_samples_per_second': 31.622, 'train_steps_per_second': 0.278, 'train_loss': 0.5026609420776367, 'epoch': 20.0}
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 648.77it/s]
-distilbert/distilbert-base-uncased
-                          precision    recall  f1-score   support
-
-inflation-cause-dominant       0.44      0.62      0.52        13
-       inflation-related       0.85      0.64      0.73        44
-   non-inflation-related       0.83      0.95      0.89        41
-
-                accuracy                           0.77        98
-               macro avg       0.71      0.73      0.71        98
-            weighted avg       0.79      0.77      0.77        98
-
-Map:   0%|          | 0/341 [00:00<?, ? examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 570.43 examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 568.26 examples/s]
-Map:   0%|          | 0/49 [00:00<?, ? examples/s]Map: 100%|██████████| 49/49 [00:00<00:00, 531.76 examples/s]
-Map:   0%|          | 0/98 [00:00<?, ? examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 547.26 examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 543.82 examples/s]
-  0%|          | 0/60 [00:00<?, ?it/s]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  2%|▏         | 1/60 [00:01<01:24,  1.43s/it]  3%|▎         | 2/60 [00:02<01:18,  1.36s/it]  5%|▌         | 3/60 [00:03<01:04,  1.13s/it]
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 632.43it/s][A  5%|▌         | 3/60 [00:03<01:04,  1.13s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  7%|▋         | 4/60 [00:18<06:02,  6.47s/it]  8%|▊         | 5/60 [00:19<04:13,  4.61s/it] 10%|█         | 6/60 [00:20<03:00,  3.33s/it]{'eval_loss': 1.2487776279449463, 'eval_f1_weighted': 0.5001855287569573, 'eval_runtime': 0.2055, 'eval_samples_per_second': 238.431, 'eval_steps_per_second': 4.866, 'epoch': 1.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 629.78it/s][A 10%|█         | 6/60 [00:20<03:00,  3.33s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 12%|█▏        | 7/60 [00:35<06:12,  7.03s/it] 13%|█▎        | 8/60 [00:36<04:30,  5.20s/it] 15%|█▌        | 9/60 [00:37<03:16,  3.85s/it]{'eval_loss': 0.9135361313819885, 'eval_f1_weighted': 0.5937087478669629, 'eval_runtime': 0.2067, 'eval_samples_per_second': 237.031, 'eval_steps_per_second': 4.837, 'epoch': 2.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 633.77it/s][A 15%|█▌        | 9/60 [00:37<03:16,  3.85s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 17%|█▋        | 10/60 [00:51<05:59,  7.19s/it] 18%|█▊        | 11/60 [00:53<04:23,  5.38s/it] 20%|██        | 12/60 [00:54<03:12,  4.01s/it]{'eval_loss': 0.8418975472450256, 'eval_f1_weighted': 0.5802075380202637, 'eval_runtime': 0.2049, 'eval_samples_per_second': 239.188, 'eval_steps_per_second': 4.881, 'epoch': 3.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 630.72it/s][A 20%|██        | 12/60 [00:54<03:12,  4.01s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 22%|██▏       | 13/60 [01:08<05:40,  7.24s/it] 23%|██▎       | 14/60 [01:10<04:10,  5.45s/it] 25%|██▌       | 15/60 [01:10<03:02,  4.07s/it]{'eval_loss': 0.7914441823959351, 'eval_f1_weighted': 0.5454545454545454, 'eval_runtime': 0.2105, 'eval_samples_per_second': 232.765, 'eval_steps_per_second': 4.75, 'epoch': 4.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 633.77it/s][A 25%|██▌       | 15/60 [01:11<03:02,  4.07s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 27%|██▋       | 16/60 [01:25<05:19,  7.26s/it] 28%|██▊       | 17/60 [01:26<03:55,  5.47s/it] 30%|███       | 18/60 [01:27<02:51,  4.08s/it]{'eval_loss': 0.7238937020301819, 'eval_f1_weighted': 0.5964270206562868, 'eval_runtime': 0.2055, 'eval_samples_per_second': 238.448, 'eval_steps_per_second': 4.866, 'epoch': 5.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 632.43it/s][A 30%|███       | 18/60 [01:27<02:51,  4.08s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 32%|███▏      | 19/60 [01:42<04:57,  7.26s/it] 33%|███▎      | 20/60 [01:43<03:38,  5.47s/it] 35%|███▌      | 21/60 [01:44<02:39,  4.09s/it]{'eval_loss': 0.7508101463317871, 'eval_f1_weighted': 0.6709956709956709, 'eval_runtime': 0.2056, 'eval_samples_per_second': 238.351, 'eval_steps_per_second': 4.864, 'epoch': 6.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 635.79it/s][A 35%|███▌      | 21/60 [01:44<02:39,  4.09s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 37%|███▋      | 22/60 [01:59<04:36,  7.26s/it] 38%|███▊      | 23/60 [02:00<03:22,  5.47s/it] 40%|████      | 24/60 [02:01<02:27,  4.09s/it]{'eval_loss': 0.6789529919624329, 'eval_f1_weighted': 0.6473232771369418, 'eval_runtime': 0.2048, 'eval_samples_per_second': 239.26, 'eval_steps_per_second': 4.883, 'epoch': 7.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 640.06it/s][A 40%|████      | 24/60 [02:01<02:27,  4.09s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 42%|████▏     | 25/60 [02:16<04:14,  7.26s/it] 43%|████▎     | 26/60 [02:17<03:06,  5.47s/it] 45%|████▌     | 27/60 [02:18<02:14,  4.09s/it]{'eval_loss': 0.7334070801734924, 'eval_f1_weighted': 0.6912976175648987, 'eval_runtime': 0.2064, 'eval_samples_per_second': 237.424, 'eval_steps_per_second': 4.845, 'epoch': 8.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 625.83it/s][A 45%|████▌     | 27/60 [02:18<02:14,  4.09s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 47%|████▋     | 28/60 [02:32<03:52,  7.26s/it] 48%|████▊     | 29/60 [02:34<02:49,  5.47s/it] 50%|█████     | 30/60 [02:35<02:02,  4.09s/it]{'eval_loss': 0.7480672597885132, 'eval_f1_weighted': 0.6885971171685457, 'eval_runtime': 0.2059, 'eval_samples_per_second': 237.924, 'eval_steps_per_second': 4.856, 'epoch': 9.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 623.78it/s][A 50%|█████     | 30/60 [02:35<02:02,  4.09s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 52%|█████▏    | 31/60 [02:49<03:30,  7.26s/it] 53%|█████▎    | 32/60 [02:50<02:33,  5.47s/it] 55%|█████▌    | 33/60 [02:51<01:50,  4.09s/it]{'eval_loss': 0.8191561102867126, 'eval_f1_weighted': 0.6450360270958279, 'eval_runtime': 0.2068, 'eval_samples_per_second': 237.001, 'eval_steps_per_second': 4.837, 'epoch': 10.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 637.82it/s][A 55%|█████▌    | 33/60 [02:52<01:50,  4.09s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 57%|█████▋    | 34/60 [03:06<03:09,  7.28s/it] 58%|█████▊    | 35/60 [03:07<02:17,  5.49s/it] 60%|██████    | 36/60 [03:08<01:38,  4.10s/it]{'eval_loss': 0.8730272650718689, 'eval_f1_weighted': 0.6673987264078564, 'eval_runtime': 0.2095, 'eval_samples_per_second': 233.897, 'eval_steps_per_second': 4.773, 'epoch': 11.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 633.96it/s][A 60%|██████    | 36/60 [03:08<01:38,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 62%|██████▏   | 37/60 [03:23<02:47,  7.28s/it] 63%|██████▎   | 38/60 [03:24<02:00,  5.49s/it] 65%|██████▌   | 39/60 [03:25<01:26,  4.10s/it]{'eval_loss': 0.8809428811073303, 'eval_f1_weighted': 0.6060365853658537, 'eval_runtime': 0.2064, 'eval_samples_per_second': 237.346, 'eval_steps_per_second': 4.844, 'epoch': 12.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 633.58it/s][A 65%|██████▌   | 39/60 [03:25<01:26,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 67%|██████▋   | 40/60 [03:40<02:25,  7.28s/it] 68%|██████▊   | 41/60 [03:41<01:44,  5.49s/it] 70%|███████   | 42/60 [03:42<01:13,  4.10s/it]{'eval_loss': 0.9253048300743103, 'eval_f1_weighted': 0.5810276679841897, 'eval_runtime': 0.2067, 'eval_samples_per_second': 237.078, 'eval_steps_per_second': 4.838, 'epoch': 13.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 636.27it/s][A 70%|███████   | 42/60 [03:42<01:13,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 72%|███████▏  | 43/60 [03:57<02:03,  7.28s/it] 73%|███████▎  | 44/60 [03:58<01:27,  5.49s/it] 75%|███████▌  | 45/60 [03:59<01:01,  4.10s/it]{'eval_loss': 0.9367815256118774, 'eval_f1_weighted': 0.6254730983302412, 'eval_runtime': 0.2064, 'eval_samples_per_second': 237.354, 'eval_steps_per_second': 4.844, 'epoch': 14.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 638.50it/s][A 75%|███████▌  | 45/60 [03:59<01:01,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 77%|███████▋  | 46/60 [04:14<01:42,  7.29s/it] 78%|███████▊  | 47/60 [04:15<01:11,  5.49s/it] 80%|████████  | 48/60 [04:16<00:49,  4.10s/it]{'eval_loss': 0.938450038433075, 'eval_f1_weighted': 0.6485371342835708, 'eval_runtime': 0.2059, 'eval_samples_per_second': 238.005, 'eval_steps_per_second': 4.857, 'epoch': 15.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 641.92it/s][A 80%|████████  | 48/60 [04:16<00:49,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 82%|████████▏ | 49/60 [04:30<01:20,  7.28s/it] 83%|████████▎ | 50/60 [04:32<00:54,  5.49s/it] 85%|████████▌ | 51/60 [04:33<00:36,  4.10s/it]{'eval_loss': 0.9805868268013, 'eval_f1_weighted': 0.6485371342835708, 'eval_runtime': 0.2058, 'eval_samples_per_second': 238.101, 'eval_steps_per_second': 4.859, 'epoch': 16.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 637.43it/s][A 85%|████████▌ | 51/60 [04:33<00:36,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 87%|████████▋ | 52/60 [04:47<00:58,  7.28s/it] 88%|████████▊ | 53/60 [04:49<00:38,  5.48s/it] 90%|█████████ | 54/60 [04:49<00:24,  4.10s/it]{'eval_loss': 0.9885863661766052, 'eval_f1_weighted': 0.6481669985067198, 'eval_runtime': 0.2098, 'eval_samples_per_second': 233.507, 'eval_steps_per_second': 4.765, 'epoch': 17.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 631.20it/s][A 90%|█████████ | 54/60 [04:50<00:24,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 92%|█████████▏| 55/60 [05:04<00:36,  7.27s/it] 93%|█████████▎| 56/60 [05:05<00:21,  5.48s/it] 95%|█████████▌| 57/60 [05:06<00:12,  4.10s/it]{'eval_loss': 0.9972196221351624, 'eval_f1_weighted': 0.6038247466818896, 'eval_runtime': 0.2073, 'eval_samples_per_second': 236.414, 'eval_steps_per_second': 4.825, 'epoch': 18.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 615.45it/s][A 95%|█████████▌| 57/60 [05:06<00:12,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 97%|█████████▋| 58/60 [05:21<00:14,  7.27s/it] 98%|█████████▊| 59/60 [05:22<00:05,  5.48s/it]100%|██████████| 60/60 [05:23<00:00,  4.10s/it]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 1.0036592483520508, 'eval_f1_weighted': 0.6038247466818896, 'eval_runtime': 0.2067, 'eval_samples_per_second': 237.07, 'eval_steps_per_second': 4.838, 'epoch': 19.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 637.34it/s][A100%|██████████| 60/60 [05:36<00:00,  4.10s/it]
-                                              [A                                               100%|██████████| 60/60 [05:58<00:00,  4.10s/it]100%|██████████| 60/60 [05:58<00:00,  5.97s/it]
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 1.004287600517273, 'eval_f1_weighted': 0.6038247466818896, 'eval_runtime': 0.2311, 'eval_samples_per_second': 212.014, 'eval_steps_per_second': 4.327, 'epoch': 20.0}
-{'train_runtime': 358.4637, 'train_samples_per_second': 19.026, 'train_steps_per_second': 0.167, 'train_loss': 0.3599302927652995, 'epoch': 20.0}
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 637.72it/s]
-Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at FacebookAI/roberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-ProsusAI/finbert
-                          precision    recall  f1-score   support
-
-inflation-cause-dominant       0.42      0.38      0.40        13
-       inflation-related       0.74      0.84      0.79        44
-   non-inflation-related       0.97      0.85      0.91        41
-
-                accuracy                           0.79        98
-               macro avg       0.71      0.69      0.70        98
-            weighted avg       0.79      0.79      0.79        98
-
-Map:   0%|          | 0/341 [00:00<?, ? examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 634.25 examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 631.92 examples/s]
-Map:   0%|          | 0/49 [00:00<?, ? examples/s]Map: 100%|██████████| 49/49 [00:00<00:00, 552.17 examples/s]
-Map:   0%|          | 0/98 [00:00<?, ? examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 586.91 examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 582.73 examples/s]
-  0%|          | 0/60 [00:00<?, ?it/s]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  2%|▏         | 1/60 [00:01<01:19,  1.34s/it]  3%|▎         | 2/60 [00:02<01:16,  1.32s/it]  5%|▌         | 3/60 [00:03<01:03,  1.12s/it]
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 617.17it/s][A  5%|▌         | 3/60 [00:03<01:03,  1.12s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  7%|▋         | 4/60 [00:19<06:40,  7.16s/it]  8%|▊         | 5/60 [00:21<04:37,  5.05s/it] 10%|█         | 6/60 [00:22<03:15,  3.63s/it]{'eval_loss': 1.0910630226135254, 'eval_f1_weighted': 0.1434948979591837, 'eval_runtime': 0.2023, 'eval_samples_per_second': 242.181, 'eval_steps_per_second': 4.942, 'epoch': 1.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 624.80it/s][A 10%|█         | 6/60 [00:22<03:15,  3.63s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 12%|█▏        | 7/60 [00:38<06:54,  7.82s/it] 13%|█▎        | 8/60 [00:39<04:58,  5.75s/it] 15%|█▌        | 9/60 [00:40<03:35,  4.22s/it]{'eval_loss': 1.0087777376174927, 'eval_f1_weighted': 0.5029624753127058, 'eval_runtime': 0.2014, 'eval_samples_per_second': 243.252, 'eval_steps_per_second': 4.964, 'epoch': 2.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 633.87it/s][A 15%|█▌        | 9/60 [00:40<03:35,  4.22s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 17%|█▋        | 10/60 [00:57<06:39,  8.00s/it] 18%|█▊        | 11/60 [00:58<04:51,  5.95s/it] 20%|██        | 12/60 [00:59<03:31,  4.40s/it]{'eval_loss': 0.9434599876403809, 'eval_f1_weighted': 0.5368694647670389, 'eval_runtime': 0.201, 'eval_samples_per_second': 243.782, 'eval_steps_per_second': 4.975, 'epoch': 3.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 635.31it/s][A 20%|██        | 12/60 [00:59<03:31,  4.40s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 22%|██▏       | 13/60 [01:15<06:18,  8.05s/it] 23%|██▎       | 14/60 [01:17<04:36,  6.01s/it] 25%|██▌       | 15/60 [01:18<03:20,  4.46s/it]{'eval_loss': 0.8032721877098083, 'eval_f1_weighted': 0.5672880094286955, 'eval_runtime': 0.2038, 'eval_samples_per_second': 240.456, 'eval_steps_per_second': 4.907, 'epoch': 4.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 633.87it/s][A 25%|██▌       | 15/60 [01:18<03:20,  4.46s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 27%|██▋       | 16/60 [01:34<05:54,  8.07s/it] 28%|██▊       | 17/60 [01:35<04:19,  6.03s/it] 30%|███       | 18/60 [01:36<03:08,  4.48s/it]{'eval_loss': 0.708349347114563, 'eval_f1_weighted': 0.654663622483997, 'eval_runtime': 0.2024, 'eval_samples_per_second': 242.093, 'eval_steps_per_second': 4.941, 'epoch': 5.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 636.08it/s][A 30%|███       | 18/60 [01:36<03:08,  4.48s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 32%|███▏      | 19/60 [01:52<05:30,  8.06s/it] 33%|███▎      | 20/60 [01:54<04:01,  6.03s/it] 35%|███▌      | 21/60 [01:55<02:54,  4.48s/it]{'eval_loss': 0.665703535079956, 'eval_f1_weighted': 0.6098525534615761, 'eval_runtime': 0.2039, 'eval_samples_per_second': 240.272, 'eval_steps_per_second': 4.904, 'epoch': 6.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 638.50it/s][A 35%|███▌      | 21/60 [01:55<02:54,  4.48s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 37%|███▋      | 22/60 [02:11<05:06,  8.07s/it] 38%|███▊      | 23/60 [02:12<03:43,  6.04s/it] 40%|████      | 24/60 [02:13<02:41,  4.49s/it]{'eval_loss': 0.6864345073699951, 'eval_f1_weighted': 0.6387633326408836, 'eval_runtime': 0.2022, 'eval_samples_per_second': 242.326, 'eval_steps_per_second': 4.945, 'epoch': 7.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 626.67it/s][A 40%|████      | 24/60 [02:13<02:41,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 42%|████▏     | 25/60 [02:30<04:42,  8.08s/it] 43%|████▎     | 26/60 [02:31<03:25,  6.04s/it] 45%|████▌     | 27/60 [02:32<02:28,  4.49s/it]{'eval_loss': 0.585874617099762, 'eval_f1_weighted': 0.7106907453008158, 'eval_runtime': 0.2031, 'eval_samples_per_second': 241.218, 'eval_steps_per_second': 4.923, 'epoch': 8.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 632.82it/s][A 45%|████▌     | 27/60 [02:32<02:28,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 47%|████▋     | 28/60 [02:48<04:18,  8.08s/it] 48%|████▊     | 29/60 [02:50<03:07,  6.05s/it] 50%|█████     | 30/60 [02:51<02:14,  4.50s/it]{'eval_loss': 0.563366174697876, 'eval_f1_weighted': 0.751530612244898, 'eval_runtime': 0.201, 'eval_samples_per_second': 243.727, 'eval_steps_per_second': 4.974, 'epoch': 9.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 628.36it/s][A 50%|█████     | 30/60 [02:51<02:14,  4.50s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 52%|█████▏    | 31/60 [03:07<03:54,  8.08s/it] 53%|█████▎    | 32/60 [03:08<02:49,  6.05s/it] 55%|█████▌    | 33/60 [03:09<02:01,  4.49s/it]{'eval_loss': 0.6199653148651123, 'eval_f1_weighted': 0.5682539682539682, 'eval_runtime': 0.202, 'eval_samples_per_second': 242.631, 'eval_steps_per_second': 4.952, 'epoch': 10.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 631.20it/s][A 55%|█████▌    | 33/60 [03:09<02:01,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 57%|█████▋    | 34/60 [03:26<03:29,  8.08s/it] 58%|█████▊    | 35/60 [03:27<02:31,  6.04s/it] 60%|██████    | 36/60 [03:28<01:47,  4.49s/it]{'eval_loss': 0.5142126083374023, 'eval_f1_weighted': 0.8165261082627845, 'eval_runtime': 0.2015, 'eval_samples_per_second': 243.179, 'eval_steps_per_second': 4.963, 'epoch': 11.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 628.36it/s][A 60%|██████    | 36/60 [03:28<01:47,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 62%|██████▏   | 37/60 [03:44<03:05,  8.07s/it] 63%|██████▎   | 38/60 [03:45<02:12,  6.04s/it] 65%|██████▌   | 39/60 [03:46<01:34,  4.49s/it]{'eval_loss': 0.5401073098182678, 'eval_f1_weighted': 0.6451099920487675, 'eval_runtime': 0.2032, 'eval_samples_per_second': 241.115, 'eval_steps_per_second': 4.921, 'epoch': 12.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 625.64it/s][A 65%|██████▌   | 39/60 [03:47<01:34,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 67%|██████▋   | 40/60 [04:03<02:41,  8.08s/it] 68%|██████▊   | 41/60 [04:04<01:54,  6.04s/it] 70%|███████   | 42/60 [04:05<01:20,  4.49s/it]{'eval_loss': 0.559660792350769, 'eval_f1_weighted': 0.7154653214669325, 'eval_runtime': 0.2026, 'eval_samples_per_second': 241.809, 'eval_steps_per_second': 4.935, 'epoch': 13.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 624.06it/s][A 70%|███████   | 42/60 [04:05<01:20,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 72%|███████▏  | 43/60 [04:21<02:17,  8.08s/it] 73%|███████▎  | 44/60 [04:23<01:36,  6.05s/it] 75%|███████▌  | 45/60 [04:24<01:07,  4.49s/it]{'eval_loss': 0.5639882683753967, 'eval_f1_weighted': 0.73804333700319, 'eval_runtime': 0.2066, 'eval_samples_per_second': 237.119, 'eval_steps_per_second': 4.839, 'epoch': 14.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 628.64it/s][A 75%|███████▌  | 45/60 [04:24<01:07,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 77%|███████▋  | 46/60 [04:40<01:53,  8.08s/it] 78%|███████▊  | 47/60 [04:41<01:18,  6.04s/it] 80%|████████  | 48/60 [04:42<00:53,  4.49s/it]{'eval_loss': 0.5308206677436829, 'eval_f1_weighted': 0.7574243490499649, 'eval_runtime': 0.2017, 'eval_samples_per_second': 242.912, 'eval_steps_per_second': 4.957, 'epoch': 15.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 637.82it/s][A 80%|████████  | 48/60 [04:42<00:53,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 82%|████████▏ | 49/60 [04:59<01:28,  8.07s/it] 83%|████████▎ | 50/60 [05:00<01:00,  6.04s/it] 85%|████████▌ | 51/60 [05:01<00:40,  4.49s/it]{'eval_loss': 0.4787793755531311, 'eval_f1_weighted': 0.777064955894146, 'eval_runtime': 0.2015, 'eval_samples_per_second': 243.127, 'eval_steps_per_second': 4.962, 'epoch': 16.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 615.72it/s][A 85%|████████▌ | 51/60 [05:01<00:40,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 87%|████████▋ | 52/60 [05:17<01:04,  8.06s/it] 88%|████████▊ | 53/60 [05:18<00:42,  6.03s/it] 90%|█████████ | 54/60 [05:19<00:26,  4.49s/it]{'eval_loss': 0.5528960227966309, 'eval_f1_weighted': 0.6910212360806393, 'eval_runtime': 0.2048, 'eval_samples_per_second': 239.283, 'eval_steps_per_second': 4.883, 'epoch': 17.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 638.40it/s][A 90%|█████████ | 54/60 [05:20<00:26,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 92%|█████████▏| 55/60 [05:36<00:40,  8.06s/it] 93%|█████████▎| 56/60 [05:37<00:24,  6.03s/it] 95%|█████████▌| 57/60 [05:38<00:13,  4.49s/it]{'eval_loss': 0.5400488972663879, 'eval_f1_weighted': 0.7162965414489664, 'eval_runtime': 0.2018, 'eval_samples_per_second': 242.759, 'eval_steps_per_second': 4.954, 'epoch': 18.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 636.18it/s][A 95%|█████████▌| 57/60 [05:38<00:13,  4.49s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 97%|█████████▋| 58/60 [05:57<00:17,  8.76s/it] 98%|█████████▊| 59/60 [05:58<00:06,  6.52s/it]100%|██████████| 60/60 [05:59<00:00,  4.83s/it]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 0.503639280796051, 'eval_f1_weighted': 0.7376914721193055, 'eval_runtime': 0.204, 'eval_samples_per_second': 240.199, 'eval_steps_per_second': 4.902, 'epoch': 19.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 630.34it/s][A100%|██████████| 60/60 [06:14<00:00,  4.83s/it]
-                                              [A                                               100%|██████████| 60/60 [06:33<00:00,  4.83s/it]100%|██████████| 60/60 [06:33<00:00,  6.57s/it]
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 0.5094805955886841, 'eval_f1_weighted': 0.7376914721193055, 'eval_runtime': 0.2271, 'eval_samples_per_second': 215.779, 'eval_steps_per_second': 4.404, 'epoch': 20.0}
-{'train_runtime': 393.8969, 'train_samples_per_second': 17.314, 'train_steps_per_second': 0.152, 'train_loss': 0.4903956413269043, 'epoch': 20.0}
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 636.75it/s]
-Some weights of BertForSequenceClassification were not initialized from the model checkpoint at google-bert/bert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-FacebookAI/roberta-base
-                          precision    recall  f1-score   support
-
-inflation-cause-dominant       0.39      0.69      0.50        13
-       inflation-related       0.78      0.57      0.66        44
-   non-inflation-related       0.86      0.90      0.88        41
-
-                accuracy                           0.72        98
-               macro avg       0.68      0.72      0.68        98
-            weighted avg       0.76      0.72      0.73        98
-
-Map:   0%|          | 0/341 [00:00<?, ? examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 587.03 examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 584.86 examples/s]
-Map:   0%|          | 0/49 [00:00<?, ? examples/s]Map: 100%|██████████| 49/49 [00:00<00:00, 516.09 examples/s]
-Map:   0%|          | 0/98 [00:00<?, ? examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 539.46 examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 536.07 examples/s]
-  0%|          | 0/60 [00:00<?, ?it/s]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  2%|▏         | 1/60 [00:01<01:21,  1.38s/it]  3%|▎         | 2/60 [00:02<01:17,  1.34s/it]  5%|▌         | 3/60 [00:03<01:03,  1.12s/it]
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 619.45it/s][A  5%|▌         | 3/60 [00:03<01:03,  1.12s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-  7%|▋         | 4/60 [00:18<05:59,  6.42s/it]  8%|▊         | 5/60 [00:19<04:11,  4.58s/it] 10%|█         | 6/60 [00:20<02:58,  3.31s/it]{'eval_loss': 1.0666426420211792, 'eval_f1_weighted': 0.3673469387755102, 'eval_runtime': 0.2056, 'eval_samples_per_second': 238.336, 'eval_steps_per_second': 4.864, 'epoch': 1.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 621.29it/s][A 10%|█         | 6/60 [00:20<02:58,  3.31s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 12%|█▏        | 7/60 [00:34<06:08,  6.96s/it] 13%|█▎        | 8/60 [00:36<04:28,  5.16s/it] 15%|█▌        | 9/60 [00:36<03:14,  3.82s/it]{'eval_loss': 1.0049697160720825, 'eval_f1_weighted': 0.44946550048590866, 'eval_runtime': 0.2058, 'eval_samples_per_second': 238.137, 'eval_steps_per_second': 4.86, 'epoch': 2.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                              
-100%|██████████| 1/1 [00:00<00:00, 625.08it/s][A 15%|█▌        | 9/60 [00:37<03:14,  3.82s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 17%|█▋        | 10/60 [00:51<05:55,  7.11s/it] 18%|█▊        | 11/60 [00:52<04:21,  5.33s/it] 20%|██        | 12/60 [00:53<03:10,  3.97s/it]{'eval_loss': 1.001010775566101, 'eval_f1_weighted': 0.4435176086111937, 'eval_runtime': 0.2057, 'eval_samples_per_second': 238.197, 'eval_steps_per_second': 4.861, 'epoch': 3.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 631.10it/s][A 20%|██        | 12/60 [00:53<03:10,  3.97s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 22%|██▏       | 13/60 [01:07<05:35,  7.14s/it] 23%|██▎       | 14/60 [01:09<04:07,  5.38s/it] 25%|██▌       | 15/60 [01:10<03:00,  4.02s/it]{'eval_loss': 0.91704922914505, 'eval_f1_weighted': 0.5050092764378479, 'eval_runtime': 0.2069, 'eval_samples_per_second': 236.812, 'eval_steps_per_second': 4.833, 'epoch': 4.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 626.86it/s][A 25%|██▌       | 15/60 [01:10<03:00,  4.02s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 27%|██▋       | 16/60 [01:24<05:14,  7.15s/it] 28%|██▊       | 17/60 [01:25<03:51,  5.39s/it] 30%|███       | 18/60 [01:26<02:49,  4.03s/it]{'eval_loss': 0.8947603106498718, 'eval_f1_weighted': 0.5214071642643071, 'eval_runtime': 0.2091, 'eval_samples_per_second': 234.369, 'eval_steps_per_second': 4.783, 'epoch': 5.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 614.01it/s][A 30%|███       | 18/60 [01:26<02:49,  4.03s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 32%|███▏      | 19/60 [01:41<04:53,  7.16s/it] 33%|███▎      | 20/60 [01:42<03:36,  5.40s/it] 35%|███▌      | 21/60 [01:43<02:37,  4.04s/it]{'eval_loss': 0.8711867928504944, 'eval_f1_weighted': 0.503001200480192, 'eval_runtime': 0.2107, 'eval_samples_per_second': 232.522, 'eval_steps_per_second': 4.745, 'epoch': 6.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 632.24it/s][A 35%|███▌      | 21/60 [01:43<02:37,  4.04s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 37%|███▋      | 22/60 [01:57<04:32,  7.16s/it] 38%|███▊      | 23/60 [01:59<03:19,  5.40s/it] 40%|████      | 24/60 [02:00<02:25,  4.04s/it]{'eval_loss': 0.8434418439865112, 'eval_f1_weighted': 0.5050092764378479, 'eval_runtime': 0.2072, 'eval_samples_per_second': 236.455, 'eval_steps_per_second': 4.826, 'epoch': 7.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 634.73it/s][A 40%|████      | 24/60 [02:00<02:25,  4.04s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 42%|████▏     | 25/60 [02:14<04:10,  7.16s/it] 43%|████▎     | 26/60 [02:15<03:03,  5.40s/it] 45%|████▌     | 27/60 [02:16<02:13,  4.04s/it]{'eval_loss': 0.8705477118492126, 'eval_f1_weighted': 0.4995173745173746, 'eval_runtime': 0.2062, 'eval_samples_per_second': 237.672, 'eval_steps_per_second': 4.85, 'epoch': 8.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 639.67it/s][A 45%|████▌     | 27/60 [02:16<02:13,  4.04s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 47%|████▋     | 28/60 [02:31<03:49,  7.17s/it] 48%|████▊     | 29/60 [02:32<02:47,  5.41s/it] 50%|█████     | 30/60 [02:33<02:01,  4.04s/it]{'eval_loss': 0.8202029466629028, 'eval_f1_weighted': 0.4870894594396899, 'eval_runtime': 0.2059, 'eval_samples_per_second': 238.008, 'eval_steps_per_second': 4.857, 'epoch': 9.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 628.17it/s][A 50%|█████     | 30/60 [02:33<02:01,  4.04s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 52%|█████▏    | 31/60 [02:47<03:28,  7.17s/it] 53%|█████▎    | 32/60 [02:49<02:31,  5.41s/it] 55%|█████▌    | 33/60 [02:49<01:49,  4.05s/it]{'eval_loss': 0.8155514597892761, 'eval_f1_weighted': 0.5191836734693878, 'eval_runtime': 0.2068, 'eval_samples_per_second': 236.964, 'eval_steps_per_second': 4.836, 'epoch': 10.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 611.95it/s][A 55%|█████▌    | 33/60 [02:50<01:49,  4.05s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 57%|█████▋    | 34/60 [03:05<03:13,  7.46s/it] 58%|█████▊    | 35/60 [03:06<02:20,  5.61s/it] 60%|██████    | 36/60 [03:07<01:40,  4.19s/it]{'eval_loss': 0.8460784554481506, 'eval_f1_weighted': 0.5191836734693878, 'eval_runtime': 0.2071, 'eval_samples_per_second': 236.616, 'eval_steps_per_second': 4.829, 'epoch': 11.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 623.50it/s][A 60%|██████    | 36/60 [03:07<01:40,  4.19s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 62%|██████▏   | 37/60 [03:21<02:47,  7.28s/it] 63%|██████▎   | 38/60 [03:23<02:00,  5.48s/it] 65%|██████▌   | 39/60 [03:24<01:26,  4.10s/it]{'eval_loss': 0.8169432878494263, 'eval_f1_weighted': 0.5378151260504201, 'eval_runtime': 0.2061, 'eval_samples_per_second': 237.691, 'eval_steps_per_second': 4.851, 'epoch': 12.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 627.51it/s][A 65%|██████▌   | 39/60 [03:24<01:26,  4.10s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 67%|██████▋   | 40/60 [03:38<02:24,  7.22s/it] 68%|██████▊   | 41/60 [03:39<01:43,  5.44s/it] 70%|███████   | 42/60 [03:40<01:13,  4.07s/it]{'eval_loss': 0.8186860084533691, 'eval_f1_weighted': 0.5481292517006803, 'eval_runtime': 0.2062, 'eval_samples_per_second': 237.599, 'eval_steps_per_second': 4.849, 'epoch': 13.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 636.56it/s][A 70%|███████   | 42/60 [03:40<01:13,  4.07s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 72%|███████▏  | 43/60 [03:55<02:02,  7.20s/it] 73%|███████▎  | 44/60 [03:56<01:26,  5.43s/it] 75%|███████▌  | 45/60 [03:57<01:00,  4.06s/it]{'eval_loss': 0.8423877358436584, 'eval_f1_weighted': 0.5823997684180056, 'eval_runtime': 0.2068, 'eval_samples_per_second': 236.995, 'eval_steps_per_second': 4.837, 'epoch': 14.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 646.07it/s][A 75%|███████▌  | 45/60 [03:57<01:00,  4.06s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 77%|███████▋  | 46/60 [04:11<01:40,  7.19s/it] 78%|███████▊  | 47/60 [04:13<01:10,  5.42s/it] 80%|████████  | 48/60 [04:14<00:48,  4.06s/it]{'eval_loss': 0.8311215043067932, 'eval_f1_weighted': 0.6180385197557284, 'eval_runtime': 0.206, 'eval_samples_per_second': 237.852, 'eval_steps_per_second': 4.854, 'epoch': 15.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 641.13it/s][A 80%|████████  | 48/60 [04:14<00:48,  4.06s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 82%|████████▏ | 49/60 [04:28<01:19,  7.19s/it] 83%|████████▎ | 50/60 [04:29<00:54,  5.43s/it] 85%|████████▌ | 51/60 [04:30<00:36,  4.06s/it]{'eval_loss': 0.8362434506416321, 'eval_f1_weighted': 0.6078194321206744, 'eval_runtime': 0.207, 'eval_samples_per_second': 236.709, 'eval_steps_per_second': 4.831, 'epoch': 16.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 637.43it/s][A 85%|████████▌ | 51/60 [04:30<00:36,  4.06s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 87%|████████▋ | 52/60 [04:45<00:57,  7.20s/it] 88%|████████▊ | 53/60 [04:46<00:37,  5.43s/it] 90%|█████████ | 54/60 [04:47<00:24,  4.06s/it]{'eval_loss': 0.8593322038650513, 'eval_f1_weighted': 0.5399745515954693, 'eval_runtime': 0.2068, 'eval_samples_per_second': 236.992, 'eval_steps_per_second': 4.837, 'epoch': 17.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 627.89it/s][A 90%|█████████ | 54/60 [04:47<00:24,  4.06s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 92%|█████████▏| 55/60 [05:01<00:35,  7.19s/it] 93%|█████████▎| 56/60 [05:03<00:21,  5.42s/it] 95%|█████████▌| 57/60 [05:04<00:12,  4.06s/it]{'eval_loss': 0.8599578738212585, 'eval_f1_weighted': 0.5461764015951208, 'eval_runtime': 0.2096, 'eval_samples_per_second': 233.756, 'eval_steps_per_second': 4.771, 'epoch': 18.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 619.54it/s][A 95%|█████████▌| 57/60 [05:04<00:12,  4.06s/it]
-                                              [A/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
- 97%|█████████▋| 58/60 [05:18<00:14,  7.17s/it] 98%|█████████▊| 59/60 [05:19<00:05,  5.41s/it]100%|██████████| 60/60 [05:20<00:00,  4.05s/it]/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 0.8650197982788086, 'eval_f1_weighted': 0.5635876057740169, 'eval_runtime': 0.2072, 'eval_samples_per_second': 236.454, 'eval_steps_per_second': 4.826, 'epoch': 19.0}
-
-  0%|          | 0/1 [00:00<?, ?it/s][A
-                                     [A                                               
-100%|██████████| 1/1 [00:00<00:00, 635.79it/s][A100%|██████████| 60/60 [05:33<00:00,  4.05s/it]
-                                              [A                                               100%|██████████| 60/60 [05:52<00:00,  4.05s/it]100%|██████████| 60/60 [05:52<00:00,  5.88s/it]
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/_functions.py:70: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
-  warnings.warn(
-{'eval_loss': 0.8659061789512634, 'eval_f1_weighted': 0.5864795918367347, 'eval_runtime': 0.2325, 'eval_samples_per_second': 210.728, 'eval_steps_per_second': 4.301, 'epoch': 20.0}
-{'train_runtime': 352.8986, 'train_samples_per_second': 19.326, 'train_steps_per_second': 0.17, 'train_loss': 0.61854248046875, 'epoch': 20.0}
-  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 643.10it/s]
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/sklearn/metrics/_classification.py:1565: UndefinedMetricWarning: Precision is ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter to control this behavior.
-  _warn_prf(average, modifier, f"{metric.capitalize()} is", len(result))
-Some weights of DebertaV2ForSequenceClassification were not initialized from the model checkpoint at worldbank/econberta-fs and are newly initialized: ['classifier.bias', 'classifier.weight', 'pooler.dense.bias', 'pooler.dense.weight']
-You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
-google-bert/bert-base-uncased
-                          precision    recall  f1-score   support
-
-inflation-cause-dominant       0.00      0.00      0.00        13
-       inflation-related       0.69      0.80      0.74        44
-   non-inflation-related       0.74      0.85      0.80        41
-
-                accuracy                           0.71        98
-               macro avg       0.48      0.55      0.51        98
-            weighted avg       0.62      0.71      0.66        98
-
-Map:   0%|          | 0/341 [00:00<?, ? examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 672.74 examples/s]Map: 100%|██████████| 341/341 [00:00<00:00, 669.93 examples/s]
-Map:   0%|          | 0/49 [00:00<?, ? examples/s]Map: 100%|██████████| 49/49 [00:00<00:00, 588.02 examples/s]
-Map:   0%|          | 0/98 [00:00<?, ? examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 614.27 examples/s]Map: 100%|██████████| 98/98 [00:00<00:00, 609.52 examples/s]
-  0%|          | 0/60 [00:00<?, ?it/s]Traceback (most recent call last):
-  File "/storage/weinig/cdl-inflation-narrative/annotation/labelstudio/agreement.py", line 313, in <module>
-    inflation_narrative.train_sequence_classifier()
-  File "/storage/weinig/cdl-inflation-narrative/annotation/labelstudio/agreement.py", line 280, in train_sequence_classifier
-    trainer.train()
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/trainer.py", line 2241, in train
-    return inner_training_loop(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/trainer.py", line 2548, in _inner_training_loop
-    tr_loss_step = self.training_step(model, inputs, num_items_in_batch)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/trainer.py", line 3698, in training_step
-    loss = self.compute_loss(model, inputs, num_items_in_batch=num_items_in_batch)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/trainer.py", line 3759, in compute_loss
-    outputs = model(**inputs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/data_parallel.py", line 193, in forward
-    outputs = self.parallel_apply(replicas, inputs, module_kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/data_parallel.py", line 212, in parallel_apply
-    return parallel_apply(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/parallel_apply.py", line 126, in parallel_apply
-    output.reraise()
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/_utils.py", line 733, in reraise
-    raise exception
-torch.OutOfMemoryError: Caught OutOfMemoryError in replica 0 on device 0.
-Original Traceback (most recent call last):
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/parallel/parallel_apply.py", line 96, in _worker
-    output = module(*input, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 1175, in forward
-    outputs = self.deberta(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 870, in forward
-    encoder_outputs = self.encoder(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 674, in forward
-    output_states, attn_weights = layer_module(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 442, in forward
-    attention_output, att_matrix = self.attention(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 375, in forward
-    self_output, att_matrix = self.self(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
-    return forward_call(*args, **kwargs)
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 255, in forward
-    rel_att = self.disentangled_attention_bias(
-  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/transformers/models/deberta_v2/modeling_deberta_v2.py", line 353, in disentangled_attention_bias
-    score += p2c_att / scale.to(dtype=p2c_att.dtype)
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 768.00 MiB. GPU 0 has a total capacity of 47.40 GiB of which 81.31 MiB is free. Including non-PyTorch memory, this process has 47.31 GiB memory in use. Of the allocated memory 46.42 GiB is allocated by PyTorch, and 424.34 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
-
-  0%|          | 0/60 [00:01<?, ?it/s]

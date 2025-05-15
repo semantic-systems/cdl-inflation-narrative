@@ -1,4 +1,0 @@
-  File "/storage/weinig/cdl-inflation-narrative/annotation/labelstudio/agreement.py", line 214
-    "worldbank/econberta": 64
-                           ^^
-SyntaxError: invalid syntax. Perhaps you forgot a comma?
