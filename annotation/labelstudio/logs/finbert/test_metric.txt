@@ -1,0 +1,9 @@
+                          precision    recall  f1-score   support
+
+inflation-cause-dominant       0.42      0.38      0.40        13
+       inflation-related       0.74      0.84      0.79        44
+   non-inflation-related       0.97      0.85      0.91        41
+
+                accuracy                           0.79        98
+               macro avg       0.71      0.69      0.70        98
+            weighted avg       0.79      0.79      0.79        98

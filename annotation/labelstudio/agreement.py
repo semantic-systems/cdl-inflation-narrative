@@ -1,7 +1,6 @@
 import os
 import json
 from pathlib import Path
-
 import pandas as pd
 import requests
 import numpy as np
@@ -16,10 +15,13 @@ from sklearn.metrics import classification_report
 import spacy
 from random import randint
 from gliner import GLiNER
-
+from transformers import EarlyStoppingCallback
+from sklearn.metrics import f1_score, precision_score, recall_score
+import torch
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
+
 
 
 class InflationNarrative(object):
@@ -204,13 +206,16 @@ class InflationNarrative(object):
         return majority_labels
 
     def train_sequence_classifier(self):
-        model_names = {"distilbert/distilbert-base-uncased": 64,
-                       "ProsusAI/finbert": 64,
-                       "FacebookAI/roberta-base": 64,
-                       "samchain/EconoBert": 64,
-                       "google-bert/bert-base-uncased": 64}
-        #               "microsoft/deberta-v3-base": 4,
-        #               "allenai/longformer-base-4096": 4}
+        model_names = {#"distilbert/distilbert-base-uncased": 64,
+                       #"ProsusAI/finbert": 64,
+                       #"FacebookAI/roberta-base": 64,
+                       #"google-bert/bert-base-uncased": 64,
+                       #"worldbank/econberta-fs": 8, 
+                       #"worldbank/econberta": 4,
+                    #   "mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis": 4,
+                       #"MAPAi/InflaBERT": 8,
+                       #"google/bigbird-roberta-base": 4,
+                       "allenai/longformer-base-4096": 4}
         train = pd.read_csv("./export/task_1_train.csv")
         valid = pd.read_csv("./export/task_1_valid.csv")
         test = pd.read_csv("./export/task_1_test.csv")
@@ -220,7 +225,7 @@ class InflationNarrative(object):
 
         train = Dataset.from_pandas(train)
         valid = Dataset.from_pandas(valid)
-        test = Dataset.from_pandas(test)
+        test = Dataset.from_pandas(test) 
         id2label_map = {value: key for key, value in self.label2id_map.items()}
 
         def preprocess_function(examples):
@@ -229,7 +234,9 @@ class InflationNarrative(object):
         def compute_metrics(eval_pred):
             logits, labels = eval_pred
             predictions = np.argmax(logits, axis=-1)
-            return metric.compute(predictions=predictions, references=labels, average="weighted")
+            f1 = f1_score(labels, predictions, average="weighted")
+            return {'f1_weighted': f1}
+# metric.compute(predictions=predictions, references=labels, average="weighted")
 
         for model_name, batch_size in model_names.items():
             name = model_name.split('/')[-1]
@@ -252,10 +259,11 @@ class InflationNarrative(object):
                 per_device_eval_batch_size=batch_size,
                 num_train_epochs=20,
                 weight_decay=0.01,
-                logging_dir=f"./logs/{name}"
+                logging_dir=f"./logs/{name}",
+                load_best_model_at_end=True, # Load the best model at the end of training
             )
             # Setup evaluation
-            metric = evaluate.load("f1")
+            #metric = evaluate.load("f1")
 
             # Trainer
             trainer = Trainer(
@@ -291,6 +299,12 @@ class InflationNarrative(object):
             print(report)
             with open(f"./logs/{name}/test_metric.txt", "w") as file:
                 file.write(report)
+            
+            del model
+            del trainer
+            
+            torch.cuda.empty_cache()
+            torch.cuda.reset_peak_memory_stats()
 
 
 
