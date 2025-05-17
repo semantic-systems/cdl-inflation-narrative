@@ -295,7 +295,7 @@ class InflationNarrative(object):
 
 
 if __name__ == "__main__":
-    inflation_narrative = InflationNarrative(pull_from_label_studio=True)
+    inflation_narrative = InflationNarrative(pull_from_label_studio=False)
     inflation_narrative.compute_agreement([5, 7, 8, 9])
     inflation_narrative.create_training_data_from_annotation()
     inflation_narrative.train_sequence_classifier()
