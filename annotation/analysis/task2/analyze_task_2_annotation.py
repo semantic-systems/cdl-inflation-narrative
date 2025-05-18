@@ -211,7 +211,7 @@ def compute_iaa(df, project_id_list,
 
     alpha = compute_alpha(data, distance_matrix=distance_matrix, missing_items=empty_graph_indicator)
     print(f"{metric_type} distance metric: {alpha:.4f}")
-    return distance_metric_type, alpha
+    return alpha
 
 
 if __name__ == "__main__":
@@ -279,13 +279,13 @@ if __name__ == "__main__":
     for feature_column, configs in configurations.items():
         graph_type = configs["graph_type"]
         for metric_type, metric in configs["graph_distance_metric"].items():
-            distance_metric_type, alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
-                                                      feature_column=feature_column,
-                                                      empty_graph_indicator=empty_graph_indicator,
-                                                      distance_metric=metric, metric_type=metric_type,
-                                                      graph_type=graph_type, forced=forced)
-            alpha_store[feature_column][distance_metric_type] = alpha
-            
+            alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
+                                feature_column=feature_column,
+                                empty_graph_indicator=empty_graph_indicator,
+                                distance_metric=metric, metric_type=metric_type,
+                                graph_type=graph_type, forced=forced)
+            alpha_store[feature_column][metric_type] = alpha
+
     with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}") as f:
         json.dump(alpha_store, f)
 
