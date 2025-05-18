@@ -195,12 +195,12 @@ def get_distance_metric_map():
 
 
 def compute_iaa(df, project_id_list,
-                feature_column="feature_one", empty_graph_indicator="*",
+                feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
                 distance_metric=node_overlap_metric, metric_type="lenient", graph_type=nx.Graph,
                 forced=True):
     print(feature_column)
     data = [df[df["annotator"] == annotator_id][feature_column].to_list() for annotator_id in project_id_list]
-    save_path = f"./export/{metric_type}_distance_matrix_{feature_column}.npy"
+    save_path = f"./export/{metric_type}_distance_matrix_{feature_column}_{'_'.join([str(annotator) for annotator in annotator_list])}.npy"
 
     if not forced and Path(save_path).exists():
         distance_matrix = np.load(save_path)
@@ -220,9 +220,8 @@ if __name__ == "__main__":
     # Create an ArgumentParser for project_list, and forced args
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--project_list', nargs="+", type=int)
-    parser.add_argument('-f', '--forced', action='store_true')
+    parser.add_argument('-f', '--forced', action='store_true', default=False)
     args = parser.parse_args()
-
 
     LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
     API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
@@ -288,7 +287,7 @@ if __name__ == "__main__":
         graph_type = configs["graph_type"]
         for metric_type, metric in configs["graph_distance_metric"].items():
             alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
-                                feature_column=feature_column,
+                                feature_column=feature_column, annotator_list=annotator_list,
                                 empty_graph_indicator=empty_graph_indicator,
                                 distance_metric=metric, metric_type=metric_type,
                                 graph_type=graph_type, forced=forced)
