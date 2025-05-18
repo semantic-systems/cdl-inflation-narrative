@@ -260,7 +260,7 @@ if __name__ == "__main__":
                       "Demand": ["Government Spending", "Monetary Policy", "Pent-up Demand", "Demand Shift",
                                  "Demand (residual)"],
                       "Supply": ["Supply Chain Issues", "Labor Shortage", "Supply (residual)", "Wages", "Food Prices",
-                                 'Transportation Costs', "Energy Prices", "Housing Costs", 'Housing Costs'],
+                                 'Transportation Costs', "Energy Prices", "Housing Costs"],
                       "Miscellaneous": ["Pandemic", "Mismanagement", "Inflation Expectations", "Base Effect",
                                         "Government Debt", "Tax Increases", "Price-Gouging", "Trade Balance",
                                         "Exchange Rates", "Medical Costs", "Education Costs", 'Climate', 'War']}
@@ -276,13 +276,13 @@ if __name__ == "__main__":
     df_task2_annotation.to_csv("./export/task_2_annotation.csv", index=False)
 
     # configurations for IAA computing
-    configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric}}, #, "strict": graph_edit_distance}},
-                      "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+    configurations = {#"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      #"feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+                      #"feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      #"feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+                      #"feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
 
     forced = args.forced
     for feature_column, configs in configurations.items():
