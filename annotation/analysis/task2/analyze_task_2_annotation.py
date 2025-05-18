@@ -220,7 +220,7 @@ if __name__ == "__main__":
     # Create an ArgumentParser for project_list, and forced args
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--project_list', nargs="+", type=int)
-    parser.add_argument('-f', '--forced', action='store_false')
+    parser.add_argument('-f', '--forced', action='store_true')
     args = parser.parse_args()
 
 
