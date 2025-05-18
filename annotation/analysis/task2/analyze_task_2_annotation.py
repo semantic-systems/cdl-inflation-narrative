@@ -286,7 +286,7 @@ if __name__ == "__main__":
                                 graph_type=graph_type, forced=forced)
             alpha_store[feature_column][metric_type] = alpha
 
-    with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}") as f:
+    with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}.json", "w") as f:
         json.dump(alpha_store, f)
 
 
