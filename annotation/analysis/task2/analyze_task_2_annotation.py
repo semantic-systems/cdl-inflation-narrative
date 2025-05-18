@@ -220,7 +220,7 @@ if __name__ == "__main__":
     API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
     project_id_list = [11, 12, 13, 14]
     project_to_annotator_map = {11: 7, 12: 6, 13: 8, 14: 5}
-    annotator_list = [project_id_list[project_id] for project_id in project_id_list]
+    annotator_list = [project_to_annotator_map[project_id] for project_id in project_id_list]
 
     feature_cols = ["feature_one", "feature_two", "feature_three", "feature-four", "feature_five", "feature_six", "feature_seven"]
     empty_graph_indicator = "*"
@@ -285,4 +285,9 @@ if __name__ == "__main__":
                                                       distance_metric=metric, metric_type=metric_type,
                                                       graph_type=graph_type, forced=forced)
             alpha_store[feature_column][distance_metric_type] = alpha
+            
+    with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}") as f:
+        json.dump(alpha_store, f)
+
+
 
