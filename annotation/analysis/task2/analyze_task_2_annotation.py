@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 from itertools import chain
@@ -216,9 +217,16 @@ def compute_iaa(df, project_id_list,
 
 if __name__ == "__main__":
     setup()
+    # Create an ArgumentParser for project_list, and forced args
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--project_list', nargs="+", type=int)
+    parser.add_argument('-f', '--forced', action='store_false')
+    args = parser.parse_args()
+
+
     LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
     API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
-    project_id_list = [11, 12, 13, 14]
+    project_id_list = args.project_list
     project_to_annotator_map = {11: 7, 12: 6, 13: 8, 14: 5}
     annotator_list = [project_to_annotator_map[project_id] for project_id in project_id_list]
 
@@ -275,7 +283,7 @@ if __name__ == "__main__":
                       "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
                       "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
 
-    forced = True
+    forced = args.forced
     for feature_column, configs in configurations.items():
         graph_type = configs["graph_type"]
         for metric_type, metric in configs["graph_distance_metric"].items():
