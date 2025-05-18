@@ -57,9 +57,12 @@ def get_triples(results):
 
     # get triples in label form
     triples_label_form = []
+    event_remapping = {"Russia-Ukraine War": "War", "Energy Crisis": "Energy Prices", "House Costs": 'Housing Costs'}
     for triple in triples:
         subj_label_form = get_label_from_id(triple[0], results)
         obj_label_form = get_label_from_id(triple[2], results)
+        subj_label_form = event_remapping.get(subj_label_form, subj_label_form)
+        obj_label_form = event_remapping.get(obj_label_form, obj_label_form)
         relation_label_form = triple[1]
         triples_label_form.append((subj_label_form, relation_label_form, obj_label_form))
 
@@ -172,9 +175,9 @@ def get_feature_seven(row, event_category):
     return high_level_event_graph
 
 
-def low_level_event_to_high_level_event_map(event: str, event_category):
+def low_level_event_to_high_level_event_map(event: str, event_category: dict):
     reverse_event_category = {v: key for key, value in event_category.items() for v in value}
-    return reverse_event_category.get(event, "Miscellaneous")
+    return reverse_event_category.get(event, event)
 
 
 def replace_empty_relation(triples: list[tuple]):
@@ -256,12 +259,11 @@ if __name__ == "__main__":
     event_category = {"Inflation": ["Inflation"],
                       "Demand": ["Government Spending", "Monetary Policy", "Pent-up Demand", "Demand Shift",
                                  "Demand (residual)"],
-                      "Supply": ["Supply Chain Issues", "Labor Shortage", "Energy Crisis", "Supply (residual)", "Wages",
-                                 "Food Prices", 'Transportation Costs', "Energy Prices", "House Costs", 'Housing Costs'],
-                      "Miscellaneous": ["Pandemic", "Mismanagement", "Russia-Ukraine War", "Inflation Expectations",
-                                        "Base Effect", "Government Debt", "Tax Increases", "Price-Gouging",
-                                        "Trade Balance", "Exchange Rates", "Medical Costs",
-                                        "Education Costs", 'Climate', 'War']}
+                      "Supply": ["Supply Chain Issues", "Labor Shortage", "Supply (residual)", "Wages", "Food Prices",
+                                 'Transportation Costs', "Energy Prices", "Housing Costs", 'Housing Costs'],
+                      "Miscellaneous": ["Pandemic", "Mismanagement", "Inflation Expectations", "Base Effect",
+                                        "Government Debt", "Tax Increases", "Price-Gouging", "Trade Balance",
+                                        "Exchange Rates", "Medical Costs", "Education Costs", 'Climate', 'War']}
 
     df_task2_annotation["feature_one"] = df_task2_annotation.apply(get_feature_one, axis=1)
     df_task2_annotation["feature_two"] = df_task2_annotation.apply(get_feature_two, axis=1)
