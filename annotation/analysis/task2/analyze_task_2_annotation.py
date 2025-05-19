@@ -8,7 +8,7 @@ import numpy as np
 import networkx as nx
 from tqdm import tqdm
 from typing import Union, Optional, Callable
-from krippendorrf_graph import (compute_alpha, graph_edit_distance, graph_overlap_metric,
+from krippendorff_graph import (compute_alpha, graph_edit_distance, graph_overlap_metric,
                                 nominal_metric, node_overlap_metric, compute_distance_matrix)
 
 
@@ -196,7 +196,7 @@ def get_distance_metric_map():
     distance_metric_map = {"lenient": [node_overlap_metric, graph_overlap_metric],
                            "strict": [nominal_metric, graph_edit_distance]}
     return distance_metric_map
-
+'''
 def modified_compute_distance_matrix(df, feature_column: str,
                             graph_distance_metric: Callable,
                             empty_graph_indicator: str = "*",
@@ -260,7 +260,7 @@ def modified_compute_distance_matrix(df, feature_column: str,
             else:
                 distance_matrix[i][j] = distance_matrix[j][i]"""
 
-
+'''
 def compute_iaa(df, project_id_list,
                 feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
                 distance_metric=node_overlap_metric, metric_type="lenient", graph_type=nx.Graph,
@@ -272,10 +272,10 @@ def compute_iaa(df, project_id_list,
     if not forced and Path(save_path).exists():
         distance_matrix = np.load(save_path)
     else:
-        distance_matrix = modified_compute_distance_matrix(df_task2_annotation, feature_column=feature_column,
+        distance_matrix = compute_distance_matrix(df_task2_annotation, feature_column=feature_column,
                                                   graph_distance_metric=distance_metric,
                                                   empty_graph_indicator=empty_graph_indicator, save_path=save_path,
-                                                  graph_type=graph_type)
+                                                  graph_type=graph_type, timeout=60)
 
     alpha = compute_alpha(data, distance_matrix=distance_matrix, missing_items=empty_graph_indicator)
     print(f"{metric_type} distance metric: {alpha:.4f}")
