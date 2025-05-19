@@ -217,14 +217,18 @@ def modified_compute_distance_matrix(df, feature_column: str,
     """
     if Path(save_path).exists():
         distance_matrix = np.load(save_path)
+        print("precomputed distance matrix found and loaded")
     else:
         distance_matrix = np.zeros(shape=(len(df[feature_column]), len(df[feature_column])))
     if Path("./export/computed_indices.json").exists():
         with open("./export/computed_indices.json", "r") as f:
+            print("precomputed indices found and loaded")
             computed_indices = json.load(f)
     else:
         computed_indices = list()
     for i, g1 in tqdm(enumerate(df[feature_column])):
+        if i < 188:
+            continue
         for j, g2 in enumerate(df[feature_column]):
             if [i, j] not in computed_indices or [j, i] not in computed_indices:
                 if g1 == empty_graph_indicator or g2 == empty_graph_indicator:
@@ -233,6 +237,7 @@ def modified_compute_distance_matrix(df, feature_column: str,
                 else:
                     distance_matrix[i][j] = graph_distance_metric(g1, g2, graph_type=graph_type)
                 computed_indices.append([i, j])
+                computed_indices.append([j, i])
             elif [i, j] in computed_indices:
                 distance_matrix[j][i] = distance_matrix[i][j]
             else:
