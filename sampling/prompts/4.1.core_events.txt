@@ -1,0 +1,15 @@
+user: tell me what you know about H. Porter Abbott's view on constituent events and supplementary events in analyzing narratives.
+
+system: H. Porter Abbott, a prominent narrative theorist, discusses the concepts of constituent events and supplementary events in his work on narrative theory, particularly in his book The Cambridge Introduction to Narrative. These terms are essential in analyzing how stories are structured and understood.
+Constituent Events
+Definition: Constituent events, also referred to as kernels, are the essential events that form the backbone of the narrative. These are the events without which the story would fundamentally change or would not make sense. They are crucial to the plot's development, driving the narrative forward and shaping its direction.
+Importance: If you remove a constituent event, the story would be significantly altered or lose coherence. For example, in a murder mystery, the actual murder is a constituent event. Without it, the narrative of the mystery would not exist.
+Supplementary Events
+Definition: Supplementary events, also known as satellites, are those that are not crucial to the plot but add depth, richness, and complexity to the narrative. These events are not necessary for the story to be complete but can enhance the understanding of characters, settings, or themes.
+Importance: Removing a supplementary event might make the story less detailed or interesting, but it would still be recognizable as the same story. For example, in the same murder mystery, a detailed description of the detective's past or personal struggles might be a supplementary event. These details help to build the character and context but are not essential to the central narrative of solving the murder.
+Analytical Application
+Abbott uses these concepts to help us understand how narratives are constructed and what elements are central to their identity. By distinguishing between what is essential and what is supplementary, we can better analyze the structure of a narrative, its pacing, and how different elements contribute to the overall story.
+This distinction also helps in editing or adapting stories, where understanding which events are constituent can guide decisions about what can be altered, omitted, or emphasized without losing the story's core.
+In summary, H. Porter Abbott's concepts of constituent and supplementary events offer a useful framework for dissecting the structure of narratives, helping us to identify the essential building blocks of a story versus the elements that enrich and elaborate on its central plot.
+
+user: Thank you. Now, please annotate the following text, marking text span indicating constituent events with <nuclei>...</nuclei> and supplementary events as <satellite>...</satellite>. Note that nuclei as events depicting causal relation with inflation.

@@ -1,0 +1,1 @@
+Does the following news snippet describe the cause of deflation? Answer with one word: Yes or No. If yes, what are the causes? Be precise. \n\nsnippet:

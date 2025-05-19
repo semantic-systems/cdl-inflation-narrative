@@ -4,7 +4,9 @@
 data/**/*.gz
 data/**/*.csv
 data/**/*.zip
-
+outputs/
+export/
+log/
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
