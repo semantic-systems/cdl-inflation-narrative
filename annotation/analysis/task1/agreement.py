@@ -242,14 +242,11 @@ class InflationNarrative(object):
             # Training Arguments
             training_args = TrainingArguments(
                 output_dir=f"./results/{name}",
-                eval_strategy="epoch",
                 save_strategy="epoch",
                 per_device_train_batch_size=batch_size,
-                per_device_eval_batch_size=batch_size,
                 num_train_epochs=20,
                 weight_decay=0.01,
-                logging_dir=f"./logs/{name}",
-                load_best_model_at_end=True, # Load the best model at the end of training
+                logging_dir=f"./logs/{name}"
             )
             # Setup evaluation
             #metric = evaluate.load("f1")
