@@ -238,7 +238,7 @@ def modified_compute_distance_matrix(df, feature_column: str,
                 distance_matrix[i][j] = distance_matrix[j][i]
         with open(save_path, 'wb') as f:
             np.save(f, distance_matrix)
-        with open("./export/computed_indices.json", "r") as f:
+        with open("./export/computed_indices.json", "w") as f:
             json.dump(list(computed_indices), f)
     return distance_matrix
 
