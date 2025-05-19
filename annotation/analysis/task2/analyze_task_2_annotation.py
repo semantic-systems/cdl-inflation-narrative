@@ -1,7 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-from itertools import chain
+from itertools import chain, combinations
 import pandas as pd
 import requests
 import numpy as np
@@ -220,13 +220,30 @@ def modified_compute_distance_matrix(df, feature_column: str,
         print("precomputed distance matrix found and loaded")
     else:
         distance_matrix = np.zeros(shape=(len(df[feature_column]), len(df[feature_column])))
-    if Path("./export/computed_indices.json").exists():
+    """if Path("./export/computed_indices.json").exists():
         with open("./export/computed_indices.json", "r") as f:
             print("precomputed indices found and loaded")
             computed_indices = json.load(f)
-    else:
-        computed_indices = list()
-    for i, g1 in tqdm(enumerate(df[feature_column])):
+    else:"""
+    #computed_indices = list()
+
+    graph_pair_indices = list(combinations(range(len(df[feature_column].to_list())), 2))
+    for (i, j) in tqdm(graph_pair_indices):
+        g1 = df[feature_column].to_list()[i]
+        g2 = df[feature_column].to_list()[j]
+        if g1 == empty_graph_indicator or g2 == empty_graph_indicator:
+            # ignore missing graph annotation by assign 0 distance to other graphs for faster computation by observed and expected disagreement.
+            distance_matrix[i][j] = 0
+        else:
+            d = graph_distance_metric(g1, g2, graph_type=graph_type)
+            distance_matrix[i][j] = d
+            distance_matrix[j][i] = d
+    with open(save_path, 'wb') as f:
+        np.save(f, distance_matrix)
+        #with open("./export/computed_indices.json", "w") as f:
+        #    json.dump(computed_indices, f)
+    return distance_matrix
+    """for i, g1 in tqdm(enumerate(df[feature_column].to_list())):
         if i < 188:
             continue
         for j, g2 in enumerate(df[feature_column]):
@@ -241,12 +258,8 @@ def modified_compute_distance_matrix(df, feature_column: str,
             elif [i, j] in computed_indices:
                 distance_matrix[j][i] = distance_matrix[i][j]
             else:
-                distance_matrix[i][j] = distance_matrix[j][i]
-        with open(save_path, 'wb') as f:
-            np.save(f, distance_matrix)
-        with open("./export/computed_indices.json", "w") as f:
-            json.dump(computed_indices, f)
-    return distance_matrix
+                distance_matrix[i][j] = distance_matrix[j][i]"""
+
 
 def compute_iaa(df, project_id_list,
                 feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
