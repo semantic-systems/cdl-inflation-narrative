@@ -6,6 +6,7 @@ import pandas as pd
 import requests
 import numpy as np
 import networkx as nx
+from tqdm import tqdm
 from typing import Union, Optional, Callable
 from krippendorrf_graph import (compute_alpha, graph_edit_distance, graph_overlap_metric,
                                 nominal_metric, node_overlap_metric, compute_distance_matrix)
@@ -196,6 +197,43 @@ def get_distance_metric_map():
                            "strict": [nominal_metric, graph_edit_distance]}
     return distance_metric_map
 
+def modified_compute_distance_matrix(df, feature_column: str,
+                            graph_distance_metric: Callable,
+                            empty_graph_indicator: str = "*",
+                            save_path: Optional[str] = "./distance_matrix.npy",
+                            graph_type: Optional[
+                                Union[nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph]] = nx.MultiDiGraph):
+    """
+    Compute distance matrix with custom graph distance metric from a pandas data frame object.
+    A graph must be represented as a list of tuple, such as [("subject_1", "predicate_1", "object_1"), ("subject_2", "predicate_2", "object_2")]
+
+    :param df: a pandas data frame object containing a feature_column storing all graph annotations for all annotators.
+    :param feature_column: name of the column storing all graph annotations for all annotators.
+    :param graph_distance_metric: a callable function to compute distance between any two graphs.
+    :param empty_graph_indicator: a string indicating an empty graph
+    :param save_path: local path to store the computed distance matrix
+    :param graph_type: a networkx graph type. Bear in mind the interaction between graph type and graph distance metric.
+    :return: distance matrix as numpy array.
+    """
+    if Path(save_path).exists():
+        distance_matrix = np.load(save_path)
+    else:
+        distance_matrix = np.zeros(shape=(len(df[feature_column]), len(df[feature_column])))
+    computed_indices = set()
+    for i, g1 in tqdm(enumerate(df[feature_column])):
+        for j, g2 in enumerate(df[feature_column]):
+            if {i, j} not in computed_indices:
+                if g1 == empty_graph_indicator or g2 == empty_graph_indicator:
+                    # ignore missing graph annotation by assign 0 distance to other graphs for faster computation by observed and expected disagreement.
+                    distance_matrix[i][j] = 0
+                else:
+                    distance_matrix[i][j] = graph_distance_metric(g1, g2, graph_type=graph_type)
+                computed_indices.update({i, j})
+            else:
+                distance_matrix[i][j] = distance_matrix[j][i]
+        with open(save_path, 'wb') as f:
+            np.save(f, distance_matrix)
+    return distance_matrix
 
 def compute_iaa(df, project_id_list,
                 feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
@@ -208,7 +246,7 @@ def compute_iaa(df, project_id_list,
     if not forced and Path(save_path).exists():
         distance_matrix = np.load(save_path)
     else:
-        distance_matrix = compute_distance_matrix(df_task2_annotation, feature_column=feature_column,
+        distance_matrix = modified_compute_distance_matrix(df_task2_annotation, feature_column=feature_column,
                                                   graph_distance_metric=distance_metric,
                                                   empty_graph_indicator=empty_graph_indicator, save_path=save_path,
                                                   graph_type=graph_type)
