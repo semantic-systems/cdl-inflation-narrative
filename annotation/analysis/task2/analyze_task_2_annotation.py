@@ -196,75 +196,12 @@ def get_distance_metric_map():
     distance_metric_map = {"lenient": [node_overlap_metric, graph_overlap_metric],
                            "strict": [nominal_metric, graph_edit_distance]}
     return distance_metric_map
-'''
-def modified_compute_distance_matrix(df, feature_column: str,
-                            graph_distance_metric: Callable,
-                            empty_graph_indicator: str = "*",
-                            save_path: Optional[str] = "./distance_matrix.npy",
-                            graph_type: Optional[
-                                Union[nx.Graph, nx.DiGraph, nx.MultiGraph, nx.MultiDiGraph]] = nx.MultiDiGraph):
-    """
-    Compute distance matrix with custom graph distance metric from a pandas data frame object.
-    A graph must be represented as a list of tuple, such as [("subject_1", "predicate_1", "object_1"), ("subject_2", "predicate_2", "object_2")]
 
-    :param df: a pandas data frame object containing a feature_column storing all graph annotations for all annotators.
-    :param feature_column: name of the column storing all graph annotations for all annotators.
-    :param graph_distance_metric: a callable function to compute distance between any two graphs.
-    :param empty_graph_indicator: a string indicating an empty graph
-    :param save_path: local path to store the computed distance matrix
-    :param graph_type: a networkx graph type. Bear in mind the interaction between graph type and graph distance metric.
-    :return: distance matrix as numpy array.
-    """
-    if Path(save_path).exists():
-        distance_matrix = np.load(save_path)
-        print("precomputed distance matrix found and loaded")
-    else:
-        distance_matrix = np.zeros(shape=(len(df[feature_column]), len(df[feature_column])))
-    """if Path("./export/computed_indices.json").exists():
-        with open("./export/computed_indices.json", "r") as f:
-            print("precomputed indices found and loaded")
-            computed_indices = json.load(f)
-    else:"""
-    #computed_indices = list()
 
-    graph_pair_indices = list(combinations(range(len(df[feature_column].to_list())), 2))
-    for (i, j) in tqdm(graph_pair_indices):
-        g1 = df[feature_column].to_list()[i]
-        g2 = df[feature_column].to_list()[j]
-        if g1 == empty_graph_indicator or g2 == empty_graph_indicator:
-            # ignore missing graph annotation by assign 0 distance to other graphs for faster computation by observed and expected disagreement.
-            distance_matrix[i][j] = 0
-        else:
-            d = graph_distance_metric(g1, g2, graph_type=graph_type)
-            distance_matrix[i][j] = d
-            distance_matrix[j][i] = d
-    with open(save_path, 'wb') as f:
-        np.save(f, distance_matrix)
-        #with open("./export/computed_indices.json", "w") as f:
-        #    json.dump(computed_indices, f)
-    return distance_matrix
-    """for i, g1 in tqdm(enumerate(df[feature_column].to_list())):
-        if i < 188:
-            continue
-        for j, g2 in enumerate(df[feature_column]):
-            if [i, j] not in computed_indices or [j, i] not in computed_indices:
-                if g1 == empty_graph_indicator or g2 == empty_graph_indicator:
-                    # ignore missing graph annotation by assign 0 distance to other graphs for faster computation by observed and expected disagreement.
-                    distance_matrix[i][j] = 0
-                else:
-                    distance_matrix[i][j] = graph_distance_metric(g1, g2, graph_type=graph_type)
-                computed_indices.append([i, j])
-                computed_indices.append([j, i])
-            elif [i, j] in computed_indices:
-                distance_matrix[j][i] = distance_matrix[i][j]
-            else:
-                distance_matrix[i][j] = distance_matrix[j][i]"""
-
-'''
 def compute_iaa(df, project_id_list,
                 feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
                 distance_metric=node_overlap_metric, metric_type="lenient", graph_type=nx.Graph,
-                forced=True):
+                forced=False):
     print(feature_column)
     data = [df[df["annotator"] == annotator_id][feature_column].to_list() for annotator_id in project_id_list]
     save_path = f"./export/{metric_type}_distance_matrix_{feature_column}_{'_'.join([str(annotator) for annotator in annotator_list])}.npy"

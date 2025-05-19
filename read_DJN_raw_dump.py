@@ -25,7 +25,7 @@ replace_tokens = [("</p>\n<pre>\n \n", ""),
                   (" </p>\n<p>\n ", "")]
 
 
-years = list(range(1984, 2024))
+years = list(range(1990, 2024))
 
 for year in tqdm(years):
     headlines = []
