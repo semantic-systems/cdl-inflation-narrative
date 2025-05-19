@@ -219,7 +219,12 @@ def modified_compute_distance_matrix(df, feature_column: str,
         distance_matrix = np.load(save_path)
     else:
         distance_matrix = np.zeros(shape=(len(df[feature_column]), len(df[feature_column])))
-    computed_indices = set()
+    if Path("./export/computed_indices.json").exists():
+        with open("./export/computed_indices.json", "r") as f:
+            computed_indices = json.load(f)
+            computed_indices = set(computed_indices)
+    else:
+        computed_indices = set()
     for i, g1 in tqdm(enumerate(df[feature_column])):
         for j, g2 in enumerate(df[feature_column]):
             if {i, j} not in computed_indices:
@@ -233,6 +238,8 @@ def modified_compute_distance_matrix(df, feature_column: str,
                 distance_matrix[i][j] = distance_matrix[j][i]
         with open(save_path, 'wb') as f:
             np.save(f, distance_matrix)
+        with open("./export/computed_indices.json", "r") as f:
+            json.dump(list(computed_indices), f)
     return distance_matrix
 
 def compute_iaa(df, project_id_list,
