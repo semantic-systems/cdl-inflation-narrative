@@ -240,7 +240,7 @@ def modified_compute_distance_matrix(df, feature_column: str,
         with open(save_path, 'wb') as f:
             np.save(f, distance_matrix)
         with open("./export/computed_indices.json", "w") as f:
-            json.dumps(computed_indices)
+            json.dump(computed_indices, f)
     return distance_matrix
 
 def compute_iaa(df, project_id_list,
