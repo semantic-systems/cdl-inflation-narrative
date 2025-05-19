@@ -10,13 +10,8 @@ import krippendorff
 from collections import Counter
 from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding
 from datasets import Dataset
-import evaluate
 from sklearn.metrics import classification_report
-import spacy
-from random import randint
-from gliner import GLiNER
-from transformers import EarlyStoppingCallback
-from sklearn.metrics import f1_score, precision_score, recall_score
+from sklearn.metrics import f1_score
 import torch
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
