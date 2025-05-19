@@ -222,24 +222,25 @@ def modified_compute_distance_matrix(df, feature_column: str,
     if Path("./export/computed_indices.json").exists():
         with open("./export/computed_indices.json", "r") as f:
             computed_indices = json.load(f)
-            computed_indices = set(computed_indices)
     else:
-        computed_indices = set()
+        computed_indices = list()
     for i, g1 in tqdm(enumerate(df[feature_column])):
         for j, g2 in enumerate(df[feature_column]):
-            if {i, j} not in computed_indices:
+            if [i, j] not in computed_indices or [j, i] not in computed_indices:
                 if g1 == empty_graph_indicator or g2 == empty_graph_indicator:
                     # ignore missing graph annotation by assign 0 distance to other graphs for faster computation by observed and expected disagreement.
                     distance_matrix[i][j] = 0
                 else:
                     distance_matrix[i][j] = graph_distance_metric(g1, g2, graph_type=graph_type)
-                computed_indices.update({i, j})
+                computed_indices.append([i, j])
+            elif [i, j] in computed_indices:
+                distance_matrix[j][i] = distance_matrix[i][j]
             else:
                 distance_matrix[i][j] = distance_matrix[j][i]
         with open(save_path, 'wb') as f:
             np.save(f, distance_matrix)
         with open("./export/computed_indices.json", "w") as f:
-            json.dump(list(computed_indices), f)
+            json.dumps(computed_indices)
     return distance_matrix
 
 def compute_iaa(df, project_id_list,
@@ -324,7 +325,7 @@ if __name__ == "__main__":
     configurations = {#"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
                       #"feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
                       #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"strict": graph_edit_distance}}}
                       #"feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
                       #"feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
                       #"feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
