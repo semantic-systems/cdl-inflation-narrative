@@ -13,6 +13,7 @@ from datasets import Dataset
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
 import torch
+import random
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
@@ -20,7 +21,8 @@ os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
 
 
 class InflationNarrative(object):
-    def __init__(self, pull_from_label_studio=True):
+    def __init__(self, pull_from_label_studio=True, seed=11):
+        self.seed = seed
         self.LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
         self.API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
         self.client = LabelStudio(base_url=self.LABEL_STUDIO_URL, api_key=self.API_KEY)
@@ -226,7 +228,6 @@ class InflationNarrative(object):
             predictions = np.argmax(logits, axis=-1)
             f1 = f1_score(labels, predictions, average="weighted")
             return {'f1_weighted': f1}
-# metric.compute(predictions=predictions, references=labels, average="weighted")
 
         for model_name, batch_size in model_names.items():
             name = model_name.split('/')[-1]
@@ -277,12 +278,12 @@ class InflationNarrative(object):
             df_pred = pd.read_csv("./export/task_1_test.csv")
             df_pred["prediction"] = decoded_predictions
 
-            df_pred.to_csv(f"./logs/{name}/prediction.csv", index=False)
+            df_pred.to_csv(f"./logs/{name}/prediction_seed_{self.seed}.csv", index=False)
             target_names = ['inflation-cause-dominant', 'inflation-related', 'non-inflation-related']
             report = classification_report(df_pred["label"], df_pred["prediction"], target_names=target_names)
             print(model_name)
             print(report)
-            with open(f"./logs/{name}/test_metric.txt", "w") as file:
+            with open(f"./logs/{name}/test_metric_seed_{self.seed}.txt", "w") as file:
                 file.write(report)
             
             del model
@@ -294,9 +295,13 @@ class InflationNarrative(object):
 
 
 if __name__ == "__main__":
-    inflation_narrative = InflationNarrative(pull_from_label_studio=True)
-    inflation_narrative.compute_agreement([5, 7, 8, 9])
-    inflation_narrative.create_training_data_from_annotation()
-    inflation_narrative.train_sequence_classifier()
+    seeds = [11, 22, 33, 44]
+    for seed in seeds:
+        random.seed(seed)
+        np.random.seed(seed)
+        inflation_narrative = InflationNarrative(pull_from_label_studio=True, seed=seed)
+        inflation_narrative.compute_agreement([5, 7, 8, 9])
+        inflation_narrative.create_training_data_from_annotation()
+        inflation_narrative.train_sequence_classifier()
 
 
