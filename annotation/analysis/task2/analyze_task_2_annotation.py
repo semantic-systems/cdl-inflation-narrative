@@ -1,13 +1,11 @@
 import argparse
 import json
 from pathlib import Path
-from itertools import chain, combinations
+from itertools import chain
 import pandas as pd
 import requests
 import numpy as np
 import networkx as nx
-from tqdm import tqdm
-from typing import Union, Optional, Callable
 from krippendorff_graph import (compute_alpha, graph_edit_distance, graph_overlap_metric,
                                 nominal_metric, node_overlap_metric, compute_distance_matrix)
 
@@ -277,13 +275,13 @@ if __name__ == "__main__":
     df_task2_annotation.to_csv("./export/task_2_annotation.csv", index=False)
 
     # configurations for IAA computing
-    configurations = {#"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      #"feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"strict": graph_edit_distance}}}
-                      #"feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      #"feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
-                      #"feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+    configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      "feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
 
     forced = args.forced
     for feature_column, configs in configurations.items():
