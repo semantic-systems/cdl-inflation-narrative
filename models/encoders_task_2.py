@@ -272,6 +272,7 @@ class CoreStoryClassification(Classification):
             df_aggregated["text"] = df.text
             df_aggregated = df_aggregated.dropna()
             df_aggregated["aggregated_label"] = self.get_majority_vote(df_aggregated)
+            df_aggregated = df_aggregated.dropna()
             df_aggregated.to_csv(save_path, index_label=False)
             return df_aggregated
 
