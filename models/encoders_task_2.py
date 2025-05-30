@@ -243,6 +243,7 @@ class DirectionClassification(Classification):
             torch.cuda.empty_cache()
             torch.cuda.reset_peak_memory_stats()
 
+
 if __name__ == "__main__":
     csv_path = '../data/annotated/task_2_annotation.csv'
     split_ratio = [0.7, 0.1, 0.2]
