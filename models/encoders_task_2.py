@@ -328,7 +328,9 @@ class CoreStoryClassification(Classification):
         id2label_map = {value: key for key, value in label2id_map.items()}
 
         def preprocess_function(examples):
-            return tokenizer(examples["text"], truncation=True, padding=True)
+            enc = tokenizer(examples['text'], truncation=True, padding='max_length')
+            enc['labels'] = to_multi_hot(examples['labels'], len(label2id_map))
+            return enc
 
         def compute_metrics(eval_pred):
             f1 = evaluate.load("f1")
@@ -336,6 +338,12 @@ class CoreStoryClassification(Classification):
             probs = 1 / (1 + np.exp(-logits))  # sigmoid
             preds = (probs > 0.5).astype(int)
             return f1.compute(predictions=preds, references=labels, average="weighted")
+
+        def to_multi_hot(label_indices, num_classes):
+            multi_hot = [0] * num_classes
+            for i in label_indices:
+                multi_hot[i] = 1
+            return multi_hot
 
         for model_name, batch_size in model_names.items():
             name = f"{model_name.split('/')[-1]}-{self.task_name}"
