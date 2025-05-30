@@ -1,0 +1,252 @@
+from abc import abstractmethod
+import ast
+from collections import Counter
+from pathlib import Path
+
+import pandas as pd
+import numpy as np
+import transformers
+from sklearn.utils import shuffle
+from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding
+from datasets import Dataset
+from sklearn.metrics import classification_report
+from sklearn.metrics import f1_score
+import torch
+import evaluate
+
+
+class Classification(object):
+    def __init__(self, csv_path, split_ratio: list[float], seed=11):
+        self.setup_directory()
+        self.seed = seed
+        self.project_id_list = [11, 12, 13, 14]
+        self.df = pd.read_csv(csv_path)
+        self.split_ratio = split_ratio
+        self.df_aggregated = None
+        self.df_train = None
+        self.df_valid = None
+        self.df_test = None
+        self.label_distribution = None
+
+    def setup_directory(self):
+        for folder in ["./logs/", "./export/"]:
+            path = Path(folder)
+            if not path.exists():  # Check existence
+                path.mkdir(parents=True)
+
+    @property
+    def feature_col(self):
+        return None
+
+    @property
+    def label2id_map(self):
+        return None
+
+    @abstractmethod
+    def aggregate(self, df, forced=False, save_path=None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def split(self, df, split_ratio, forced=False, save_path=None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def train(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def eval(self):
+        raise NotImplementedError
+
+    def get_majority_vote(self, df, no_winner_label="Mixed"):
+        col_names = df.columns
+
+        majority_labels = []
+        has_winner = 0
+
+        for i, row in enumerate(df[col_names].values):
+            counter = Counter(row)
+            most_common = counter.most_common()
+
+            # Get highest frequency count
+            max_count = most_common[0][1]
+            top_labels = [label for label, count in most_common if count == max_count]
+
+            # Handle tie-breaks
+            if len(top_labels) == 1:
+                majority_labels.append(top_labels[0])  # Clear winner
+                has_winner += 1
+            else:
+                majority_labels.append(no_winner_label)  # no winner, pick inflation-related
+        print(f"has winner ratio: {has_winner / len(df)}\n")
+        return majority_labels
+
+
+class DirectionClassification(Classification):
+    def __init__(self, csv_path, split_ratio: list[float], forced=False, seed=11):
+        super().__init__(csv_path, split_ratio, seed)
+        save_path = "../data/annotated/task_2_direction_classification.csv"
+        self.df_aggregated = self.aggregate(self.df, forced=forced, save_path=save_path)
+        self.df_train, self.df_valid, self.df_test = self.split(self.df_aggregated, split_ratio, forced=forced, save_path="../data/annotated/")
+        self.task_name = "direction_classification"
+        self.num_labels = len(self.label2id_map)
+
+    @property
+    def feature_col(self):
+        return "feature_three"
+
+    @property
+    def label2id_map(self):
+        return {"Increases": 0, "Decreases": 1, "Mixed": 2}
+
+    def aggregate(self, df, forced=False, save_path="../data/annotated/task_2_direction_classification.csv"):
+        if not forced and Path(save_path).exists():
+            return pd.read_csv(save_path, index_col=False)
+        else:
+            df[self.feature_col] = df[self.feature_col].str.replace('*', '{}', regex=False)
+            df[self.feature_col] = df[self.feature_col].apply(ast.literal_eval)
+            df_aggregated = df.pivot(index='item_id', columns='annotator', values=self.feature_col)
+            df_aggregated.columns = [f'annotation_{col}' for col in df_aggregated.columns]
+            for col in df_aggregated.columns:
+                df_aggregated[col] = df_aggregated[col].apply(self.convert_label)
+            df_aggregated["text"] = df.text
+            df_aggregated = df_aggregated.dropna()
+            df_aggregated["aggregated_label"] = self.get_majority_vote(df_aggregated, no_winner_label="Mixed")
+            df_aggregated.to_csv(save_path, index_label=False)
+            return df_aggregated
+
+    def split(self, df, split_ratio, forced=False, save_path="../data/annotated/"):
+        train_path = Path(save_path, "task_2_direction_classification_train.csv")
+        valid_path = Path(save_path, "task_2_direction_classification_valid.csv")
+        test_path = Path(save_path, "task_2_direction_classification_test.csv")
+        if not forced and train_path.exists() and valid_path.exists() and test_path.exists():
+            return pd.read_csv(train_path, index_col=False), pd.read_csv(valid_path, index_col=False), pd.read_csv(test_path, index_col=False)
+        else:
+            assert sum(split_ratio) == 1.0, "Split ratios must sum to 1.0"
+
+            df = shuffle(df, random_state=self.seed).reset_index(drop=True)
+            n = len(df)
+
+            train_end = int(split_ratio[0] * n)
+            valid_end = train_end + int(split_ratio[1] * n)
+
+            df_train = df.iloc[:train_end]
+            df_valid = df.iloc[train_end:valid_end]
+            df_test = df.iloc[valid_end:]
+            df_train.to_csv(train_path, index_label=False)
+            df_valid.to_csv(valid_path, index_label=False)
+            df_test.to_csv(test_path, index_label=False)
+            return df_train, df_valid, df_test
+
+    @staticmethod
+    def convert_label(row):
+        row = list(row)
+        if len(row) == 0:
+            return None
+        elif len(row) == 1:
+            return row[0]
+        elif len(row) == 2:
+            return "Mixed"
+        else:
+            raise ValueError
+
+    def train(self):
+        model_names = {"distilbert/distilbert-base-uncased": 64,
+                       "ProsusAI/finbert": 64,
+                       "FacebookAI/roberta-base": 64,
+                       "google-bert/bert-base-uncased": 64,
+                       "worldbank/econberta-fs": 8,
+                       "worldbank/econberta": 4,
+                       "MAPAi/InflaBERT": 8, }
+        train = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_train.csv")
+        valid = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_valid.csv")
+        test = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_test.csv")
+        train['label'] = train['label'].replace(self.label2id_map)
+        valid['label'] = valid['label'].replace(self.label2id_map)
+        test['label'] = test['label'].replace(self.label2id_map)
+
+        train = Dataset.from_pandas(train)
+        valid = Dataset.from_pandas(valid)
+        test = Dataset.from_pandas(test)
+        id2label_map = {value: key for key, value in self.label2id_map.items()}
+
+        def preprocess_function(examples):
+            return tokenizer(examples["text"], truncation=True, padding=True)
+
+        def compute_metrics(eval_pred):
+            logits, labels = eval_pred
+            predictions = np.argmax(logits, axis=-1)
+            f1 = f1_score(labels, predictions, average="weighted")
+            return {'f1_weighted': f1}
+
+        for model_name, batch_size in model_names.items():
+            name = f"{model_name.split('/')[-1]}-{self.task_name}"
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+            model = AutoModelForSequenceClassification.from_pretrained(
+                model_name, num_labels=self.num_labels, id2label=id2label_map, label2id=self.label2id_map)
+            model.resize_token_embeddings(len(tokenizer))
+            data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+
+            tokenized_train = train.map(preprocess_function, batched=True)
+            tokenized_valid = valid.map(preprocess_function, batched=True)
+            tokenized_test = test.map(preprocess_function, batched=True)
+
+            # Training Arguments
+            training_args = TrainingArguments(
+                output_dir=f"./results/{name}",
+                evaluation_strategy="epoch",
+                save_strategy="epoch",
+                per_device_train_batch_size=batch_size,
+                num_train_epochs=20,
+                weight_decay=0.01,
+                logging_dir=f"./logs/{name}"
+            )
+
+            # Trainer
+            trainer = Trainer(
+                model=model,
+                args=training_args,
+                train_dataset=tokenized_train,
+                eval_dataset=tokenized_valid,
+                processing_class=tokenizer,
+                data_collator=data_collator,
+                compute_metrics=compute_metrics,
+            )
+
+            # Train Model
+            trainer.train()
+            model.save_pretrained(f"./logs/{name}/model", from_pt=True)
+
+            # Test model
+            predictions = trainer.predict(tokenized_test)
+
+            # Extract predicted labels
+            predicted_logits = predictions.predictions
+            predicted_labels = np.argmax(predicted_logits, axis=-1)
+
+            # Convert label indices back to label names
+            decoded_predictions = [id2label_map[label] for label in predicted_labels]
+            df_pred = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_test.csv")
+            df_pred["prediction"] = decoded_predictions
+
+            df_pred.to_csv(f"./logs/{name}/prediction_seed_{self.seed}.csv", index=False)
+            target_names = list(self.label2id_map.keys())
+            report = classification_report(df_pred["label"], df_pred["prediction"], target_names=target_names)
+            print(model_name)
+            print(report)
+            with open(f"./logs/{name}/test_metric_seed_{self.seed}.txt", "w") as file:
+                file.write(report)
+
+            del model
+            del trainer
+
+            torch.cuda.empty_cache()
+            torch.cuda.reset_peak_memory_stats()
+
+if __name__ == "__main__":
+    csv_path = '../data/annotated/task_2_annotation.csv'
+    split_ratio = [0.7, 0.1, 0.2]
+    seed = 11
+    forced = True
+    classifier = DirectionClassification(csv_path, split_ratio, forced, seed)
+    classifier.train()
