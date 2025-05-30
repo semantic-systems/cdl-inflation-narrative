@@ -324,7 +324,8 @@ class CoreStoryClassification(Classification):
         train = Dataset.from_pandas(train)
         valid = Dataset.from_pandas(valid)
         test = Dataset.from_pandas(test)
-        id2label_map = {value: key for key, value in self.label2id_map.items()}
+        label2id_map = {str(key): value for key, value in self.label2id_map.items()}
+        id2label_map = {value: key for key, value in label2id_map.items()}
 
         def preprocess_function(examples):
             return tokenizer(examples["text"], truncation=True, padding=True)
@@ -340,7 +341,7 @@ class CoreStoryClassification(Classification):
             name = f"{model_name.split('/')[-1]}-{self.task_name}"
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForSequenceClassification.from_pretrained(
-                model_name, num_labels=self.num_labels, id2label=id2label_map, label2id=self.label2id_map,
+                model_name, num_labels=self.num_labels, id2label=id2label_map, label2id=label2id_map,
                 problem_type="multi_label_classification")
             model.resize_token_embeddings(len(tokenizer))
             data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
@@ -388,7 +389,7 @@ class CoreStoryClassification(Classification):
             df_pred["prediction"] = decoded_predictions
 
             df_pred.to_csv(f"./logs/{name}/prediction_seed_{self.seed}.csv", index=False)
-            target_names = list(self.label2id_map.keys())
+            target_names = list(label2id_map.keys())
             report = classification_report(df_pred["aggregated_label"], df_pred["prediction"], target_names=target_names)
             print(model_name)
             print(report)
