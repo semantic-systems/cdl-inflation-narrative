@@ -289,11 +289,9 @@ class CoreStoryClassification(Classification):
             if not most_common:
                 majority_labels.append(None)
             else:
-                print(most_common)
                 # Get highest frequency count
                 max_count = most_common[0][1]
                 top_labels = [label for label, count in most_common if count == max_count]
-                print(top_labels)
                 # Handle tie-breaks
                 if len(top_labels) == 1:
                     majority_labels.append([top_labels[0]])  # Clear winner
@@ -340,10 +338,13 @@ class CoreStoryClassification(Classification):
             return f1.compute(predictions=preds, references=labels, average="weighted")
 
         def to_multi_hot(label_indices, num_classes):
-            multi_hot = [0] * num_classes
-            for i in label_indices:
-                multi_hot[i] = 1
-            return multi_hot
+            multi_hot_batch = []
+            for indices in label_indices:
+                vec = [0] * num_classes
+                for i in indices:
+                    vec[i] = 1
+                multi_hot_batch.append(vec)
+            return multi_hot_batch
 
         for model_name, batch_size in model_names.items():
             name = f"{model_name.split('/')[-1]}-{self.task_name}"
