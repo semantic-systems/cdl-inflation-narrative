@@ -328,7 +328,6 @@ class CoreStoryClassification(Classification):
         def preprocess_function(examples):
             enc = tokenizer(examples['text'], truncation=True, padding='max_length')
             enc['label'] = to_multi_hot(examples['label'], len(label2id_map))
-            enc['label'] = [list(map(float, x)) for x in enc['label']]
             return enc
 
         def compute_metrics(eval_pred):
@@ -341,9 +340,9 @@ class CoreStoryClassification(Classification):
         def to_multi_hot(label_indices, num_classes):
             multi_hot_batch = []
             for indices in label_indices:
-                vec = [0] * num_classes
+                vec = [float(0)] * num_classes
                 for i in indices:
-                    vec[i] = 1
+                    vec[i] = float(1)
                 multi_hot_batch.append(vec)
             return multi_hot_batch
 
