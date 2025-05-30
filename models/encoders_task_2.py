@@ -246,7 +246,7 @@ class CoreStoryClassification(Classification):
         self.df_aggregated = self.aggregate(self.df, forced=forced, save_path=self.save_path)
         self.df_train, self.df_valid, self.df_test = self.split(self.df_aggregated, split_ratio, forced=forced,
                                                                 save_path="../data/annotated/")
-        self.label_distribution = dict(Counter(self.df_aggregated.aggregated_label))
+        self.label_distribution = dict(Counter(list(chain(*self.df_aggregated.aggregated_label))))
         print(f"label distribution: {self.label_distribution}")
         self.num_labels = len(self.label2id_map)
 
