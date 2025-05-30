@@ -86,7 +86,7 @@ def get_feature_one(row):
 
 def get_feature_two(row):
     # constituent and supplementary events: all factors marked in the annotation
-    all_events = {triple[0] for triple in row["triples_label_form"]}|{triple[0] for triple in row["triples_label_form"]}
+    all_events = {triple[0] for triple in row["triples_label_form"]}|{triple[2] for triple in row["triples_label_form"]}
     if "Inflation" in all_events:
         all_events.remove("Inflation")
     if not all_events:
@@ -237,16 +237,18 @@ if __name__ == "__main__":
 
     # crawl project
     project_annotations = get_task_2_annotation_json(project_id_list)
-    inner_id = [project_annotations[i]["inner_id"] for i in range(len(project_annotations))]
+    inner_id = [project_annotations[i]["data"]["inner_id"] for i in range(len(project_annotations))]
+    text = [project_annotations[i]["data"]["text"] for i in range(len(project_annotations))]
     project_id = [project_annotations[i]["project"] for i in range(len(project_annotations))]
     results = [project_annotations[i]["annotations"][0]["result"] for i in range(len(project_annotations))]
 
-    task2_annotation_dict = {"annotator": [], "item_id": [], "triples": [], "triples_surface_form": [],
+    task2_annotation_dict = {"annotator": [], "item_id": [], "text": [], "triples": [], "triples_surface_form": [],
                              "triples_label_form": []}
 
     for i, result in enumerate(results):
         task2_annotation_dict["annotator"].append(project_id[i])
         task2_annotation_dict["item_id"].append(inner_id[i])
+        task2_annotation_dict["text"].append(text[i])
         triples, triples_surface_form, triples_label_form = get_triples(result)
         task2_annotation_dict["triples"].append(triples)
         task2_annotation_dict["triples_surface_form"].append(triples_surface_form)
