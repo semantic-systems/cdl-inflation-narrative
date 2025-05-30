@@ -314,6 +314,9 @@ class CoreStoryClassification(Classification):
         train = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_train.csv")
         valid = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_valid.csv")
         test = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_test.csv")
+        train["aggregated_label"] = train["aggregated_label"].apply(ast.literal_eval)
+        valid["aggregated_label"] = valid["aggregated_label"].apply(ast.literal_eval)
+        test["aggregated_label"] = test["aggregated_label"].apply(ast.literal_eval)
         train['label'] = [[self.label2id_map[label] for label in labels] for labels in train['aggregated_label']]
         valid['label'] = [[self.label2id_map[label] for label in labels] for labels in valid['aggregated_label']]
         test['label'] = [[self.label2id_map[label] for label in labels] for labels in test['aggregated_label']]
