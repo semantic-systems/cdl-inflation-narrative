@@ -32,7 +32,6 @@ class Classification(object):
         self.df_valid = None
         self.df_test = None
         self.label_distribution = None
-        self.num_labels = len(self.label2id_map)
 
     def setup_directory(self):
         for folder in ["./logs/", "./export/"]:
@@ -199,6 +198,7 @@ class DirectionClassification(Classification):
         self.task_name = "direction_classification"
         self.df_aggregated = self.aggregate(self.df, forced=forced, save_path=self.save_path)
         self.df_train, self.df_valid, self.df_test = self.split(self.df_aggregated, split_ratio, forced=forced, save_path="../data/annotated/")
+        self.num_labels = len(self.label2id_map)
         self.label_distribution = dict(Counter(self.df_aggregated.aggregated_label))
         print(f"label distribution: {self.label_distribution}")
 
