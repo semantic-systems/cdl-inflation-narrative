@@ -327,7 +327,7 @@ class CoreStoryClassification(Classification):
 
         def preprocess_function(examples):
             enc = tokenizer(examples['text'], truncation=True, padding='max_length')
-            enc['label'] = to_multi_hot(examples['label'], len(label2id_map))
+            enc['labels'] = to_multi_hot(examples['label'], len(label2id_map))
             return enc
 
         def compute_metrics(eval_pred):
