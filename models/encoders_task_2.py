@@ -161,9 +161,9 @@ class DirectionClassification(Classification):
         train = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_train.csv")
         valid = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_valid.csv")
         test = pd.read_csv(f"../data/annotated/task_2_{self.task_name}_test.csv")
-        train['label'] = train['label'].replace(self.label2id_map)
-        valid['label'] = valid['label'].replace(self.label2id_map)
-        test['label'] = test['label'].replace(self.label2id_map)
+        train['label'] = train['aggregated_label'].replace(self.label2id_map)
+        valid['label'] = valid['aggregated_label'].replace(self.label2id_map)
+        test['label'] = test['aggregated_label'].replace(self.label2id_map)
 
         train = Dataset.from_pandas(train)
         valid = Dataset.from_pandas(valid)
