@@ -18,6 +18,8 @@ import evaluate
 class Classification(object):
     def __init__(self, csv_path, split_ratio: list[float], seed=11):
         self.setup_directory()
+        self.task_name = "classification"
+        self.save_path = f"../data/annotated/task_2_{self.task_name}.csv"
         self.seed = seed
         self.project_id_list = [11, 12, 13, 14]
         self.df = pd.read_csv(csv_path)
@@ -27,6 +29,7 @@ class Classification(object):
         self.df_valid = None
         self.df_test = None
         self.label_distribution = None
+        self.num_labels = len(self.label2id_map)
 
     def setup_directory(self):
         for folder in ["./logs/", "./export/"]:
@@ -40,87 +43,19 @@ class Classification(object):
 
     @property
     def label2id_map(self):
-        return None
+        return {}
 
     @abstractmethod
     def aggregate(self, df, forced=False, save_path=None):
         raise NotImplementedError
 
-    @abstractmethod
-    def split(self, df, split_ratio, forced=False, save_path=None):
-        raise NotImplementedError
-
-    @abstractmethod
-    def train(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def eval(self):
-        raise NotImplementedError
-
-    def get_majority_vote(self, df, no_winner_label="Mixed"):
-        col_names = df.columns
-
-        majority_labels = []
-        has_winner = 0
-
-        for i, row in enumerate(df[col_names].values):
-            counter = Counter(row)
-            most_common = counter.most_common()
-
-            # Get highest frequency count
-            max_count = most_common[0][1]
-            top_labels = [label for label, count in most_common if count == max_count]
-
-            # Handle tie-breaks
-            if len(top_labels) == 1:
-                majority_labels.append(top_labels[0])  # Clear winner
-                has_winner += 1
-            else:
-                majority_labels.append(no_winner_label)  # no winner, pick inflation-related
-        print(f"has winner ratio: {has_winner / len(df)}\n")
-        return majority_labels
-
-
-class DirectionClassification(Classification):
-    def __init__(self, csv_path, split_ratio: list[float], forced=False, seed=11):
-        super().__init__(csv_path, split_ratio, seed)
-        save_path = "../data/annotated/task_2_direction_classification.csv"
-        self.df_aggregated = self.aggregate(self.df, forced=forced, save_path=save_path)
-        self.df_train, self.df_valid, self.df_test = self.split(self.df_aggregated, split_ratio, forced=forced, save_path="../data/annotated/")
-        self.task_name = "direction_classification"
-        self.num_labels = len(self.label2id_map)
-
-    @property
-    def feature_col(self):
-        return "feature_three"
-
-    @property
-    def label2id_map(self):
-        return {"Increases": 0, "Decreases": 1, "Mixed": 2}
-
-    def aggregate(self, df, forced=False, save_path="../data/annotated/task_2_direction_classification.csv"):
-        if not forced and Path(save_path).exists():
-            return pd.read_csv(save_path, index_col=False)
-        else:
-            df[self.feature_col] = df[self.feature_col].str.replace('*', '{}', regex=False)
-            df[self.feature_col] = df[self.feature_col].apply(ast.literal_eval)
-            df_aggregated = df.pivot(index='item_id', columns='annotator', values=self.feature_col)
-            df_aggregated.columns = [f'annotation_{col}' for col in df_aggregated.columns]
-            for col in df_aggregated.columns:
-                df_aggregated[col] = df_aggregated[col].apply(self.convert_label)
-            df_aggregated["text"] = df.text
-            df_aggregated = df_aggregated.dropna()
-            df_aggregated["aggregated_label"] = self.get_majority_vote(df_aggregated, no_winner_label="Mixed")
-            df_aggregated.to_csv(save_path, index_label=False)
-            return df_aggregated
-
     def split(self, df, split_ratio, forced=False, save_path="../data/annotated/"):
-        train_path = Path(save_path, "task_2_direction_classification_train.csv")
-        valid_path = Path(save_path, "task_2_direction_classification_valid.csv")
-        test_path = Path(save_path, "task_2_direction_classification_test.csv")
+        train_path = Path(save_path, f"task_2_{self.task_name}_train.csv")
+        valid_path = Path(save_path, f"task_2_{self.task_name}_valid.csv")
+        test_path = Path(save_path, f"task_2_{self.task_name}_test.csv")
         if not forced and train_path.exists() and valid_path.exists() and test_path.exists():
-            return pd.read_csv(train_path, index_col=False), pd.read_csv(valid_path, index_col=False), pd.read_csv(test_path, index_col=False)
+            return pd.read_csv(train_path, index_col=False), pd.read_csv(valid_path, index_col=False), pd.read_csv(
+                test_path, index_col=False)
         else:
             assert sum(split_ratio) == 1.0, "Split ratios must sum to 1.0"
 
@@ -137,18 +72,6 @@ class DirectionClassification(Classification):
             df_valid.to_csv(valid_path, index_label=False)
             df_test.to_csv(test_path, index_label=False)
             return df_train, df_valid, df_test
-
-    @staticmethod
-    def convert_label(row):
-        row = list(row)
-        if len(row) == 0:
-            return None
-        elif len(row) == 1:
-            return row[0]
-        elif len(row) == 2:
-            return "Mixed"
-        else:
-            raise ValueError
 
     def train(self):
         model_names = {"distilbert/distilbert-base-uncased": 64,
@@ -231,7 +154,7 @@ class DirectionClassification(Classification):
 
             df_pred.to_csv(f"./logs/{name}/prediction_seed_{self.seed}.csv", index=False)
             target_names = list(self.label2id_map.keys())
-            report = classification_report(df_pred["label"], df_pred["prediction"], target_names=target_names)
+            report = classification_report(df_pred["aggregated_label"], df_pred["prediction"], target_names=target_names)
             print(model_name)
             print(report)
             with open(f"./logs/{name}/test_metric_seed_{self.seed}.txt", "w") as file:
@@ -242,6 +165,73 @@ class DirectionClassification(Classification):
 
             torch.cuda.empty_cache()
             torch.cuda.reset_peak_memory_stats()
+
+    def get_majority_vote(self, df, no_winner_label="Mixed"):
+        col_names = df.columns
+
+        majority_labels = []
+        has_winner = 0
+
+        for i, row in enumerate(df[col_names].values):
+            counter = Counter(row)
+            most_common = counter.most_common()
+
+            # Get highest frequency count
+            max_count = most_common[0][1]
+            top_labels = [label for label, count in most_common if count == max_count]
+
+            # Handle tie-breaks
+            if len(top_labels) == 1:
+                majority_labels.append(top_labels[0])  # Clear winner
+                has_winner += 1
+            else:
+                majority_labels.append(no_winner_label)  # no winner, pick inflation-related
+        print(f"has winner ratio: {has_winner / len(df)}\n")
+        return majority_labels
+
+
+class DirectionClassification(Classification):
+    def __init__(self, csv_path, split_ratio: list[float], forced=False, seed=11):
+        super().__init__(csv_path, split_ratio, seed)
+        self.task_name = "direction_classification"
+        self.df_aggregated = self.aggregate(self.df, forced=forced, save_path=self.save_path)
+        self.df_train, self.df_valid, self.df_test = self.split(self.df_aggregated, split_ratio, forced=forced, save_path="../data/annotated/")
+
+    @property
+    def feature_col(self):
+        return "feature_three"
+
+    @property
+    def label2id_map(self):
+        return {"Increases": 0, "Decreases": 1, "Mixed": 2}
+
+    def aggregate(self, df, forced=False, save_path="../data/annotated/task_2_direction_classification.csv"):
+        if not forced and Path(save_path).exists():
+            return pd.read_csv(save_path, index_col=False)
+        else:
+            df[self.feature_col] = df[self.feature_col].str.replace('*', '{}', regex=False)
+            df[self.feature_col] = df[self.feature_col].apply(ast.literal_eval)
+            df_aggregated = df.pivot(index='item_id', columns='annotator', values=self.feature_col)
+            df_aggregated.columns = [f'annotation_{col}' for col in df_aggregated.columns]
+            for col in df_aggregated.columns:
+                df_aggregated[col] = df_aggregated[col].apply(self.convert_label)
+            df_aggregated["text"] = df.text
+            df_aggregated = df_aggregated.dropna()
+            df_aggregated["aggregated_label"] = self.get_majority_vote(df_aggregated, no_winner_label="Mixed")
+            df_aggregated.to_csv(save_path, index_label=False)
+            return df_aggregated
+
+    @staticmethod
+    def convert_label(row):
+        row = list(row)
+        if len(row) == 0:
+            return None
+        elif len(row) == 1:
+            return row[0]
+        elif len(row) == 2:
+            return "Mixed"
+        else:
+            raise ValueError
 
 
 if __name__ == "__main__":
