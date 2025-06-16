@@ -179,14 +179,21 @@ def low_level_event_to_high_level_event_map(event: str, event_category: dict):
     return reverse_event_category.get(event, event)
 
 
+def to_tuple(obj):
+    if isinstance(obj, list):
+        return tuple(to_tuple(x) for x in obj)
+    return obj
+
 def replace_empty_relation(triples: list[tuple]):
     new_triples = []
     for triple in triples:
-        if not triple[1]:
-            continue
-        else:
-            new_triples.append((triple[0], triple[1][0], triple[2]))
-    new_triples = set(new_triples) if new_triples else "*"
+        # Alle Elemente rekursiv in Tupel umwandeln, falls nötig
+        new_triples.append((
+            to_tuple(triple[0]),
+            to_tuple(triple[1]),
+            to_tuple(triple[2])
+        ))
+    new_triples = set(new_triples)
     return new_triples
 
 
@@ -269,28 +276,29 @@ if __name__ == "__main__":
 
     # create features
     event_category = {"Inflation": ["Inflation"],
-                      "Demand": ["Staatsausgaben", "Geldpolitik", "Aufgestaute Nachfrage", "Nachfrageverschiebung",
+                      "Nachfrage": ["Staatsausgaben", "Geldpolitik", "Aufgestaute Nachfrage", "Nachfrageverschiebung",
                                  "Nachfrage (Rest)"],
-                      "Supply": ["Lieferkettenprobleme", "Arbeitskräftemangel", "Lebensmittelpreise", "Hohe Energiepreise", "Angebot (Rest)",
+                      "Angebot": ["Lieferkettenprobleme", "Arbeitskräftemangel", "Lebensmittelpreise", "Hohe Energiepreise", "Angebot (Rest)",
                                  'Löhne', "Wohnraum"],
-                      "Miscellaneous": ["Pandemie", "Politisches Missmanagement", "Inflationserwartungen", "Basiseffekt",
+                      "Andere": ["Pandemie", "Politisches Missmanagement", "Inflationserwartungen", "Basiseffekt",
                                         "Hohe Staatsschulden", "Steuererhöhungen", "Preistreiberei", "Klimawandel",
                                         "Krieg", "Geopolitik", "Migration", 'Zölle', 'Ökonomische Krise']}
 
     df_task2_annotation["feature_one"] = df_task2_annotation.apply(get_feature_one, axis=1)
     df_task2_annotation["feature_two"] = df_task2_annotation.apply(get_feature_two, axis=1)
-    df_task2_annotation["feature_three"] = df_task2_annotation.apply(get_feature_three, axis=1)
+    #df_task2_annotation["feature_three"] = df_task2_annotation.apply(get_feature_three, axis=1)
     df_task2_annotation["feature_four"] = df_task2_annotation.apply(get_feature_four, axis=1)
     df_task2_annotation["feature_five"] = df_task2_annotation.apply(get_feature_five, event_category=event_category, axis=1)
     df_task2_annotation["feature_six"] = df_task2_annotation.apply(get_feature_six, axis=1)
     df_task2_annotation["feature_seven"] = df_task2_annotation.apply(get_feature_seven, event_category=event_category, axis=1)
 
-    df_task2_annotation.to_csv("./export/task_2_annotation.csv", index=False)
+    df_task2_annotation.to_csv("./export/task_2_annotation_survey.csv", index=False)
+    
 
     # configurations for IAA computing
     configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
                       "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
                       "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
                       "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
                       "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
