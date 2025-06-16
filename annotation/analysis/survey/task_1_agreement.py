@@ -26,6 +26,15 @@ for project in projects:
     print(f"Project ID: {project.id}, Title: {project.title}")
 
 
+import json
+
+# Datei öffnen und laden
+with open('./export/survey_annotation_project_20.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+# Jetzt ist data ein Python-Objekt (z.B. dict oder list)
+print(data)
+
 class InflationNarrative(object):
     def __init__(self, pull_from_label_studio=True, seed=11): # pull from label studio 
         self.seed = seed
@@ -35,7 +44,7 @@ class InflationNarrative(object):
         self.project_id_list = [20,21]
         self.number_documents = self.client.projects.get(id=20).finished_task_number + int(
             self.client.projects.get(id=20).queue_total)
-        self.label2id_map = {"kausales Inflationsnarrative": 0, "Gründe der Inflation": 1, "Keine sinnvolle Antwort": 2}
+        self.label2id_map = {"kausales Inflationsnarrativ": 0, "Gründe der Inflation": 1, "Keine sinnvolle Antwort": 2}
         self.training_data_inner_id = None
         self.training_data_label = None
         self.df = self.instantiate(pull_from_label_studio=pull_from_label_studio)

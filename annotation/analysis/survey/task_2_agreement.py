@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
     # crawl project
     project_annotations = get_task_2_annotation_json(project_id_list)
-    inner_id = [project_annotations[i]["data"]["inner_id"] for i in range(len(project_annotations))]
+    inner_id = [project_annotations[i]["inner_id"] for i in range(len(project_annotations))]
     text = [project_annotations[i]["data"]["text"] for i in range(len(project_annotations))]
     project_id = [project_annotations[i]["project"] for i in range(len(project_annotations))]
     results = [project_annotations[i]["annotations"][0]["result"] for i in range(len(project_annotations))]
@@ -254,16 +254,28 @@ if __name__ == "__main__":
         task2_annotation_dict["triples_label_form"].append(triples_label_form)
 
     df_task2_annotation = pd.DataFrame.from_dict(task2_annotation_dict)
+    df_task2_annotation.to_csv("./export/task_2_annotation_raw.csv", index=False)
+    
+    # remove documents with empty triples
+    df_task2_annotation = df_task2_annotation[df_task2_annotation["triples"].apply(lambda x: bool(x) and x != "*")].reset_index(drop=True) #bool(x) and x != "*" filters out empty graphs
+
+    # take only those that have been fully annotated by all annotators
+    item_id_counts = df_task2_annotation.groupby("item_id")["annotator"].nunique()
+    item_ids_with_multiple_annotators = item_id_counts[item_id_counts > 1].index
+    df_task2_annotation = df_task2_annotation[df_task2_annotation["item_id"].isin(item_ids_with_multiple_annotators)].reset_index(drop=True)
+
+
+
 
     # create features
     event_category = {"Inflation": ["Inflation"],
-                      "Demand": ["Government Spending", "Monetary Policy", "Pent-up Demand", "Demand Shift",
-                                 "Demand (residual)"],
-                      "Supply": ["Supply Chain Issues", "Labor Shortage", "Supply (residual)", "Wages", "Food Prices",
-                                 'Transportation Costs', "Energy Prices", "Housing Costs"],
-                      "Miscellaneous": ["Pandemic", "Mismanagement", "Inflation Expectations", "Base Effect",
-                                        "Government Debt", "Tax Increases", "Price-Gouging", "Trade Balance",
-                                        "Exchange Rates", "Medical Costs", "Education Costs", 'Climate', 'War']}
+                      "Demand": ["Staatsausgaben", "Geldpolitik", "Aufgestaute Nachfrage", "Nachfrageverschiebung",
+                                 "Nachfrage (Rest)"],
+                      "Supply": ["Lieferkettenprobleme", "Arbeitskräftemangel", "Lebensmittelpreise", "Hohe Energiepreise", "Angebot (Rest)",
+                                 'Löhne', "Wohnraum"],
+                      "Miscellaneous": ["Pandemie", "Politisches Missmanagement", "Inflationserwartungen", "Basiseffekt",
+                                        "Hohe Staatsschulden", "Steuererhöhungen", "Preistreiberei", "Klimawandel",
+                                        "Krieg", "Geopolitik", "Migration", 'Zölle', 'Ökonomische Krise']}
 
     df_task2_annotation["feature_one"] = df_task2_annotation.apply(get_feature_one, axis=1)
     df_task2_annotation["feature_two"] = df_task2_annotation.apply(get_feature_two, axis=1)
