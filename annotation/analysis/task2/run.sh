@@ -1,4 +1,4 @@
 #!/bin/bash
 #SBATCH --gpus-per-node=1 --constraint=24GB
 
-python task_2_annotation.py -p 11 12 13 14 -f
+python analyze_task_2_annotation.py -p 11 12 13 14 -f
