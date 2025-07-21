@@ -223,7 +223,6 @@ def compute_iaa(df, project_id_list,
     print(f"{metric_type} distance metric: {alpha:.4f}")
     return alpha
 
-
 if __name__ == "__main__":
     setup()
     # Create an ArgumentParser for project_list, and forced args
@@ -234,6 +233,8 @@ if __name__ == "__main__":
 
     LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
     API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
+    if args.project_list is None:
+        raise ValueError("You must provide at least one project ID using --project_list or -p.")
     project_id_list = args.project_list
     annotator_list = [[project_id] for project_id in project_id_list]
 
