@@ -1,39 +1,16 @@
 import pandas as pd
 import json
+import re
 
-for i in (20, 21):
-    with open(f'./export/survey_annotation_project_{i}.json', 'r') as f:
-        data = json.load(f)
-    df = pd.DataFrame(data['annotations'])
-    print(f"Project {i} has {len(df)} annotations")
-    print(df.head())
 
 with open(f'./export/survey_annotation_project_{20}.json', 'r') as f:
     data = json.load(f)
     
 print(type(data))        # See what type it is
 print(len(data))         # See how many items/keys it has
-print(list(data)[:5])    # See the first few keys or list items
+print(list(data)[:1])    # See the first few keys or list items
 
 
-import json
-import pandas as pd
-import re
-
-# Load your JSON file
-with open(f'./export/survey_annotation_project_{20}.json', 'r') as f:
-    data = json.load(f)
-
-
-
-
-import json
-import pandas as pd
-import re
-
-# assumes project_id is defined and data already loaded into `data`
-# with open(f'./export/survey_annotation_project_{project_id}.json', 'r', encoding='utf-8') as f:
-#     data = json.load(f)
 
 rows = []
 for item in data:
@@ -47,10 +24,11 @@ for item in data:
 
     # Use only final annotations (as you had it)
     all_annots = item.get("annotations", [])
+    ID = item.get("data", {}).get("id", "")
 
     for annot in all_annots:
         results = annot.get("result", [])
-
+        
         # 1) First pass: build a map from result-id -> label name(s)
         # Some results have multiple labels; we'll join them with '+'.
         id_to_label = {}
@@ -97,6 +75,7 @@ for item in data:
 
     rows.append({
         "Inner_ID": inner_id,
+        "ID": ID,
         "Text": text,
         "Annotation First Stage": first_stage,
         "Annotation Second Stage": second_stage,
@@ -107,7 +86,7 @@ for item in data:
 df = pd.DataFrame(rows)
 
 # quick sanity checks
-print(df[['Inner_ID','Relations']].head(10))
+print(df[['Inner_ID','ID', 'Relations']].head(10))
 # df.to_csv("annotations_with_relations.csv", index=False)
 
 df['Relations'] = (
