@@ -29,11 +29,11 @@ for project in projects:
 import json
 
 # Datei öffnen und laden
-with open('./export/survey_annotation_project_20.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
+#with open('./export/survey_annotation_project_20.json', 'r', encoding='utf-8') as f:
+#    data = json.load(f)
 
 # Jetzt ist data ein Python-Objekt (z.B. dict oder list)
-print(data)
+# print(data)
 
 seed = 118
 # Set random seed for reproducibility
@@ -54,7 +54,7 @@ def is_annotation_done(project_id): # check if annotation is done
     is_done = num_unfinished == 0
     return is_done, num_unfinished
 
-is_annotation_done(20)
+is_annotation_done(20) # still to annotate
 is_annotation_done(21)
 
 
@@ -125,7 +125,7 @@ def get_project_title_from_id(project_id): # get project title from project id
         
 def instantiate(pull_from_label_studio=True): # export project to json and create dataframe
 
-    response = export_project_to_json(project_id=20, write_to_dist=True)
+    response = export_project_to_json(project_id=21, write_to_dist=True)
     inner_id = [document["inner_id"] for document in response]
     text = [document["data"]["text"] for document in response]
     if Path("./export/task_1_annotation_survey.csv").exists():
@@ -142,7 +142,7 @@ def instantiate(pull_from_label_studio=True): # export project to json and creat
         
 data = instantiate(pull_from_label_studio=True)
 data.head()
-
+len(data)
 
 def get_data_by_inner_id(inner_id, json_data):
     for data in json_data:
@@ -209,8 +209,22 @@ def compute_agreement(annotator_list=None):
     df["label"] = labels
     df.to_csv("./export/survey_task_1_annotation.csv", index=False)
     irr = compute_task_1_agreement(annotations_numeric, metric="krippendorff")
+    
+    label_remapping = {"Gründe der Inflation": "Inflationsnarrative", "kausales Inflationsnarrativ": "Inflationsnarrative"}
+    df["label"] = df["label"].replace(label_remapping)
+    
+    remapped_annotations = [[label_remapping.get(label, label) for label in annotator_labels]
+    for annotator_labels in annotations]
+    
+    remapped_annotations_numeric = [
+    [label2id_map.get(label, -1) for label in annotator_labels]
+    for annotator_labels in remapped_annotations]
+
+    irr_2 = compute_task_1_agreement(remapped_annotations_numeric, metric="krippendorff")
+    
     print(irr)
-    return irr
+    print(irr_2)
+    return irr, irr_2
 
 agreement = compute_agreement(annotator_list=project_id_list)
 
