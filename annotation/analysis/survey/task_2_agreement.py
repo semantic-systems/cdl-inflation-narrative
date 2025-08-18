@@ -179,14 +179,21 @@ def low_level_event_to_high_level_event_map(event: str, event_category: dict):
     return reverse_event_category.get(event, event)
 
 
+def to_tuple(obj):
+    if isinstance(obj, list):
+        return tuple(to_tuple(x) for x in obj)
+    return obj
+
 def replace_empty_relation(triples: list[tuple]):
     new_triples = []
     for triple in triples:
-        if not triple[1]:
-            continue
-        else:
-            new_triples.append((triple[0], triple[1][0], triple[2]))
-    new_triples = set(new_triples) if new_triples else "*"
+        # Alle Elemente rekursiv in Tupel umwandeln, falls nötig
+        new_triples.append((
+            to_tuple(triple[0]),
+            to_tuple(triple[1]),
+            to_tuple(triple[2])
+        ))
+    new_triples = set(new_triples)
     return new_triples
 
 
@@ -216,7 +223,6 @@ def compute_iaa(df, project_id_list,
     print(f"{metric_type} distance metric: {alpha:.4f}")
     return alpha
 
-
 if __name__ == "__main__":
     setup()
     # Create an ArgumentParser for project_list, and forced args
@@ -227,6 +233,8 @@ if __name__ == "__main__":
 
     LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
     API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
+    if args.project_list is None:
+        raise ValueError("You must provide at least one project ID using --project_list or -p.")
     project_id_list = args.project_list
     annotator_list = [[project_id] for project_id in project_id_list]
 
@@ -236,7 +244,7 @@ if __name__ == "__main__":
 
     # crawl project
     project_annotations = get_task_2_annotation_json(project_id_list)
-    inner_id = [project_annotations[i]["data"]["inner_id"] for i in range(len(project_annotations))]
+    inner_id = [project_annotations[i]["inner_id"] for i in range(len(project_annotations))]
     text = [project_annotations[i]["data"]["text"] for i in range(len(project_annotations))]
     project_id = [project_annotations[i]["project"] for i in range(len(project_annotations))]
     results = [project_annotations[i]["annotations"][0]["result"] for i in range(len(project_annotations))]
@@ -254,31 +262,44 @@ if __name__ == "__main__":
         task2_annotation_dict["triples_label_form"].append(triples_label_form)
 
     df_task2_annotation = pd.DataFrame.from_dict(task2_annotation_dict)
+    df_task2_annotation.to_csv("./export/task_2_annotation_raw.csv", index=False)
+    
+    # remove documents with empty triples
+    df_task2_annotation = df_task2_annotation[df_task2_annotation["triples"].apply(lambda x: bool(x) and x != "*")].reset_index(drop=True) #bool(x) and x != "*" filters out empty graphs
+
+    # take only those that have been fully annotated by all annotators
+    item_id_counts = df_task2_annotation.groupby("item_id")["annotator"].nunique()
+    item_ids_with_multiple_annotators = item_id_counts[item_id_counts > 1].index
+    df_task2_annotation = df_task2_annotation[df_task2_annotation["item_id"].isin(item_ids_with_multiple_annotators)].reset_index(drop=True)
+
+
+
 
     # create features
     event_category = {"Inflation": ["Inflation"],
-                      "Demand": ["Government Spending", "Monetary Policy", "Pent-up Demand", "Demand Shift",
-                                 "Demand (residual)"],
-                      "Supply": ["Supply Chain Issues", "Labor Shortage", "Supply (residual)", "Wages", "Food Prices",
-                                 'Transportation Costs', "Energy Prices", "Housing Costs"],
-                      "Miscellaneous": ["Pandemic", "Mismanagement", "Inflation Expectations", "Base Effect",
-                                        "Government Debt", "Tax Increases", "Price-Gouging", "Trade Balance",
-                                        "Exchange Rates", "Medical Costs", "Education Costs", 'Climate', 'War']}
+                      "Nachfrage": ["Staatsausgaben", "Geldpolitik", "Aufgestaute Nachfrage", "Nachfrageverschiebung",
+                                 "Nachfrage (Rest)"],
+                      "Angebot": ["Lieferkettenprobleme", "Arbeitskräftemangel", "Lebensmittelpreise", "Hohe Energiepreise", "Angebot (Rest)",
+                                 'Löhne', "Wohnraum"],
+                      "Andere": ["Pandemie", "Politisches Missmanagement", "Inflationserwartungen", "Basiseffekt",
+                                        "Hohe Staatsschulden", "Steuererhöhungen", "Preistreiberei", "Klimawandel",
+                                        "Krieg", "Geopolitik", "Migration", 'Zölle', 'Ökonomische Krise']}
 
     df_task2_annotation["feature_one"] = df_task2_annotation.apply(get_feature_one, axis=1)
     df_task2_annotation["feature_two"] = df_task2_annotation.apply(get_feature_two, axis=1)
-    df_task2_annotation["feature_three"] = df_task2_annotation.apply(get_feature_three, axis=1)
+    #df_task2_annotation["feature_three"] = df_task2_annotation.apply(get_feature_three, axis=1)
     df_task2_annotation["feature_four"] = df_task2_annotation.apply(get_feature_four, axis=1)
     df_task2_annotation["feature_five"] = df_task2_annotation.apply(get_feature_five, event_category=event_category, axis=1)
     df_task2_annotation["feature_six"] = df_task2_annotation.apply(get_feature_six, axis=1)
     df_task2_annotation["feature_seven"] = df_task2_annotation.apply(get_feature_seven, event_category=event_category, axis=1)
 
-    df_task2_annotation.to_csv("./export/task_2_annotation.csv", index=False)
+    df_task2_annotation.to_csv("./export/task_2_annotation_survey.csv", index=False)
+    
 
     # configurations for IAA computing
     configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
                       "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
                       "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
                       "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
                       "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
