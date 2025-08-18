@@ -138,21 +138,21 @@ def get_feature_five(row, event_category):
 
 
 def get_feature_six(row):
-    # graph: all events that go to inflation (in graph)
+    # one-hop graph: all events that directly go to inflation 
     raw_triples = row["triples_label_form"]
     if not raw_triples:
         graph = "*"
     else:
         graph = replace_empty_relation(raw_triples)
-    high_level_event_graph = []
+    event_graph = []
     for g in graph:
         if g != "*":
             sub_category = g[0]
             obj_category = g[2]
             if obj_category == "Inflation":
-                high_level_event_graph.append((sub_category, g[1], obj_category))
-    high_level_event_graph = set(high_level_event_graph) if high_level_event_graph else "*"
-    return high_level_event_graph
+                event_graph.append((sub_category, g[1], obj_category))
+    event_graph = set(event_graph) if event_graph else "*"
+    return event_graph
 
 
 def get_feature_seven(row, event_category):
@@ -172,6 +172,30 @@ def get_feature_seven(row, event_category):
                 high_level_event_graph.append((sub_category, g[1], obj_category))
     high_level_event_graph = set(high_level_event_graph) if high_level_event_graph else "*"
     return high_level_event_graph
+
+
+def get_feature_eight(row):
+    # multi_hop graph: all events that directly and indirectly go to inflation 
+    raw_triples = row["triples_label_form"]
+    if not raw_triples:
+        graph = "*"
+    else:
+        graph = replace_empty_relation(raw_triples)
+    #print(graph)
+    if graph != "*":
+        connected_triples = [triple for triple in graph if triple[2] == "Inflation" ]
+        remaining_triples = [triple for triple in graph if triple[2] != "Inflation"]
+        nodes_to_be_connected = [triple[0] for triple in connected_triples]
+        for triple in remaining_triples:
+            if triple[2] in nodes_to_be_connected:
+                connected_triples.append(triple)
+                nodes_to_be_connected = [triple[0] for triple in connected_triples]
+        annotated_graph = set(connected_triples) if connected_triples else "*"
+    else:
+        annotated_graph = "*"
+    print(annotated_graph)
+    return annotated_graph
+
 
 
 def low_level_event_to_high_level_event_map(event: str, event_category: dict):
@@ -231,7 +255,7 @@ if __name__ == "__main__":
     project_to_annotator_map = {11: 7, 12: 6, 13: 8, 14: 5}
     annotator_list = [project_to_annotator_map[project_id] for project_id in project_id_list]
 
-    feature_cols = ["feature_one", "feature_two", "feature_three", "feature_four", "feature_five", "feature_six", "feature_seven"]
+    feature_cols = ["feature_one", "feature_two", "feature_three", "feature_four", "feature_five", "feature_six", "feature_seven", "feature_eight"]
     empty_graph_indicator = "*"
     alpha_store = {feature: {"lenient": None, "strict": None} for feature in feature_cols}
 
@@ -273,17 +297,19 @@ if __name__ == "__main__":
     df_task2_annotation["feature_five"] = df_task2_annotation.apply(get_feature_five, event_category=event_category, axis=1)
     df_task2_annotation["feature_six"] = df_task2_annotation.apply(get_feature_six, axis=1)
     df_task2_annotation["feature_seven"] = df_task2_annotation.apply(get_feature_seven, event_category=event_category, axis=1)
+    df_task2_annotation["feature_eight"] = df_task2_annotation.apply(get_feature_eight, axis=1)
 
     df_task2_annotation.to_csv("./export/task_2_annotation.csv", index=False)
 
     # configurations for IAA computing
-    configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+    configurations = {#"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      #"feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
+                      #"feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      #"feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      #"feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      #"feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      "feature_eight": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
 
     forced = args.forced
     for feature_column, configs in configurations.items():
