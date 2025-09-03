@@ -25,15 +25,15 @@ def export_project_to_json(project_id, write_to_dist=True):
             json.dump(export, f)
     return export
 
-
-def get_task_2_annotation_json(project_id_list):
+def get_task_2_annotation_json(project_id_list, redownload=False):
     project_annotations = []
     for project_id in project_id_list:
-        if Path(f'./export/annotation_task2_project_{project_id}.json').exists():
-            with open(f'./export/annotation_task2_project_{project_id}.json', "r") as f:
-                project_annotations.extend(json.load(f))
-        else:
+        cache_path = Path(f'./export/annotation_task2_project_{project_id}.json')
+        if redownload or not cache_path.exists():
             project_annotations.extend(export_project_to_json(project_id))
+        else:
+            with open(cache_path, "r") as f:
+                project_annotations.extend(json.load(f))
     return project_annotations
 
 
@@ -229,6 +229,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--project_list', nargs="+", type=int)
     parser.add_argument('-f', '--forced', action='store_true', default=False)
+    parser.add_argument('--redownload', action='store_true', default=False)
     args = parser.parse_args()
 
     LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
