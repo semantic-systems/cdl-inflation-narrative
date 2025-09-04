@@ -1,0 +1,20 @@
+digraph Inflation_Annotation_Flow {
+	A [label="News data from Dow Jones Newswire
+(Newswires, Barron's, MarketWatch, WSJ)"]
+	B [label="Select subset covering years of elevated inflation
+N = 1,386,018"]
+	C [label="Filter by DJN subject codes + regex
+N = 707,121"]
+	D [label="Zero-shot classification with LLaMa 3.1:
+Identify causes of inflation
+N = 39,783"]
+	E [label="Sample 2 docs/day
+N = 4,853"]
+	F [label="Sample 5 docs/month → Annotation set
+N = 488"]
+	A -> B
+	B -> C
+	C -> D
+	D -> E
+	E -> F
+}

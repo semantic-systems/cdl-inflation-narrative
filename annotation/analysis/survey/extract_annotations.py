@@ -3,7 +3,7 @@ import json
 import re
 
 
-with open(f'./export/survey_annotation_project_{20}.json', 'r') as f:
+with open(f'./export/survey_annotation_project_{21}.json', 'r') as f:
     data = json.load(f)
     
 print(type(data))        # See what type it is
@@ -100,7 +100,7 @@ df['Relations'] = (
 
 # Ensure no NaN in Relations column
 
-df.to_excel('./export/survey_annotations_project_20.xlsx', index=False)
+df.to_excel('./export/survey_annotations_project_21.xlsx', index=False)
 
 
 

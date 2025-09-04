@@ -41,6 +41,8 @@ LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
 API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
 client = LabelStudio(base_url=LABEL_STUDIO_URL, api_key=API_KEY)
 project_id_list = [20,21]
+# assuming `client` is an SDK client:
+
 number_documents = client.projects.get(id=20).finished_task_number + int(
             client.projects.get(id=20).queue_total)
 label2id_map = {"Keine sinnvolle Antwort": 0, "Gründe der Inflation": 1, "kausales Inflationsnarrative": 2}
