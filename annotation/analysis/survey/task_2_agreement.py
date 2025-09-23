@@ -324,11 +324,11 @@ if __name__ == "__main__":
 
 from collections import defaultdict
 
-# Features und Metriken, die du betrachten willst
+# Define features and metrics to check agreement
 features = ["feature_four", "feature_six"]
 metrics = ["lenient", "strict"]
 
-# Hilfsfunktion zum Vergleich (Agreement) für ein Feature und eine Metrik
+# Function to check agreement
 def check_agreement(df, feature, metric):
     # Gruppiere nach item_id und sammle die Werte aller Annotatoren
     agreement_item_ids = []
@@ -344,12 +344,9 @@ agreement_results = defaultdict(dict)
 
 for feature in features:
     for metric in metrics:
-        # Hier ggf. die richtige Spalte/Metrik auswählen, falls du verschiedene Spalten für lenient/strict hast
-        # In deinem Fall sind die Features gleich, die Metrik wirkt sich auf die spätere Auswertung aus
+
         agreement_item_ids = check_agreement(df_task2_annotation, feature, metric)
-        # Extrahiere die Zeilen mit Agreement
         df_agreement = df_task2_annotation[df_task2_annotation["item_id"].isin(agreement_item_ids)]
-        # Speichern oder exportieren
         agreement_results[feature][metric] = df_agreement
         df_agreement.to_csv(f"./export/agreement_{feature}_{metric}.csv", index=False)
 
