@@ -328,25 +328,32 @@ from collections import defaultdict
 features = ["feature_four", "feature_six"]
 metrics = ["lenient", "strict"]
 
-# Function to check agreement
-def check_agreement(df, feature, metric):
-    # Gruppiere nach item_id und sammle die Werte aller Annotatoren
-    agreement_item_ids = []
+def extract_agreed_values(df, feature):
+    """
+    Gibt für jedes item_id die Werte zurück, auf die sich alle Annotatoren geeinigt haben.
+    """
+    agreed_values_per_item = []
     for item_id, group in df.groupby("item_id"):
-        values = group[feature].tolist()
-        # Prüfe auf vollständige Übereinstimmung (alle Werte gleich)
-        if all(v == values[0] for v in values):
-            agreement_item_ids.append(item_id)
-    return agreement_item_ids
+        values = list(group[feature])
+        # Schnittmenge aller Annotator-Werte berechnen
+        sets = [set(v) if isinstance(v, (set, list)) else set([v]) for v in values]
+        if sets:
+            intersection = set.intersection(*sets)
+            if intersection:
+                agreed_values_per_item.append({
+                    "item_id": item_id,
+                    "agreed_values": list(intersection),
+                    "n_annotators": len(values)
+                })
+    return agreed_values_per_item
 
-# Ergebnisse speichern
 agreement_results = defaultdict(dict)
 
 for feature in features:
     for metric in metrics:
-
-        agreement_item_ids = check_agreement(df_task2_annotation, feature, metric)
-        df_agreement = df_task2_annotation[df_task2_annotation["item_id"].isin(agreement_item_ids)]
-        agreement_results[feature][metric] = df_agreement
-        df_agreement.to_csv(f"./export/agreement_{feature}_{metric}.csv", index=False)
-
+        # Extrahiere alle Werte, auf die sich alle Annotatoren geeinigt haben
+        agreed_values = extract_agreed_values(df_task2_annotation, feature)
+        # Speichere als DataFrame
+        df_agreed = pd.DataFrame(agreed_values)
+        agreement_results[feature][metric] = df_agreed
+        df_agreed.to_csv(f"./export/agreed_values_{feature}_{metric}.csv", index=False)
