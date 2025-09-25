@@ -294,8 +294,8 @@ if __name__ == "__main__":
     df_task2_annotation["feature_six"] = df_task2_annotation.apply(get_feature_six, axis=1)
     df_task2_annotation["feature_seven"] = df_task2_annotation.apply(get_feature_seven, event_category=event_category, axis=1)
 
-    df_task2_annotation.to_csv("./export/task_2_annotation_survey.csv", index=False)
-    
+    df_task2_annotation.to_csv("./export/task_2_annotation_survey.csv", index=False, encoding = "utf-8")
+    df_task2_annotation.to_pickle("./export/task_2_annotation_survey.pkl")
 
     # configurations for IAA computing
     configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
@@ -319,41 +319,3 @@ if __name__ == "__main__":
 
     with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}.json", "w") as f:
         json.dump(alpha_store, f)
-
-
-
-from collections import defaultdict
-
-# Define features and metrics to check agreement
-features = ["feature_four", "feature_six"]
-metrics = ["lenient", "strict"]
-
-def extract_agreed_values(df, feature):
-    """
-    Gibt für jedes item_id die Werte zurück, auf die sich alle Annotatoren geeinigt haben.
-    """
-    agreed_values_per_item = []
-    for item_id, group in df.groupby("item_id"):
-        values = list(group[feature])
-        # Schnittmenge aller Annotator-Werte berechnen
-        sets = [set(v) if isinstance(v, (set, list)) else set([v]) for v in values]
-        if sets:
-            intersection = set.intersection(*sets)
-            if intersection:
-                agreed_values_per_item.append({
-                    "item_id": item_id,
-                    "agreed_values": list(intersection),
-                    "n_annotators": len(values)
-                })
-    return agreed_values_per_item
-
-agreement_results = defaultdict(dict)
-
-for feature in features:
-    for metric in metrics:
-        # Extrahiere alle Werte, auf die sich alle Annotatoren geeinigt haben
-        agreed_values = extract_agreed_values(df_task2_annotation, feature)
-        # Speichere als DataFrame
-        df_agreed = pd.DataFrame(agreed_values)
-        agreement_results[feature][metric] = df_agreed
-        df_agreed.to_csv(f"./export/agreed_values_{feature}_{metric}.csv", index=False)
