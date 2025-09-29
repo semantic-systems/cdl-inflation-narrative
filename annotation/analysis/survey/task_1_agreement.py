@@ -115,7 +115,8 @@ def get_task_1_annotation(annotator_id, filler="MISSING"):
     annot_series = annot_df.set_index("inner_id")["label"]
     # Fill missing values with filler
     df[f"annotator_{annotator_id}"] = annot_series.reindex(df["inner_id"], fill_value=filler).values
-    df.to_csv("./export/task_1_annotation_survey.csv", index=False)
+    df.to_csv("./export/task_1_annotation_survey.csv", index=False, encoding='utf-8')
+    df.to_pkl("./export/task_1_annotation_survey.pkl")
     print(f"Updated annotation from user {annotator_id}, result saved in ./export/task_1_annotation_survey.csv")
     task_1_annotation = df.set_index('inner_id')[f"annotator_{annotator_id}"].to_dict()
     return task_1_annotation
@@ -135,7 +136,9 @@ def instantiate(pull_from_label_studio=True): # export project to json and creat
     else:
         df = pd.DataFrame.from_dict({"inner_id": inner_id, "text": text})
         df = df.sort_values(by='inner_id', ascending=True)
-        df.to_csv("./export/task_1_annotation_survey.csv", index=False)
+        df.to_csv("./export/task_1_annotation_survey.csv", index=False, encoding='utf-8')
+        df.to_pkl("./export/task_1_annotation_survey.pkl")
+        
     if pull_from_label_studio:
         for annotator_id in project_id_list:
                 get_task_1_annotation(annotator_id)
