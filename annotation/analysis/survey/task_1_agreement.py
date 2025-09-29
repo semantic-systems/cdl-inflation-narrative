@@ -116,7 +116,7 @@ def get_task_1_annotation(annotator_id, filler="MISSING"):
     # Fill missing values with filler
     df[f"annotator_{annotator_id}"] = annot_series.reindex(df["inner_id"], fill_value=filler).values
     df.to_csv("./export/task_1_annotation_survey.csv", index=False, encoding='utf-8')
-    df.to_pkl("./export/task_1_annotation_survey.pkl")
+    df.to_pickle("./export/task_1_annotation_survey.pkl")
     print(f"Updated annotation from user {annotator_id}, result saved in ./export/task_1_annotation_survey.csv")
     task_1_annotation = df.set_index('inner_id')[f"annotator_{annotator_id}"].to_dict()
     return task_1_annotation
@@ -137,7 +137,7 @@ def instantiate(pull_from_label_studio=True): # export project to json and creat
         df = pd.DataFrame.from_dict({"inner_id": inner_id, "text": text})
         df = df.sort_values(by='inner_id', ascending=True)
         df.to_csv("./export/task_1_annotation_survey.csv", index=False, encoding='utf-8')
-        df.to_pkl("./export/task_1_annotation_survey.pkl")
+        df.to_pickle("./export/task_1_annotation_survey.pkl")
         
     if pull_from_label_studio:
         for annotator_id in project_id_list:
@@ -232,123 +232,6 @@ def compute_agreement(annotator_list=None):
     return irr, irr_2
 
 agreement = compute_agreement(annotator_list=project_id_list)
-
-
-def get_text_from_inner_id(data, inner_id):
-    for document in data:
-        tmp_inner_id = document.get("inner_id", None)
-        if int(tmp_inner_id) == inner_id:
-            text = document["data"]["text"]
-            return text
-
-def get_text_from_indices(self, indices):
-    with open("./export/survey_annotation_project_20.json", "r") as f:
-            docs = json.load(f)
-    text = [self.get_text_from_inner_id(docs, inner_id) for inner_id in indices]
-    return text
-
-
-@staticmethod
-def create_training_data_from_annotation(save_to_disk=True):
-        df = pd.read_csv("./export/survey_task_1_annotation.csv", index_col=0)
-        if Path("./export/survey_task_1_train.csv").exists() and Path("./export/survey_task_1_test.csv").exists():
-            df_train = pd.read_csv("./export/survey_task_1_train.csv", index_col=False)
-            df_test = pd.read_csv("./export/survey_task_1_test.csv", index_col=False)
-        else:
-            df_train, df_test = train_test_split(df, test_size=0.3)
-            if save_to_disk:
-                df_train.to_csv("./export/survey_task_1_train.csv", index=False)
-                df_test.to_csv("./export/survey_task_1_test.csv", index=False)
-        return df_train, df_test
-
-def train_sequence_classifier(self):
-    model_names = {"distilbert/distilbert-base-uncased": 64,
-                    "ProsusAI/finbert": 64,
-                    "FacebookAI/roberta-base": 64,
-                    "google-bert/bert-base-uncased": 64,
-                    "worldbank/econberta-fs": 8,
-                    "worldbank/econberta": 4,
-                    "MAPAi/InflaBERT": 8,}
-    train = pd.read_csv("./export/task_1_train.csv")
-    test = pd.read_csv("./export/task_1_test.csv")
-    train['label'] = train['label'].replace(self.label2id_map)
-    test['label'] = test['label'].replace(self.label2id_map)
-
-    train = Dataset.from_pandas(train)
-    test = Dataset.from_pandas(test)
-    id2label_map = {value: key for key, value in self.label2id_map.items()}
-
-    def preprocess_function(examples):
-        return tokenizer(examples["text"], truncation=True, padding=True)
-
-    def compute_metrics(eval_pred):
-        logits, labels = eval_pred
-        predictions = np.argmax(logits, axis=-1)
-        f1 = f1_score(labels, predictions, average="weighted")
-        return {'f1_weighted': f1}
-
-    for model_name, batch_size in model_names.items():
-        name = model_name.split('/')[-1]
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForSequenceClassification.from_pretrained(
-            model_name, num_labels=3, id2label=id2label_map, label2id=self.label2id_map)
-        model.resize_token_embeddings(len(tokenizer))
-        data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
-
-        tokenized_train = train.map(preprocess_function, batched=True)
-        tokenized_test = test.map(preprocess_function, batched=True)
-
-        # Training Arguments
-        training_args = TrainingArguments(
-            output_dir=f"./results/survey/{name}",
-            save_strategy="epoch",
-            per_device_train_batch_size=batch_size,
-            num_train_epochs=20,
-            weight_decay=0.01,
-            logging_dir=f"./logs/survey/{name}"
-        )
-            # Setup evaluation
-            #metric = evaluate.load("f1")
-
-            # Trainer
-        trainer = Trainer(
-            model=model,
-            args=training_args,
-            train_dataset=tokenized_train,
-            processing_class=tokenizer,
-            data_collator=data_collator,
-            compute_metrics=compute_metrics,
-        )
-
-        # Train Model
-        trainer.train()
-        model.save_pretrained(f"./logs/survey/{name}/model", from_pt=True)
-
-        # Test model
-        predictions = trainer.predict(tokenized_test)
-
-        # Extract predicted labels
-        predicted_logits = predictions.predictions
-        predicted_labels = np.argmax(predicted_logits, axis=-1)
-
-        # Convert label indices back to label names
-        decoded_predictions = [id2label_map[label] for label in predicted_labels]
-        df_pred = pd.read_csv("./export/task_1_test.csv")
-        df_pred["prediction"] = decoded_predictions
-
-        df_pred.to_csv(f"./logs/{name}/prediction_seed_{self.seed}.csv", index=False)
-        target_names = ['inflation-cause-dominant', 'inflation-related', 'non-inflation-related']
-        report = classification_report(df_pred["label"], df_pred["prediction"], target_names=target_names)
-        print(model_name)
-        print(report)
-        with open(f"./logs/{name}/test_metric_seed_{self.seed}.txt", "w") as file:
-            file.write(report)
-            
-        del model
-        del trainer
-            
-        torch.cuda.empty_cache()
-        torch.cuda.reset_peak_memory_stats()
 
 
 
