@@ -4,7 +4,7 @@ import unicodedata
 
 # Daten laden
 df_task2_annotation = pd.read_pickle(
-    "./export/task_2_annotation_survey.pkl"
+    "./annotation/analysis/survey/export/task_2_annotation_survey.pkl"
 )
 
 focus_feature = "feature_six"
@@ -70,5 +70,5 @@ for item in df_sorted["item_id"].unique():
 
 # Export
 output_cols = ["annotator", "item_id", "text", focus_feature, f"agreed_{focus_feature}"]
-df_sorted[output_cols].to_excel(f"./export/agreed_{focus_feature}.xlsx", index=False, engine='openpyxl')
-df_sorted[output_cols].to_pickle(f"./export/agreed_{focus_feature}.pkl")
+df_sorted[output_cols].to_excel(f"./annotation/analysis/survey/export/agreed_{focus_feature}.xlsx", index=False, engine='openpyxl')
+df_sorted[output_cols].to_pickle(f"./annotation/analysis/survey/export/agreed_{focus_feature}.pkl")
