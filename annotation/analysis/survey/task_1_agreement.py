@@ -8,12 +8,8 @@ from label_studio_sdk.client import LabelStudio
 from sklearn.model_selection import train_test_split
 import krippendorff
 from collections import Counter
-from transformers import AutoModelForSequenceClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorWithPadding
-from datasets import Dataset
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
-import torch
-import random
 from label_studio_sdk import Client
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
