@@ -323,15 +323,15 @@ if __name__ == "__main__":
     for feature_column, configs in configurations.items():
         graph_type = configs["graph_type"]
         for metric_type, metric in configs["graph_distance_metric"].items():
-            if metric == "graph_edit_distance":
-                pass
-            else:
-                alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
-                                    feature_column=feature_column, annotator_list=annotator_list,
-                                    empty_graph_indicator=empty_graph_indicator,
-                                    distance_metric=metric, metric_type=metric_type,
-                                    graph_type=graph_type, forced=forced)
-                alpha_store[feature_column][metric_type] = alpha
+            if feature_column == "feature_four" or feature_column == "feature_six" or feature_column == "feature_eight":
+                if metric_type == "moderate":
+                    continue
+            alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
+                                feature_column=feature_column, annotator_list=annotator_list,
+                                empty_graph_indicator=empty_graph_indicator,
+                                distance_metric=metric, metric_type=metric_type,
+                                graph_type=graph_type, forced=forced)
+            alpha_store[feature_column][metric_type] = alpha
 
     with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}.json", "w") as f:
         json.dump(alpha_store, f)
