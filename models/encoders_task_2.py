@@ -371,7 +371,8 @@ class CoreStoryClassification(Classification):
                 save_strategy="best",
                 learning_rate=2e-5,
                 load_best_model_at_end=True,
-                metric_for_best_model="f1_macro",                per_device_train_batch_size=batch_size,
+                metric_for_best_model="f1_macro",                
+                per_device_train_batch_size=batch_size,
                 num_train_epochs=20,
                 weight_decay=0.01,
                 logging_dir=f"./logs/{name}"
@@ -424,5 +425,5 @@ if __name__ == "__main__":
     split_ratio = [0.7, 0.3]
     seed = 11
     forced = True
-    classifier = DirectionClassification(csv_path, split_ratio, forced, seed)
+    classifier = CoreStoryClassification(csv_path, split_ratio, forced, seed)
     classifier.train()

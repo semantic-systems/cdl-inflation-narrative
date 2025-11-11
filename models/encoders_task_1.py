@@ -117,7 +117,7 @@ class EncoderBasedClassifier(pl.LightningModule):
         self.linear = nn.Linear(self.encoder.config.hidden_size, num_labels)
         self.lr = lr
         self.label_col = label_col
-        self.use_mean_pooling = False  # Use mean pooling instead of CLS token
+        self.use_mean_pooling = True  # Use mean pooling instead of CLS token
         self.loss = L1Loss(reduction='mean') # Mean Absolute Error as baseline loss function
         self.valid_avg_md_metric = AverageMDMetric()
         self.test_avg_md_metric = AverageMDMetric()
@@ -373,8 +373,8 @@ class FinetuningClassifier(EncoderBasedClassifier):
 if __name__ == "__main__":
     torch.set_float32_matmul_precision('medium')
     data_module = CDLDataModule(model_name="allenai/longformer-base-4096", batch_size=4, force=False)
-    model = FinetuningClassifier(model_name="allenai/longformer-base-4096", num_labels=2, lr=2e-5, label_col="soft_label")
-    exp_name = "longformer_pretrained_sscl_finetuned_mae"
+    model = EncoderBasedClassifier(model_name="allenai/longformer-base-4096", num_labels=2, lr=2e-5, label_col="soft_label")
+    exp_name = "longformer_mae"
     checkpoint_callback = ModelCheckpoint(monitor="val_avg_MD", mode="min", save_top_k=1, dirpath="checkpoints/", filename=exp_name, enable_version_counter=False)
     early_stop_callback = EarlyStopping(monitor="val_avg_MD", min_delta=0.001, patience=10, verbose=False, mode="min")
     device = model.device
