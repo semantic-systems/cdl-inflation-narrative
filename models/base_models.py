@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_recall_curve
 from torch import nn
 import torch.nn.functional as F
 from transformers import Trainer
@@ -34,23 +34,42 @@ class MultilabelTrainer(Trainer):
         # forward pass
         outputs = model(**inputs)
         logits = outputs.get("logits")
-        
         # compute custom loss
+        self.label_weights = self.label_weights.to(logits.device)
+
         loss = F.binary_cross_entropy_with_logits(logits, labels.to(torch.float32), pos_weight=self.label_weights)
         return (loss, outputs) if return_outputs else loss
     
 
-def compute_metrics(p):
-    predictions, labels = p
-    f1_micro = f1_score(labels, predictions > 0, average = 'micro', zero_division=0)
-    f1_macro = f1_score(labels, predictions > 0, average = 'macro', zero_division=0)
-    f1_weighted = f1_score(labels, predictions > 0, average = 'weighted', zero_division=0)
+def compute_metrics_setfit(y_pred, y_test):
+    #best_p = best_threshold_from_roc(labels, probs)
+    #print(f"Best threshold: {best_p}")
+    f1_micro = f1_score(y_test, y_pred, average = 'micro', zero_division=0)
+    f1_macro = f1_score(y_test, y_pred, average = 'macro', zero_division=0)
+    f1_weighted = f1_score(y_test, y_pred, average = 'weighted', zero_division=0)
     return {
         'f1_micro': f1_micro,
         'f1_macro': f1_macro,
         'f1_weighted': f1_weighted
     }
 
+def compute_metrics(p):
+    logits, labels = p
+    probs = torch.sigmoid(torch.tensor(logits)).numpy()
+    preds = (probs > 0.2).astype(int)
+    f1_micro = f1_score(labels, preds, average = 'micro', zero_division=0)
+    f1_macro = f1_score(labels, preds, average = 'macro', zero_division=0)
+    f1_weighted = f1_score(labels, preds, average = 'weighted', zero_division=0)
+    return {
+        'f1_micro': f1_micro,
+        'f1_macro': f1_macro,
+        'f1_weighted': f1_weighted
+    }
+
+def best_threshold_from_roc(labels, probs):
+    precision, recall, thresh = precision_recall_curve(labels, probs)
+    f1 = 2 * precision * recall / (precision + recall + 1e-9)
+    return thresh[np.argmax(f1)]
 
 # preprocess dataset with tokenizer
 def tokenize_examples(examples, tokenizer):
