@@ -72,6 +72,7 @@ def get_surface_form_from_id(result_id, results):
     return [result["value"]["text"] for result in results if result.get("id", None) == result_id][0]
 
 
+
 def get_label_from_id(result_id, results):
     return [result["value"]["labels"][0] for result in results if result.get("id", None) == result_id][0]
 
@@ -187,10 +188,13 @@ def to_tuple(obj):
 def replace_empty_relation(triples: list[tuple]):
     new_triples = []
     for triple in triples:
-        if not triple[1]:  # Skip if relation is empty
-            continue
+        # Extract relation: use first element if exists, otherwise empty string
+        if triple[1] and len(triple[1]) > 0:
+            relation = triple[1][0]
         else:
-            new_triples.append((triple[0], triple[1][0], triple[2]))  # Extract first element of relation
+            relation = "()"  # Keep triple with empty relation
+        new_triples.append((triple[0], relation, triple[2]))
+    
     new_triples = set(new_triples) if new_triples else "*"
     return new_triples
 
@@ -199,8 +203,17 @@ def compute_iaa(df, feature_column="feature_one", empty_graph_indicator="*", ann
                 distance_metric=node_overlap_metric, metric_type="lenient", graph_type=nx.Graph,
                 forced=False):
     
-    # Build data structure: each row = one annotator, each column = one item
-    data = [df[df["annotator"] == annotator][feature_column].to_list() for annotator in annotator_list]
+    # Get unique item_ids that have been annotated by ALL annotators
+    item_ids = df.groupby("item_id")["annotator"].nunique()
+    item_ids = item_ids[item_ids == len(annotator_list)].index.tolist()
+    item_ids = sorted(item_ids)
+    
+    # Build data matrix: rows = annotators, columns = items (in same order)
+    data = []
+    for annotator in annotator_list:
+        annotator_data = df[df["annotator"] == annotator].set_index("item_id")[feature_column]
+        row = [annotator_data.get(item_id, empty_graph_indicator) for item_id in item_ids]
+        data.append(row)
 
     save_path = f"./export/{metric_type}_distance_matrix_{feature_column}_{'_'.join([str(annotator) for annotator in annotator_list])}.npy"
 
@@ -209,7 +222,8 @@ def compute_iaa(df, feature_column="feature_one", empty_graph_indicator="*", ann
     else:
         distance_matrix = compute_distance_matrix(df, feature_column=feature_column,
                                                   graph_distance_metric=distance_metric,
-                                                  empty_graph_indicator=empty_graph_indicator, save_path=save_path,
+                                                  empty_graph_indicator=empty_graph_indicator, 
+                                                  save_path=save_path,
                                                   graph_type=graph_type, timeout=60)
 
     alpha = compute_alpha(data, distance_matrix=distance_matrix, missing_items=empty_graph_indicator)
