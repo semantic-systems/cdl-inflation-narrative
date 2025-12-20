@@ -1,0 +1,16 @@
+
+Computing feature_one with lenient metric...
+Traceback (most recent call last):
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/survey/task_2_agreement.py", line 363, in <module>
+    alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/survey/task_2_agreement.py", line 230, in compute_iaa
+    annotator_data = project_data[project_data["annotator"] == annotator]
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/pandas/core/ops/common.py", line 76, in new_method
+    return method(self, other)
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/pandas/core/arraylike.py", line 40, in __eq__
+    return self._cmp_method(other, operator.eq)
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/pandas/core/series.py", line 6119, in _cmp_method
+    res_values = ops.comparison_op(lvalues, rvalues, op)
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/pandas/core/ops/array_ops.py", line 321, in comparison_op
+    raise ValueError(
+ValueError: ('Lengths must match to compare', (2,), (1,))
