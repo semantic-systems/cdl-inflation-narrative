@@ -281,7 +281,7 @@ if __name__ == "__main__":
     if args.project_list is None:
         raise ValueError("You must provide at least one project ID using --project_list or -p.")
     project_id_list = args.project_list
-    annotator_list = [[project_id] for project_id in project_id_list]
+    annotator_list = project_id_list
 
     feature_cols = ["feature_one", "feature_two", "feature_four", "feature_five", "feature_six", "feature_seven"]
     empty_graph_indicator = "*"
