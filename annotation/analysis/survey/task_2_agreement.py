@@ -187,13 +187,11 @@ def to_tuple(obj):
 def replace_empty_relation(triples: list[tuple]):
     new_triples = []
     for triple in triples:
-        # Alle Elemente rekursiv in Tupel umwandeln, falls nötig
-        new_triples.append((
-            to_tuple(triple[0]),
-            to_tuple(triple[1]),
-            to_tuple(triple[2])
-        ))
-    new_triples = set(new_triples)
+        if not triple[1]:  # Skip if relation is empty
+            continue
+        else:
+            new_triples.append((triple[0], triple[1][0], triple[2]))  # Extract first element of relation
+    new_triples = set(new_triples) if new_triples else "*"
     return new_triples
 
 
@@ -223,6 +221,15 @@ def compute_iaa(df, project_id_list,
     print(f"{metric_type} distance metric: {alpha:.4f}")
     return alpha
 
+def jaccard_distance(a, b, graph_type=None, timeout=None):
+    if a == "*" or b == "*":
+        return 1
+    # compute jaccard index given two sets a and b
+    intersection = len(a.intersection(b))
+    union = len(a.union(b))
+    score = intersection / union
+    return 1-score
+
 if __name__ == "__main__":
     setup()
     # Create an ArgumentParser for project_list, and forced args
@@ -239,9 +246,9 @@ if __name__ == "__main__":
     project_id_list = args.project_list
     annotator_list = [[project_id] for project_id in project_id_list]
 
-    feature_cols = ["feature_one", "feature_two", "feature_three", "feature_four", "feature_five", "feature_six", "feature_seven"]
+    feature_cols = ["feature_one", "feature_two", "feature_four", "feature_five", "feature_six", "feature_seven"]
     empty_graph_indicator = "*"
-    alpha_store = {feature: {"lenient": None, "strict": None} for feature in feature_cols}
+    alpha_store = {feature: {"lenient": None, "moderate": None, "strict": None} for feature in feature_cols}
 
     # crawl project
     project_annotations = get_task_2_annotation_json(project_id_list)
@@ -296,20 +303,25 @@ if __name__ == "__main__":
 
     df_task2_annotation.to_csv("./export/task_2_annotation_survey.csv", index=False, encoding = "utf-8")
     df_task2_annotation.to_pickle("./export/task_2_annotation_survey.pkl")
+    
 
     # configurations for IAA computing
-    configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+    configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "moderate": jaccard_distance, "strict": nominal_metric}},
+                      "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "moderate": jaccard_distance, "strict": nominal_metric}},
+                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
+                      "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
+                      "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
+                      "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}}}
 
     forced = args.forced
     for feature_column, configs in configurations.items():
         graph_type = configs["graph_type"]
         for metric_type, metric in configs["graph_distance_metric"].items():
+            # Skip moderate metric for graph features (optional - remove if you want to compute it)
+            if feature_column in ["feature_four", "feature_five", "feature_six", "feature_seven"]:
+                if metric_type == "moderate":
+                    continue
+            
             alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
                                 feature_column=feature_column, annotator_list=annotator_list,
                                 empty_graph_indicator=empty_graph_indicator,
@@ -319,3 +331,24 @@ if __name__ == "__main__":
 
     with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}.json", "w") as f:
         json.dump(alpha_store, f)
+        
+
+import json
+from pathlib import Path
+
+# Load the saved alpha scores
+alpha_file = "./export/alpha-[20]-[21].json" # ./annotation/analysis/survey/export/alpha-[20]-[21
+
+if Path(alpha_file).exists():
+    with open(alpha_file, "r") as f:
+        alpha_scores = json.load(f)
+    
+    print("\n=== Krippendorff's Alpha Agreement Scores ===")
+    for feature, metrics in alpha_scores.items():
+        print(f"\n{feature}:")
+        print(f"  Lenient:  {metrics.get('lenient', 'N/A')}")
+        print(f"  Moderate: {metrics.get('moderate', 'N/A')}")
+        print(f"  Strict:   {metrics.get('strict', 'N/A')}")
+else:
+    print(f"Alpha file not found: {alpha_file}")
+    
