@@ -1,7 +1,8 @@
 import pandas as pd
 import json
 import re
-
+import os
+os.getcwd() 
 
 with open(f'./export/survey_annotation_project_{21}.json', 'r') as f:
     data = json.load(f)

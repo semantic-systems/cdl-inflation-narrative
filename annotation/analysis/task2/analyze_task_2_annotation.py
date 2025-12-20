@@ -9,7 +9,6 @@ import networkx as nx
 from krippendorff_graph import (compute_alpha, graph_edit_distance, graph_overlap_metric,
                                 nominal_metric, node_overlap_metric, compute_distance_matrix)
 
-
 def setup():
     if not Path("./export").exists():
         Path("./export").mkdir()
@@ -193,7 +192,6 @@ def get_feature_eight(row):
         annotated_graph = set(connected_triples) if connected_triples else "*"
     else:
         annotated_graph = "*"
-    print(annotated_graph)
     return annotated_graph
 
 
@@ -241,6 +239,16 @@ def compute_iaa(df, project_id_list,
     return alpha
 
 
+def jaccard_distance(a, b, graph_type=None, timeout=None):
+    if a == "*" or b == "*":
+        return 1
+    # compute jaccard index given two sets a and b
+    intersection = len(a.intersection(b))
+    union = len(a.union(b))
+    score = intersection / union
+    return 1-score
+
+
 if __name__ == "__main__":
     setup()
     # Create an ArgumentParser for project_list, and forced args
@@ -255,9 +263,9 @@ if __name__ == "__main__":
     project_to_annotator_map = {11: 7, 12: 6, 13: 8, 14: 5}
     annotator_list = [project_to_annotator_map[project_id] for project_id in project_id_list]
 
-    feature_cols = ["feature_one", "feature_two", "feature_three", "feature_four", "feature_five", "feature_six", "feature_seven", "feature_eight"]
+    feature_cols = ["feature_one", "feature_two", "feature_three", "feature_four", "feature_six", "feature_eight"]
     empty_graph_indicator = "*"
-    alpha_store = {feature: {"lenient": None, "strict": None} for feature in feature_cols}
+    alpha_store = {feature: {"lenient": None, "moderate": None, "strict": None} for feature in feature_cols}
 
     # crawl project
     project_annotations = get_task_2_annotation_json(project_id_list)
@@ -294,27 +302,30 @@ if __name__ == "__main__":
     df_task2_annotation["feature_two"] = df_task2_annotation.apply(get_feature_two, axis=1)
     df_task2_annotation["feature_three"] = df_task2_annotation.apply(get_feature_three, axis=1)
     df_task2_annotation["feature_four"] = df_task2_annotation.apply(get_feature_four, axis=1)
-    df_task2_annotation["feature_five"] = df_task2_annotation.apply(get_feature_five, event_category=event_category, axis=1)
+    #df_task2_annotation["feature_five"] = df_task2_annotation.apply(get_feature_five, event_category=event_category, axis=1)
     df_task2_annotation["feature_six"] = df_task2_annotation.apply(get_feature_six, axis=1)
-    df_task2_annotation["feature_seven"] = df_task2_annotation.apply(get_feature_seven, event_category=event_category, axis=1)
+    #df_task2_annotation["feature_seven"] = df_task2_annotation.apply(get_feature_seven, event_category=event_category, axis=1)
     df_task2_annotation["feature_eight"] = df_task2_annotation.apply(get_feature_eight, axis=1)
 
     df_task2_annotation.to_csv("./export/task_2_annotation.csv", index=False)
 
     # configurations for IAA computing
-    configurations = {#"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      #"feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      #"feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "strict": nominal_metric}},
-                      #"feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+    configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "moderate": jaccard_distance, "strict": nominal_metric}},
+                      "feature_two": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "moderate": jaccard_distance, "strict": nominal_metric}},
+                      "feature_three": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "moderate": jaccard_distance, "strict": nominal_metric}},
+                      "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
                       #"feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      #"feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
+                      "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
                       #"feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}},
-                      "feature_eight": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "strict": graph_edit_distance}}}
+                      "feature_eight": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}}}
 
     forced = args.forced
     for feature_column, configs in configurations.items():
         graph_type = configs["graph_type"]
         for metric_type, metric in configs["graph_distance_metric"].items():
+            if feature_column == "feature_four" or feature_column == "feature_six" or feature_column == "feature_eight":
+                if metric_type == "moderate":
+                    continue
             alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
                                 feature_column=feature_column, annotator_list=annotator_list,
                                 empty_graph_indicator=empty_graph_indicator,
@@ -324,6 +335,5 @@ if __name__ == "__main__":
 
     with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}.json", "w") as f:
         json.dump(alpha_store, f)
-
 
 
