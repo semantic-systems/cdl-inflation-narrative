@@ -195,23 +195,19 @@ def replace_empty_relation(triples: list[tuple]):
     return new_triples
 
 
-def get_distance_metric_map():
-    distance_metric_map = {"lenient": [node_overlap_metric, graph_overlap_metric],
-                           "strict": [nominal_metric, graph_edit_distance]}
-    return distance_metric_map
-
-
-def compute_iaa(df, project_id_list,
-                feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
+def compute_iaa(df, feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
                 distance_metric=node_overlap_metric, metric_type="lenient", graph_type=nx.Graph,
                 forced=False):
     
+    # Get unique item_ids from the dataframe (not project_ids)
+    item_ids = sorted(df["item_id"].unique())
+    
     data = []
-    for project_id in project_id_list:
-        project_data = df[df["item_id"] == project_id]
+    for item_id in item_ids:
+        item_data = df[df["item_id"] == item_id]
         row = [empty_graph_indicator] * len(annotator_list)
         for annotator_idx, annotator in enumerate(annotator_list):
-            annotator_data = project_data[project_data["annotator"] == annotator]
+            annotator_data = item_data[item_data["annotator"] == annotator]
             if len(annotator_data) > 0:
                 row[annotator_idx] = annotator_data.iloc[0][feature_column]
         data.append(row)
@@ -256,10 +252,10 @@ if __name__ == "__main__":
     
     # crawl project
     project_annotations = get_task_2_annotation_json(project_id_list)
-    inner_id = [project_annotations[i]["inner_id"] for i in range(len(project_annotations))]
-    text = [project_annotations[i]["data"]["text"] for i in range(len(project_annotations))]
-    project_id = [project_annotations[i]["project"] for i in range(len(project_annotations))]
-    results = [project_annotations[i]["annotations"][0]["result"] for i in range(len(project_annotations))]
+    inner_id = [ann["inner_id"] for ann in project_annotations]
+    text = [ann["data"]["text"] for ann in project_annotations]
+    project_id = [ann["project"] for ann in project_annotations]
+    results = [ann["annotations"][0]["result"] for ann in project_annotations]
 
     task2_annotation_dict = {"annotator": [], "item_id": [], "text": [], "triples": [], "triples_surface_form": [],
                              "triples_label_form": []}
@@ -330,7 +326,7 @@ if __name__ == "__main__":
                 if metric_type == "moderate":
                     continue
             
-            alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
+            alpha = compute_iaa(df=df_task2_annotation,
                                 feature_column=feature_column, annotator_list=annotator_list,
                                 empty_graph_indicator=empty_graph_indicator,
                                 distance_metric=metric, metric_type=metric_type,
