@@ -205,8 +205,41 @@ def compute_iaa(df, project_id_list,
                 feature_column="feature_one", empty_graph_indicator="*", annotator_list=None,
                 distance_metric=node_overlap_metric, metric_type="lenient", graph_type=nx.Graph,
                 forced=False):
-    print(feature_column)
-    data = [df[df["annotator"] == annotator_id][feature_column].to_list() for annotator_id in project_id_list]
+    
+    # Filter out rows where feature is empty/missing BEFORE creating distance matrix
+    df_valid = df[df[feature_column].apply(lambda x: x != empty_graph_indicator and x and (not isinstance(x, float) or not pd.isna(x)))].copy()
+    
+    if len(df_valid) < 2:
+        print(f"Warning: Not enough valid annotations for {feature_column} ({metric_type}). Skipping.")
+        return None
+    
+    # Check if we have at least 2 different annotators
+    if df_valid['annotator'].nunique() < 2:
+        print(f"Warning: Less than 2 annotators with valid data for {feature_column} ({metric_type}). Skipping.")
+        return None
+    
+    # Create data matrix from filtered dataframe
+    data = []
+    for project_id in project_id_list:
+        project_data = df_valid[df_valid["item_id"] == project_id]
+        if len(project_data) == 0:
+            continue
+        
+        row = [empty_graph_indicator] * len(annotator_list)
+        for annotator_idx, annotator in enumerate(annotator_list):
+            annotator_data = project_data[project_data["annotator"] == annotator]
+            if len(annotator_data) > 0:
+                row[annotator_idx] = annotator_data.iloc[0][feature_column]
+        
+        # Only add row if at least 2 annotators have valid data
+        valid_count = sum(1 for x in row if x != empty_graph_indicator)
+        if valid_count >= 2:
+            data.append(row)
+    
+    if len(data) < 2:
+        print(f"Warning: Not enough items with multiple annotations for {feature_column} ({metric_type}). Skipping.")
+        return None
+    
     save_path = f"./export/{metric_type}_distance_matrix_{feature_column}_{'_'.join([str(annotator) for annotator in annotator_list])}.npy"
 
     if not forced and Path(save_path).exists():
@@ -217,9 +250,13 @@ def compute_iaa(df, project_id_list,
                                                   empty_graph_indicator=empty_graph_indicator, save_path=save_path,
                                                   graph_type=graph_type, timeout=60)
 
-    alpha = compute_alpha(data, distance_matrix=distance_matrix, missing_items=empty_graph_indicator)
-    print(f"{metric_type} distance metric: {alpha:.4f}")
-    return alpha
+    try:
+        alpha = compute_alpha(data, distance_matrix=distance_matrix, missing_items=empty_graph_indicator)
+        print(f"{feature_column} ({metric_type}): alpha = {alpha}")
+        return alpha
+    except ValueError as e:
+        print(f"Error computing alpha for {feature_column} ({metric_type}): {e}")
+        return None
 
 def jaccard_distance(a, b, graph_type=None, timeout=None):
     if a == "*" or b == "*":
@@ -322,12 +359,17 @@ if __name__ == "__main__":
                 if metric_type == "moderate":
                     continue
             
+            print(f"\nComputing {feature_column} with {metric_type} metric...")
             alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
                                 feature_column=feature_column, annotator_list=annotator_list,
                                 empty_graph_indicator=empty_graph_indicator,
                                 distance_metric=metric, metric_type=metric_type,
                                 graph_type=graph_type, forced=forced)
-            alpha_store[feature_column][metric_type] = alpha
+            
+            if alpha is not None:
+                alpha_store[feature_column][metric_type] = alpha
+            else:
+                alpha_store[feature_column][metric_type] = "N/A"
 
     with open(f"./export/alpha-{'-'.join([str(annotator) for annotator in annotator_list])}.json", "w") as f:
         json.dump(alpha_store, f)
@@ -337,7 +379,7 @@ import json
 from pathlib import Path
 
 # Load the saved alpha scores
-alpha_file = "./export/alpha-[20]-[21].json" # ./annotation/analysis/survey/export/alpha-[20]-[21
+alpha_file = "./annotation/analysis/survey/export/alpha-[20]-[21].json" # ./annotation/analysis/survey/export/alpha-[20]-[21
 
 if Path(alpha_file).exists():
     with open(alpha_file, "r") as f:
@@ -351,4 +393,3 @@ if Path(alpha_file).exists():
         print(f"  Strict:   {metrics.get('strict', 'N/A')}")
 else:
     print(f"Alpha file not found: {alpha_file}")
-    
