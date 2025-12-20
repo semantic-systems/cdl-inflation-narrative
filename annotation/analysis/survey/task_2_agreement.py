@@ -349,3 +349,79 @@ if __name__ == "__main__":
         print(f"\n{feature}:")
         for metric_name, score in metrics.items():
             print(f"  {metric_name}: {score}")
+    
+    # Calculate node-level observed agreement probability between annotator pairs
+    print("\n\n=== Node-Level Agreement Probability ===")
+    print("Probability that if Annotator 1 assigns an event/node, Annotator 2 also assigns it:\n")
+    
+    # Focus on node-based features (feature_one and feature_two)
+    node_features = ["feature_one", "feature_two"]
+    
+    for feature in node_features:
+        print(f"\n{feature}:")
+        
+        # Get items annotated by all annotators
+        item_ids = df_task2_annotation.groupby("item_id")["annotator"].nunique()
+        item_ids = item_ids[item_ids == len(annotator_list)].index.tolist()
+        
+        # Calculate pairwise agreement for each annotator pair
+        from itertools import combinations
+        
+        for ann1, ann2 in combinations(annotator_list, 2):
+            total_nodes_ann1 = 0
+            matched_nodes = 0
+            
+            for item_id in item_ids:
+                # Get annotations for this item from both annotators
+                ann1_data = df_task2_annotation[(df_task2_annotation["item_id"] == item_id) & 
+                                                 (df_task2_annotation["annotator"] == ann1)][feature].values
+                ann2_data = df_task2_annotation[(df_task2_annotation["item_id"] == item_id) & 
+                                                 (df_task2_annotation["annotator"] == ann2)][feature].values
+                
+                if len(ann1_data) > 0 and len(ann2_data) > 0:
+                    ann1_nodes = ann1_data[0]
+                    ann2_nodes = ann2_data[0]
+                    
+                    # Skip if either is empty indicator
+                    if ann1_nodes == "*" or ann2_nodes == "*":
+                        continue
+                    
+                    # Count nodes from ann1 and how many are also in ann2
+                    if isinstance(ann1_nodes, set) and isinstance(ann2_nodes, set):
+                        total_nodes_ann1 += len(ann1_nodes)
+                        matched_nodes += len(ann1_nodes.intersection(ann2_nodes))
+            
+            # Calculate probability
+            if total_nodes_ann1 > 0:
+                probability = matched_nodes / total_nodes_ann1
+                print(f"  Annotator {ann1} -> Annotator {ann2}: {probability:.4f} ({matched_nodes}/{total_nodes_ann1} nodes)")
+            else:
+                print(f"  Annotator {ann1} -> Annotator {ann2}: No valid data")
+        
+        # Calculate average agreement across all pairs
+        all_probabilities = []
+        for ann1, ann2 in combinations(annotator_list, 2):
+            total_nodes_ann1 = 0
+            matched_nodes = 0
+            
+            for item_id in item_ids:
+                ann1_data = df_task2_annotation[(df_task2_annotation["item_id"] == item_id) & 
+                                                 (df_task2_annotation["annotator"] == ann1)][feature].values
+                ann2_data = df_task2_annotation[(df_task2_annotation["item_id"] == item_id) & 
+                                                 (df_task2_annotation["annotator"] == ann2)][feature].values
+                
+                if len(ann1_data) > 0 and len(ann2_data) > 0:
+                    ann1_nodes = ann1_data[0]
+                    ann2_nodes = ann2_data[0]
+                    
+                    if ann1_nodes != "*" and ann2_nodes != "*":
+                        if isinstance(ann1_nodes, set) and isinstance(ann2_nodes, set):
+                            total_nodes_ann1 += len(ann1_nodes)
+                            matched_nodes += len(ann1_nodes.intersection(ann2_nodes))
+            
+            if total_nodes_ann1 > 0:
+                all_probabilities.append(matched_nodes / total_nodes_ann1)
+        
+        if all_probabilities:
+            avg_probability = sum(all_probabilities) / len(all_probabilities)
+            print(f"  Average probability across all pairs: {avg_probability:.4f}")

@@ -68,7 +68,7 @@ for item in df_sorted["item_id"].unique():
     for i in idx:
         df_sorted.loc[i, f"agreed_{focus_feature}"] = agreed_str
 
-
+df_sorted[["annotator", focus_feature, f"agreed_{focus_feature}"]].head(10)
 df_sorted[["annotator", focus_feature, f"agreed_{focus_feature}"]].tail(10)
 # Export
 output_cols = ["annotator", "item_id", "text", focus_feature, f"agreed_{focus_feature}"]
