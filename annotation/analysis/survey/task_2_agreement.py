@@ -253,12 +253,7 @@ if __name__ == "__main__":
     if args.project_list is None:
         raise ValueError("You must provide at least one project ID using --project_list or -p.")
     project_id_list = args.project_list
-    annotator_list = project_id_list
-
-    feature_cols = ["feature_one", "feature_two", "feature_four", "feature_five", "feature_six", "feature_seven"]
-    empty_graph_indicator = "*"
-    alpha_store = {feature: {"lenient": None, "moderate": None, "strict": None} for feature in feature_cols}
-
+    
     # crawl project
     project_annotations = get_task_2_annotation_json(project_id_list)
     inner_id = [project_annotations[i]["inner_id"] for i in range(len(project_annotations))]
