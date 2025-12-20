@@ -199,18 +199,8 @@ def compute_iaa(df, feature_column="feature_one", empty_graph_indicator="*", ann
                 distance_metric=node_overlap_metric, metric_type="lenient", graph_type=nx.Graph,
                 forced=False):
     
-    # Get unique item_ids from the dataframe (not project_ids)
-    item_ids = sorted(df["item_id"].unique())
-    
-    data = []
-    for item_id in item_ids:
-        item_data = df[df["item_id"] == item_id]
-        row = [empty_graph_indicator] * len(annotator_list)
-        for annotator_idx, annotator in enumerate(annotator_list):
-            annotator_data = item_data[item_data["annotator"] == annotator]
-            if len(annotator_data) > 0:
-                row[annotator_idx] = annotator_data.iloc[0][feature_column]
-        data.append(row)
+    # Build data structure: each row = one annotator, each column = one item
+    data = [df[df["annotator"] == annotator][feature_column].to_list() for annotator in annotator_list]
 
     save_path = f"./export/{metric_type}_distance_matrix_{feature_column}_{'_'.join([str(annotator) for annotator in annotator_list])}.npy"
 
