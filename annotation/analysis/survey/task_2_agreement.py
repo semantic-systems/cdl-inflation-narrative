@@ -308,6 +308,11 @@ if __name__ == "__main__":
     df_task2_annotation.to_csv("./export/task_2_annotation_survey.csv", index=False, encoding = "utf-8")
     df_task2_annotation.to_pickle("./export/task_2_annotation_survey.pkl")
     
+    # Initialize variables for IAA computation
+    annotator_list = sorted(df_task2_annotation["annotator"].unique().tolist())
+    feature_cols = ["feature_one", "feature_two", "feature_four", "feature_five", "feature_six", "feature_seven"]
+    empty_graph_indicator = "*"
+    alpha_store = {feature: {"lenient": None, "moderate": None, "strict": None} for feature in feature_cols}
 
     # configurations for IAA computing
     configurations = {"feature_one": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "moderate": jaccard_distance, "strict": nominal_metric}},
