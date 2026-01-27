@@ -51,12 +51,18 @@ print(f"Loaded {df_task2_annotation['item_id'].nunique()} items from agreement d
 span_data_available = {}
 
 for annotator_id in [20, 21]:
-    span_file = f'./export/survey_annotations_project_{annotator_id}_dual.pkl'
+    span_file = f'./annotation/analysis/survey/export/survey_annotations_project_{annotator_id}_dual.pkl'
     
     if os.path.exists(span_file):
         df_spans = pd.read_pickle(span_file)
         span_data_available[annotator_id] = df_spans
         print(f"✅ Loaded span data for Annotator {annotator_id}: {len(df_spans)} items")
+        
+        # Check if old-style Relations column exists for backward compatibility
+        if 'Relations' in df_spans.columns:
+            print(f"   - Old-style Relations: {df_spans['Relations'].notna().sum()} items")
+        if 'Relations_Spans' in df_spans.columns:
+            print(f"   - New-style Relations_Spans: {df_spans['Relations_Spans'].notna().sum()} items")
     else:
         span_data_available[annotator_id] = None
         print(f"⚠️  No span data found for Annotator {annotator_id}")
@@ -92,10 +98,10 @@ def normalize_triple(triple):
 def get_span_data_for_item(item_id, annotator_id):
     """
     Retrieves span data for a specific item and annotator
-    Returns: (Relations_Spans JSON, Entities_Spans JSON) or (None, None)
+    Returns: (Relations_Spans JSON, Entities_Spans JSON, Relations_Old string) or (None, None, None)
     """
     if annotator_id not in span_data_available or span_data_available[annotator_id] is None:
-        return None, None
+        return None, None, None
     
     df_spans = span_data_available[annotator_id]
     
@@ -109,9 +115,13 @@ def get_span_data_for_item(item_id, annotator_id):
     
     if len(match) > 0:
         row = match.iloc[0]
-        return row.get('Relations_Spans'), row.get('Entities_Spans')
+        return (
+            row.get('Relations_Spans'),
+            row.get('Entities_Spans'),
+            row.get('Relations')  # OLD format for backward compatibility
+        )
     
-    return None, None
+    return None, None, None
 
 # ==============================================================
 # DUAL EXTRACTION: Agreement + Spans
@@ -131,6 +141,8 @@ df_sorted[f"annotator_20_{focus_feature}_spans"] = None
 df_sorted[f"annotator_21_{focus_feature}_spans"] = None
 df_sorted[f"annotator_20_entities_spans"] = None
 df_sorted[f"annotator_21_entities_spans"] = None
+df_sorted[f"annotator_20_{focus_feature}_old"] = None  # OLD format from extract_annotations.py
+df_sorted[f"annotator_21_{focus_feature}_old"] = None  # OLD format from extract_annotations.py
 df_sorted[f"agreed_{focus_feature}_spans"] = None  # Agreed span data (if possible)
 
 print("\n" + "="*70)
@@ -143,6 +155,7 @@ for item in df_sorted["item_id"].unique():
     annotator_values = {}  # OLD: String values
     annotator_spans = {}   # NEW: Span data (JSON)
     annotator_entities = {}  # NEW: Entity spans (JSON)
+    annotator_relations_old = {}  # OLD format from extract_annotations.py
 
     for i in idx:
         annotator = df_sorted.loc[i, "annotator"]
@@ -171,10 +184,11 @@ for item in df_sorted["item_id"].unique():
         # ==============================================================
         # NEW METHOD: Get span data from Label Studio
         # ==============================================================
-        relations_spans, entities_spans = get_span_data_for_item(item, annotator)
+        relations_spans, entities_spans, relations_old = get_span_data_for_item(item, annotator)
         
         annotator_spans[annotator] = relations_spans
         annotator_entities[annotator] = entities_spans
+        annotator_relations_old[annotator] = relations_old  # Store OLD format
 
     # ==============================================================
     # Agreement Computation (OLD METHOD)
@@ -241,6 +255,8 @@ for item in df_sorted["item_id"].unique():
     ann_21_spans = annotator_spans.get(21)
     ann_20_entities = annotator_entities.get(20)
     ann_21_entities = annotator_entities.get(21)
+    ann_20_old = annotator_relations_old.get(20)  # OLD format
+    ann_21_old = annotator_relations_old.get(21)  # OLD format
     
     for i in idx:
         # OLD COLUMNS
@@ -259,6 +275,8 @@ for item in df_sorted["item_id"].unique():
         df_sorted.loc[i, f"annotator_21_{focus_feature}_spans"] = ann_21_spans
         df_sorted.loc[i, f"annotator_20_entities_spans"] = ann_20_entities
         df_sorted.loc[i, f"annotator_21_entities_spans"] = ann_21_entities
+        df_sorted.loc[i, f"annotator_20_{focus_feature}_old"] = ann_20_old  # OLD format
+        df_sorted.loc[i, f"annotator_21_{focus_feature}_old"] = ann_21_old  # OLD format
         df_sorted.loc[i, f"agreed_{focus_feature}_spans"] = agreed_spans_json
 
 # ==============================================================
@@ -305,6 +323,8 @@ for item in df_sorted["item_id"].unique():
     export_row[f"annotator_21_{focus_feature}_spans"] = row[f"annotator_21_{focus_feature}_spans"]
     export_row[f"annotator_20_entities_spans"] = row[f"annotator_20_entities_spans"]
     export_row[f"annotator_21_entities_spans"] = row[f"annotator_21_entities_spans"]
+    export_row[f"annotator_20_{focus_feature}_old"] = row[f"annotator_20_{focus_feature}_old"]  # OLD format
+    export_row[f"annotator_21_{focus_feature}_old"] = row[f"annotator_21_{focus_feature}_old"]  # OLD format
     export_row[f"agreed_{focus_feature}_spans"] = row[f"agreed_{focus_feature}_spans"]
     
     export_rows.append(export_row)
@@ -327,6 +347,8 @@ df_sorted[["annotator", "item_id", "text", focus_feature,
            f"resolution_{focus_feature}",
            f"annotator_20_{focus_feature}_spans",
            f"annotator_21_{focus_feature}_spans",
+           f"annotator_20_{focus_feature}_old",
+           f"annotator_21_{focus_feature}_old",
            f"agreed_{focus_feature}_spans"]].to_pickle(output_pkl)
 
 print("\n" + "="*70)
@@ -351,7 +373,7 @@ df_compatible = df_export.copy()
 # Add manual_resolution logic (same as oversampling.py)
 # For now, set to 1 (use agreed) for non-conflicts
 df_compatible[f"manual_resolution_{focus_feature}"] = 1
-df_compatible.loc[df_compatible["agreement_status"] == "CONFLICT", f"manual_resolution_{focus_feature}"] = ""
+df_compatible.loc[df_compatible["agreement_status"] == "CONFLICT", f"manual_resolution_{focus_feature}"] = np.nan
 
 # Create feature_four column
 conditions = [
@@ -431,6 +453,8 @@ print("\nNew columns available:")
 print(f"  - agreed_{focus_feature}_spans: Agreed span data (JSON)")
 print(f"  - annotator_20_{focus_feature}_spans: Annotator 20 spans (JSON)")
 print(f"  - annotator_21_{focus_feature}_spans: Annotator 21 spans (JSON)")
+print(f"  - annotator_20_{focus_feature}_old: Annotator 20 old format (string)")
+print(f"  - annotator_21_{focus_feature}_old: Annotator 21 old format (string)")
 print("  - Annotation_Events_Spans: Events from span data")
 print("  - Annotation_Events_Combined: Union of old + span methods")
 

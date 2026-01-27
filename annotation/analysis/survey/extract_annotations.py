@@ -19,13 +19,13 @@ LABEL_SET = [
     "migration","wechselkurse","ökonomische krise","inflation"
 ]
 
-ANNOTATOR_ID = 21  # Change this for different annotators
+ANNOTATOR_ID = 20  # Change this for different annotators
 
 # ==============================================================
 # Load Label Studio JSON
 # ==============================================================
 
-with open(f'./export/survey_annotation_project_{ANNOTATOR_ID}.json', 'r') as f:
+with open(f'./annotation/analysis/survey/export/survey_annotation_project_{ANNOTATOR_ID}.json', 'r') as f:
     data = json.load(f)
     
 print(f"Loaded {len(data)} items from Label Studio")
@@ -168,7 +168,7 @@ for item in data:
     if relations_str_old:
         relations_str_old = (
             relations_str_old
-            .replace(r'\s*->\s*', '-', regex=False)
+            .replace(' -> ', '-')
             .replace('; ', ',')
             .strip()
         )
@@ -230,8 +230,8 @@ if pd.notna(sample['Relations_Spans']):
 # SAVE OUTPUTS
 # ==============================================================
 
-output_xlsx = f'./export/survey_annotations_project_{ANNOTATOR_ID}_dual.xlsx'
-output_pkl = f'./export/survey_annotations_project_{ANNOTATOR_ID}_dual.pkl'
+output_xlsx = f'./annotation/analysis/survey/export/survey_annotations_project_{ANNOTATOR_ID}_dual.xlsx'
+output_pkl = f'./annotation/analysis/survey/export/survey_annotations_project_{ANNOTATOR_ID}_dual.pkl'
 
 df.to_excel(output_xlsx, index=False)
 df.to_pickle(output_pkl)
@@ -241,163 +241,3 @@ print("SAVED FILES")
 print("="*70)
 print(f"✅ {output_xlsx}")
 print(f"✅ {output_pkl}")
-
-# ==============================================================
-# CREATE COMPATIBLE FORMAT FOR OVERSAMPLING.PY
-# ==============================================================
-
-print("\n" + "="*70)
-print("CREATING COMPATIBLE FORMAT FOR OVERSAMPLING.PY")
-print("="*70)
-
-# Rename columns to match your existing workflow
-df_compatible = df.rename(columns={
-    "Inner_ID": "item_id",
-    "Text": "text",
-    "Relations": "Annotation"  # Use old format for compatibility
-})
-
-# Add span data as separate columns (NEW)
-df_compatible["Annotation_Spans"] = df["Relations_Spans"]
-df_compatible["Entity_Spans"] = df["Entities_Spans"]
-
-# Parse annotations (OLD METHOD - for backward compatibility)
-def parse_annotation(annotation_str):
-    """OLD METHOD: Extract events from string format"""
-    if pd.isna(annotation_str) or annotation_str == "" or annotation_str == "*":
-        return []
-    
-    # Extract all labels from "Label1-Label2,Label3-Label4" format
-    labels = re.findall(r'([a-zäöüß\s\(\)]+?)(?:-|,|$)', annotation_str.lower())
-    labels = [lbl.strip() for lbl in labels if lbl.strip() and lbl.strip() in LABEL_SET]
-    return list(set(labels))
-
-# Parse annotations (NEW METHOD - from spans)
-def parse_annotation_from_spans(spans_json):
-    """NEW METHOD: Extract events from span data"""
-    if pd.isna(spans_json):
-        return []
-    
-    try:
-        relations = json.loads(spans_json)
-        labels = set()
-        for rel in relations:
-            source = rel['source'].lower().strip()
-            target = rel['target'].lower().strip()
-            if source in LABEL_SET:
-                labels.add(source)
-            if target in LABEL_SET:
-                labels.add(target)
-        return list(labels)
-    except:
-        return []
-
-# Apply BOTH methods
-df_compatible["Annotation_Events"] = df_compatible["Annotation"].apply(parse_annotation)  # OLD
-df_compatible["Annotation_Events_Spans"] = df_compatible["Annotation_Spans"].apply(parse_annotation_from_spans)  # NEW
-
-# Merge both methods (union of events found by either method)
-df_compatible["Annotation_Events_Combined"] = df_compatible.apply(
-    lambda row: list(set(row["Annotation_Events"]) | set(row["Annotation_Events_Spans"])),
-    axis=1
-)
-
-# Filter valid samples
-df_compatible = df_compatible[
-    (df_compatible['Annotation'].notna()) & 
-    (df_compatible['Annotation'] != '*')
-].copy()
-
-print(f"Filtered to {len(df_compatible)} samples with valid annotations")
-
-# Print label distribution (OLD vs NEW vs COMBINED)
-from collections import Counter
-
-print("\n" + "="*70)
-print("LABEL DISTRIBUTION COMPARISON")
-print("="*70)
-
-counts_old = Counter([lbl for labels in df_compatible["Annotation_Events"] for lbl in labels])
-counts_new = Counter([lbl for labels in df_compatible["Annotation_Events_Spans"] for lbl in labels])
-counts_combined = Counter([lbl for labels in df_compatible["Annotation_Events_Combined"] for lbl in labels])
-
-comparison_df = pd.DataFrame({
-    "Label": sorted(set(counts_old.keys()) | set(counts_new.keys())),
-    "Old Method": [counts_old.get(lbl, 0) for lbl in sorted(set(counts_old.keys()) | set(counts_new.keys()))],
-    "New Method (Spans)": [counts_new.get(lbl, 0) for lbl in sorted(set(counts_old.keys()) | set(counts_new.keys()))],
-    "Combined": [counts_combined.get(lbl, 0) for lbl in sorted(set(counts_old.keys()) | set(counts_new.keys()))]
-})
-
-print(comparison_df.to_string(index=False))
-
-# Save compatible format
-output_compatible = f'./data/agreed_feature_four_annotator_{ANNOTATOR_ID}_dual.xlsx'
-df_compatible.to_excel(output_compatible, index=False)
-
-print("\n" + "="*70)
-print("✅ SAVED COMPATIBLE FORMAT")
-print("="*70)
-print(f"File: {output_compatible}")
-print(f"Columns: {list(df_compatible.columns)}")
-print("\nThis file can be used as drop-in replacement for:")
-print("  './data/agreed_feature_four_expert.xlsx'")
-print("\nNew columns available:")
-print("  - Annotation_Spans: Full span information (JSON)")
-print("  - Entity_Spans: All entities with positions (JSON)")
-print("  - Annotation_Events_Spans: Events extracted from spans")
-print("  - Annotation_Events_Combined: Union of old + new methods")
-
-# ==============================================================
-# HELPER FUNCTIONS FOR MTB INTEGRATION
-# ==============================================================
-
-print("\n" + "="*70)
-print("EXAMPLE: USING SPANS FOR MTB")
-print("="*70)
-
-def replace_with_markers_from_spans(text, relation_span_dict):
-    """
-    MTB-ready: Replace events using exact span positions
-    No fuzzy matching needed!
-    """
-    source_start = relation_span_dict['source_start']
-    source_end = relation_span_dict['source_end']
-    target_start = relation_span_dict['target_start']
-    target_end = relation_span_dict['target_end']
-    
-    # Sort spans (replace from back to front)
-    spans = sorted(
-        [(source_start, source_end, '[E1]'), (target_start, target_end, '[E2]')],
-        key=lambda x: x[0],
-        reverse=True
-    )
-    
-    result = text
-    for start, end, marker in spans:
-        result = result[:start] + marker + result[end:]
-    
-    return result
-
-# Example usage
-if df_compatible['Annotation_Spans'].notna().any():
-    sample_row = df_compatible[df_compatible['Annotation_Spans'].notna()].iloc[0]
-    
-    print(f"Original Text:\n{sample_row['text'][:200]}...\n")
-    
-    relations = json.loads(sample_row['Annotation_Spans'])
-    
-    if relations:
-        rel = relations[0]
-        marked_text = replace_with_markers_from_spans(sample_row['text'], rel)
-        
-        print("MTB Format (with markers):")
-        print(f"{marked_text[:200]}...\n")
-        
-        print("This can be used directly in:")
-        print("  - Contrastive Pre-Training")
-        print("  - Binary Classification")
-        print("  - No fuzzy matching errors!")
-
-print("\n" + "="*70)
-print("✅ EXTRACTION COMPLETE")
-print("="*70)
