@@ -2,8 +2,12 @@ import os
 import torch
 import functools
 import sys
+import json
+import time
+import re
+from tqdm import tqdm
 sys.path.append('./')
-
+import numpy as np
 from pathlib import Path
 from transformers import AutoModelForSequenceClassification, TrainingArguments, AutoTokenizer, EarlyStoppingCallback
 from models.base_models import MultilabelTrainer, compute_metrics, tokenize_examples, collate_fn, compute_metrics_setfit
@@ -12,26 +16,27 @@ from peft import LoraConfig, prepare_model_for_kbit_training, get_peft_model
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, BitsAndBytesConfig, TrainingArguments, Trainer
 from torch import nn
 from setfit import SetFitModel, SetFitModelCardData, TrainingArguments as SetFitTrainingArguments, Trainer as SetFitTrainer
+from llms_task_2_zero_shot import extract_events, extract_relations, load_prompt, call_academic_api, academic_model_map
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
 
 
 class AdjacentEventClassification(object):
-    def __init__(self, seed=11):
+    def __init__(self, task_name, label_cols, seed=11):
         self.setup_directory()
-        self.task_name = "adjacent_event_classification"
+        self.task_name = task_name
         self.save_path = f"./data/preprocessed/task_2_{self.task_name}.csv"
         self.seed = seed
         feature_col = "text"
-        label_cols = "feature_one"
-        task_name = "adjacent_event_classification"
+        label_cols = label_cols
         input_csv = "data/annotated/task_2_annotation.csv"
-        output_csv = "data/preprocessed/task_2_adjacent_event_classification.csv"
-        data = PrepareData(input_csv, output_csv, feature_col, label_cols, task_name)
-        data.preprocess()
-        print(data.label2id_map)
-        self.dataset, self.label_weights, self.labels, self.labels_in_string = data.stratify_split(test_size=0.2)
+        output_csv = f"data/preprocessed/task_2_{self.task_name}.csv"
+        self.data = PrepareData(input_csv, output_csv, feature_col, label_cols, task_name)
+        self.data.preprocess()
+        print(self.data.label2id_map)
+        self.dataset, self.label_weights, self.labels = self.data.stratify_split(test_size=0.2)
 
     def setup_directory(self):
         for folder in ["./logs/", "./export/"]:
@@ -128,10 +133,15 @@ class AdjacentEventClassification(object):
 
     def train_setfit(self):
         dataset = self.dataset.rename_column("labels", "label")
-        model_names = {"allenai/longformer-base-4096": 4}
-        configs = {"one-vs-rest": [True, False], 
-                   "multi-output": [True, False], 
-                   "classifier-chain": [False]}
+        model_names = {
+                       "Leo1212/longformer-base-4096-sentence-transformers-all-nli-stsb-quora-nq": 4,
+                       "allenai/longformer-base-4096": 4,
+                       "google/embeddinggemma-300m": 4,
+                       "danchev/embeddinggemma-300M-sts-v1": 4,
+                       #"Qwen/Qwen3-Embedding-0.6B": 2
+                       }
+        configs = {"one-vs-rest": [True], 
+                   "multi-output": [True]}
         for model_name, batch_size in model_names.items():
             print(f"Training model: {model_name} with batch size {batch_size}")
             for multi_target_strategy, use_differentiable_head in configs.items():
@@ -142,27 +152,44 @@ class AdjacentEventClassification(object):
                                             model_name, 
                                             multi_target_strategy=multi_target_strategy,
                                             use_differentiable_head=head,
-                                            labels=self.labels_in_string,
+                                            labels=self.data.labels_in_string,
                                             head_params={"out_features": self.labels.shape[1]} 
                                                         if head else {"solver": "liblinear", "max_iter": 300},
                                             model_card_data=SetFitModelCardData(
                                                                     language="en",
-                                                                    license="apache-2.0"))
+                                                                    license="apache-2.0"),
+                                            token=os.getenv("HF_TOKEN"))
+                    if model_name.startswith("Qwen"):
+                        lora_config = LoraConfig(
+                                        r = 16, # the dimension of the low-rank matrices
+                                        lora_alpha = 8, # scaling factor for LoRA activations vs pre-trained weight activations
+                                        target_modules = ['q_proj', 'k_proj', 'v_proj', 'o_proj'],
+                                        lora_dropout = 0.05, # dropout probability of the LoRA layers
+                                        bias = 'none', # wether to train bias weights, set to 'none' for attention layers
+                                        task_type = 'SEQ_CLS'
+                                    )
+                        hf_encoder = model.model_body._modules["0"].auto_model
+                        peft_encoder = get_peft_model(hf_encoder, lora_config)
+                        model.model_body._modules["0"].auto_model = peft_encoder
+
 
                     print("Using", torch.cuda.device_count(), "GPUs!")
 
                     # define training args
                     training_args = SetFitTrainingArguments(
-                        output_dir = f'outputs/setfit/{model_name}/{multi_target_strategy}_differentiable_{head}',
+                        output_dir = f'outputs/setfit/{model_name}/{task_name}/{multi_target_strategy}_differentiable_{head}',
                         batch_size=(batch_size, batch_size),
-                        num_epochs=(2, 40),
-                        end_to_end=False,
-                        body_learning_rate=(2e-6, 5e-6),
-                        head_learning_rate=2e-5,
+                        num_epochs=(4, 10),
+                        end_to_end=True,
+                        body_learning_rate=(2e-5, 5e-6),
+                        head_learning_rate=2e-3,
                         l2_weight=0.01,
                         eval_strategy = 'steps',
                         save_strategy = 'steps',
-                        load_best_model_at_end = True
+                        load_best_model_at_end = True,
+                        metric_for_best_model = 'eval_embedding_loss',
+                        greater_is_better = False,
+                        use_amp = True if model_name.startswith("Qwen") else False,
                     )
 
                     # train
@@ -172,12 +199,12 @@ class AdjacentEventClassification(object):
                         train_dataset = dataset['train'],
                         eval_dataset = dataset['val'],
                         metric = compute_metrics_setfit,
-                        callbacks = [EarlyStoppingCallback(early_stopping_patience=15)], 
+                        callbacks = [EarlyStoppingCallback(early_stopping_patience=50)], 
                     )
 
                     trainer.train()
                     evaluation_metrics = trainer.evaluate()
-                    print(f"---------------{model_name}-multilabel: {multi_target_strategy}--------differentiable: {head}---------------")
+                    print(f"---------------{model_name}-multilabel: {multi_target_strategy}--------differentiable: {head}----task_name:{self.task_name}-----------")
                     print("Evaluation metrics:\n", evaluation_metrics)
                     print(f"--------------------------------------------------------------------")
                     # save model
@@ -188,7 +215,54 @@ class AdjacentEventClassification(object):
                     del model
                     torch.cuda.empty_cache()
 
+    def infer_events(self):
+        # use llms_task_2.py extract_events function to extract events from new texts and evaluate with test set. 
+        # use multi-hot encoding of labels for evaluation
+        for model in academic_model_map.keys():
+            print(f"Inferring events with model: {model}")
+            # load test dataset
+            test_dataset = self.dataset['val']
+            y_true = np.asarray(test_dataset['labels'])
+            y_pred = []
+            call_count = 0
+            for item in tqdm(test_dataset):
+                text = item['text']
+                response = extract_events(
+                    text=text,
+                    model=model,
+                    api_key=os.getenv("ACADEMIC_CLOUD_API_KEY"),
+                )["choices"][0]["message"]["content"]
+                print("Model response:", response)
+                # Parse the JSON string
+                content_json = json.loads(response)
+
+                # process response to get multi-hot encoding
+                predicted_labels = [0] * self.labels.shape[1]
+                for event in content_json.get('events', []):
+                    for idx, label in enumerate(self.data.labels_in_string):
+                        if label in event.get('category', []):
+                            predicted_labels[idx] = 1
+                y_pred.append(predicted_labels)
+                call_count += 1
+
+                # Pause after every 10 calls
+                if call_count % 10 == 0:
+                    print("Rate limit pause: sleeping 5 seconds...")
+                    time.sleep(5)
+            # evaluate with ground truth labels in test dataset  (use compute_metrics_setfit function)
+            y_pred = np.asarray(y_pred)
+            print("y_true:", y_true)
+            print("y_pred:", y_pred)
+            metrics = compute_metrics_setfit(y_pred, y_true)
+            print(f"Evaluation metrics for model {model}:\n", metrics)
+
+
+
+
 if __name__ == "__main__":
-    classifier = AdjacentEventClassification(seed=11)
+    task_name = "adjacent_event_classification_greater_than_2_overlap"
+    label_cols = "feature_one"
+    classifier = AdjacentEventClassification(task_name=task_name, label_cols=label_cols, seed=11)
     #classifier.train_llm()
-    classifier.train_setfit()
+    #classifier.train_setfit()
+    classifier.infer_events()

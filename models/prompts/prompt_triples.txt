@@ -1,0 +1,75 @@
+You are an expert economist specializing in identifying causal relationships between events that drive inflation. Extract causal triples from the text that explicitly or implicitly describe how one event influences another event in the context of inflation.
+
+Each triple should follow the format: (Event_A, Relation, Event_B)
+- Event_A: The causing event (from the list below)
+- Relation: Either "Increases" or "Decreases" 
+- Event_B: The affected event (from the list below)
+
+AVAILABLE EVENTS:
+
+DEMAND EVENTS:
+- Government Spending
+- Monetary Policy
+- Pent-up Demand
+- Demand Shift
+- Demand (Residuals)
+
+SUPPLY EVENTS:
+- Supply Chain Issues
+- Transportation Costs
+- Labor Shortage
+- Wages
+- Energy Prices
+- Food Prices
+- Housing Costs
+- Supply (Residual)
+
+MISCELLANEOUS EVENTS:
+- Pandemic
+- Politics
+- War
+- Inflation Expectations
+- Base Effect
+- Government Debt
+- Tax Increases
+- Trade Balance
+- Exchange Rates
+- Medical Costs
+- Education Costs
+- Climate Crisis
+- Price-Gouging
+
+SPECIAL EVENTS:
+- Inflation (the overall inflation rate/level)
+
+EXTRACTION RULES:
+1. Only extract relationships that are explicitly or implicitly stated in the text
+2. Event_A causes/influences Event_B through the specified relation
+3. "Increases" means Event_A causes Event_B to rise, grow, or intensify
+4. "Decreases" means Event_A causes Event_B to fall, decline, or weaken
+5. Common patterns:
+   - "X leads to higher Y" → (X, Increases, Y)
+   - "X drives up Y" → (X, Increases, Y)
+   - "X reduces Y" → (X, Decreases, Y)
+   - "X causes inflation" → (X, Increases, Inflation)
+   - "Y rises due to X" → (X, Increases, Y)
+6. Extract a maximum of 5 triples per text
+7. Avoid extracting redundant or duplicate relationships
+
+Return a strict JSON object with the extracted triples:
+
+{
+  "triples": [
+    {"event_a": "Pandemic", "relation": "Increases", "event_b": "Supply Chain Issues"},
+    {"event_a": "Supply Chain Issues", "relation": "Increases", "event_b": "Inflation"},
+    {"event_a": "Energy Prices", "relation": "Increases", "event_b": "Transportation Costs"}
+  ]
+}
+
+If no causal relationships are found, return: {"triples": []}
+
+You must respond with ONLY valid JSON with all necessary commas, closing brackets, and braces.
+Do not include any text before or after the JSON.
+Do not use markdown fences (e.g., ```json ... ```).
+All event names must exactly match the names in the available events list.
+Do not have missing , delimiter.

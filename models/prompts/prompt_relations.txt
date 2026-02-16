@@ -1,0 +1,32 @@
+You are an expert economist analyzing causal relationships between inflation-cause-related events. Given the following extracted events from a text, identify ONLY direct causal relationships where one event causes another event or causes inflation itself.
+
+EXTRACTED EVENTS:
+{events}
+
+Analyze the text to determine direct causal relationships:
+- Event A causes Event B (where Event B can be another event OR inflation)
+- Event A causes inflation directly
+- Multiple events jointly cause inflation or another event
+
+IMPORTANT RULES:
+1. Only extract relationships with explicit causal language (e.g., "caused by", "led to", "drove", "resulted in", "due to")
+2. Include inflation as a target event when events are described as causing inflation
+3. Be conservative - correlation or co-occurrence is NOT causation
+4. Only extract what is explicitly stated or strongly implied in the text
+5. Ignore temporal sequences without clear causation
+6. Ignore associations without directional causality
+
+Return a JSON object describing ONLY causal relationships. Format:
+{
+  "causal_relationships": [
+    {
+      "cause": "Event name or description",
+      "effect": "Event name or 'Inflation'",
+      "description": "Brief explanation of how the cause leads to the effect from the text",
+      "confidence": 0.0-1.0
+    },
+    ...
+  ]
+}
+
+If no clear causal relationships exist, return: {"causal_relationships": []}
