@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/survey/task_2_agreement.py", line 329, in <module>
+    feature_column=feature_column, annotator_list=annotator_list,
+NameError: name 'annotator_list' is not defined
