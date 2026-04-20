@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/macro_agg/analyze_task_2_annotation.py", line 105, in <module>
+    project_annotations = get_task_2_annotation_json(project_id_list)
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/macro_agg/analyze_task_2_annotation.py", line 20, in get_task_2_annotation_json
+    raise FileNotFoundError(f"Local export not found: {path}")
+FileNotFoundError: Local export not found: export/annotation_task2_project_11.json
