@@ -224,7 +224,7 @@ if __name__ == "__main__":
         "Commodity": {"Energy Prices", "Food Prices", "Climate", "Trade Balance", "Exchange Rates"},
         "Pandemic": {"Pandemic"},
         "War": {"War"},
-        "Monetary": {"Monetary Policy", "Inflation Expectations", "Exchange Rates", "Base Effect"},
+        "Monetary": {"Monetary Policy", "Inflation Expectations", "Base Effect"},
         "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
         "Taxation": {"Tax Increases"},
         "Market Power": {"Price-Gouging"},
