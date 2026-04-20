@@ -1,0 +1,24 @@
+
+--------------------------------------------
+Request URL: https://annotation.hitec.skynet.coypu.org/api/version
+Response status code: 503
+Response content:
+<html><body><h1>503 Service Unavailable</h1>
+No server is available to handle this request.
+</body></html>
+
+
+
+SDK error traceback:
+Traceback (most recent call last):
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/survey/task_1_agreement.py", line 18, in <module>
+    ls = Client(url="https://annotation.hitec.skynet.coypu.org/", api_key="87023e8a5f12dee9263581bc4543806f80051133")
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/label_studio_sdk/_legacy/client.py", line 111, in __init__
+    self.versions = versions if versions else self.get_versions()
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/label_studio_sdk/_legacy/client.py", line 122, in get_versions
+    self.versions = self.make_request("GET", "/api/version").json()
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/label_studio_sdk/_legacy/client.py", line 448, in make_request
+    response.raise_for_status()
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.10/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 503 Server Error: Service Unavailable for url: https://annotation.hitec.skynet.coypu.org/api/version
