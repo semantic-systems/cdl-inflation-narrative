@@ -219,12 +219,16 @@ if __name__ == "__main__":
     LABEL_GROUPS = {
         "Demand": {"Demand Shift", "Demand (residual)", "Pent-up Demand"},
         "Government": {"Government Debt", "Government Spending"},
-        "Supply": {"Supply Chain Issues", "Supply (residual)", "Transportation Costs", "Labor Shortage", "Pandemic"},
-        "Energy/Food/War": {"Energy Prices", "Food Prices", "War", "Climate", "Trade Balance"},
+        "Supply/Supply Chain": {"Supply Chain Issues", "Supply (residual)", "Transportation Costs"},
+        "Labor": {"Labor Shortage", "Wages"},
+        "Commodity": {"Energy Prices", "Food Prices", "Climate", "Trade Balance", "Exchange Rates"},
+        "Pandemic": {"Pandemic"},
+        "War": {"War"},
         "Monetary": {"Monetary Policy", "Inflation Expectations", "Exchange Rates", "Base Effect"},
-        "Cost of Living": {"Wages", "Housing Costs", "Medical Costs", "Education Costs"},
-        "Political": {"Price-Gouging", "Tax Increases"},
-        "Mismanagement": {"Mismanagement"}
+        "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
+        "Taxation": {"Tax Increases"},
+        "Market Power": {"Price-Gouging"},
+        "Mismanagement": {"Mismanagement"},
     }
 
     def apply_label_groups(label_set):
@@ -293,44 +297,14 @@ if __name__ == "__main__":
         for lbl, count in sorted(co_label_counts.items(), key=lambda x: -x[1]):
             print(f"    {lbl}: {count}x")
 
-    print("\nSubject label frequencies (across all annotators):")
-    label_counts = {}
-    for label_set in df["subject_labels"]:
-        for label in label_set:
-            label_counts[label] = label_counts.get(label, 0) + 1
-    for label, count in sorted(label_counts.items(), key=lambda x: -x[1]):
-        print(f"  {label}: {count}")
-
-    # --- Subject label alpha excluding low-frequency labels (<20 obs) ---
-    LOW_FREQ_LABELS = {label for label, count in label_counts.items() if count < 20}
-    print(f"\nExcluding low-frequency labels (<20 obs): {sorted(LOW_FREQ_LABELS)}")
-
-    df["subject_labels_filtered"] = df["subject_labels"].apply(
-        lambda s: s - LOW_FREQ_LABELS
-    )
-
-    print("\nFiltered subject agreement means:")
-    filtered_alpha_store = {}
-    for subset in subsets:
-        key = "-".join(str(a) for a in subset)
-        subj = compute_label_alpha(df, subset, "subject_labels_filtered")
-        subj_raw = compute_label_raw_agreement(df, subset, "subject_labels_filtered")
-        overall = compute_overall_alpha(df, subset, "subject_labels_filtered")
-        filtered_alpha_store[key] = {
-            "subjects_mean": overall,
-            "subjects_raw_mean": mean_alpha(subj_raw),
-            "subjects": subj,
-            "subjects_raw": subj_raw,
-        }
-        alpha_str = f"{overall:.4f}" if overall is not None else "N/A"
-        raw_str = f"{mean_alpha(subj_raw):.4f}" if mean_alpha(subj_raw) is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  raw={raw_str}")
-
-    print("\nFiltered subject agreement per label (all-4 setting only):")
-    key_all = "-".join(str(a) for a in project_id_list)
-    for label, score in sorted(filtered_alpha_store[key_all]["subjects"].items()):
-        alpha_str = f"{score:.4f}" if score is not None else "N/A"
-        raw = filtered_alpha_store[key_all]["subjects_raw"].get(label)
-        raw_str = f"{raw:.4f}" if raw is not None else "N/A"
-        print(f"  {label}: alpha={alpha_str}  raw={raw_str}")
+    # --- Save annotated data as CSV ---
+    pivot = df.pivot(index="item_id", columns="annotator", values="subject_labels")
+    pivot.columns = [f"annotator_{col}" for col in pivot.columns]
+    text_df = df.drop_duplicates("item_id").set_index("item_id")[["text"]]
+    out_df = text_df.join(pivot).reset_index().rename(columns={"item_id": "doc_id"})
+    for col in [c for c in out_df.columns if c.startswith("annotator_")]:
+        out_df[col] = out_df[col].apply(lambda x: "|".join(sorted(x)) if isinstance(x, set) else "")
+    csv_path = f"./export/annotations-{'-'.join([str(a) for a in project_id_list])}.csv"
+    out_df.to_csv(csv_path, index=False, encoding="utf-8")
+    print(f"\nSaved annotation data to {csv_path}")
 
