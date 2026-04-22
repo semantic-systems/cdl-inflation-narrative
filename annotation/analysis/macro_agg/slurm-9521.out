@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/macro_agg/analyze_task_2_annotation.py", line 6, in <module>
+    import krippendorff
+ModuleNotFoundError: No module named 'krippendorff'

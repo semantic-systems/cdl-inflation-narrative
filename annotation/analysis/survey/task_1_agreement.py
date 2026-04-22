@@ -230,6 +230,33 @@ def compute_agreement(annotator_list=None):
 agreement = compute_agreement(annotator_list=project_id_list)
 
 
+def reload_and_compute_irr(csv_path: str = "./annotation/analysis/survey/export/task_1_annotation_survey.csv", annotator_list=None):
+    """Load a saved annotation CSV and recompute Krippendorff's alpha.
+
+    This mirrors the logic in :func:`compute_agreement` but starts from a
+    previously exported ``task_1_annotation_survey.csv`` file. It is
+    useful when you want to recompute the IRR without pulling data again
+    from Label Studio.
+    """
+    if annotator_list is None:
+        annotator_list = project_id_list
+
+    df = pd.read_csv(csv_path)
+    for annotator_id in annotator_list:
+        df = df[df[f"annotator_{annotator_id}"].notnull()]
+        df = df[df[f"annotator_{annotator_id}"] != "MISSING"]
+
+    annotations = [df[f"annotator_{annotator_id}"].tolist() for annotator_id in annotator_list]
+    annotations_numeric = [[label2id_map.get(label, -1) for label in ann] for ann in annotations]
+    irr = compute_task_1_agreement(annotations_numeric, metric="krippendorff")
+    print(f"reloaded irr: {irr}")
+    return irr
+
+
+project_id_list = [20, 21]
+
+# recompute from the existing CSV
+irr_value = reload_and_compute_irr() 
 
 #if __name__ == "__main__":
 #    seeds = [11, 22, 33, 44]
