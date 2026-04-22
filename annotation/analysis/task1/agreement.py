@@ -23,12 +23,13 @@ os.environ["PYTORCH_USE_CUDA_DSA"] = "1"
 class InflationNarrative(object):
     def __init__(self, pull_from_label_studio=True, seed=11):
         self.seed = seed
-        self.LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
-        self.API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
-        self.client = LabelStudio(base_url=self.LABEL_STUDIO_URL, api_key=self.API_KEY)
+        
         self.project_id_list = [5,7,8,9]
-        self.number_documents = self.client.projects.get(id=5).finished_task_number + int(
-            self.client.projects.get(id=5).queue_total)
+        if pull_from_label_studio:
+            self.LABEL_STUDIO_URL = 'https://annotation.hitec.skynet.coypu.org/'
+            self.API_KEY = '87023e8a5f12dee9263581bc4543806f80051133'
+            self.client = LabelStudio(base_url=self.LABEL_STUDIO_URL, api_key=self.API_KEY)
+            self.number_documents = self.client.projects.get(id=5).finished_task_number + int(self.client.projects.get(id=5).queue_total)
         self.label2id_map = {"inflation-cause-dominant": 0, "inflation-related": 1, "non-inflation-related": 2}
         self.training_data_inner_id = None
         self.training_data_label = None
@@ -59,10 +60,11 @@ class InflationNarrative(object):
         2) create df for storing annotated result, and write to disk
         """
         self.setup_directory()
-        self.check_annotation_status()
-        response = self.export_project_to_json(project_id=1, write_to_dist=True)
-        inner_id = [document["inner_id"] for document in response]
-        text = [document["data"]["text"] for document in response]
+        if pull_from_label_studio:
+            self.check_annotation_status()
+            response = self.export_project_to_json(project_id=1, write_to_dist=True)
+            inner_id = [document["inner_id"] for document in response]
+            text = [document["data"]["text"] for document in response]
         if Path("./export/task_1_annotation.csv").exists():
             df = pd.read_csv("./export/task_1_annotation.csv")
         else:
@@ -295,13 +297,13 @@ class InflationNarrative(object):
 
 
 if __name__ == "__main__":
-    seeds = [11, 22, 33, 44]
+    seeds = [11] # [11, 22, 33, 44]
     for seed in seeds:
         random.seed(seed)
         np.random.seed(seed)
-        inflation_narrative = InflationNarrative(pull_from_label_studio=True, seed=seed)
+        inflation_narrative = InflationNarrative(pull_from_label_studio=False, seed=seed)
         inflation_narrative.compute_agreement([5, 7, 8, 9])
-        inflation_narrative.create_training_data_from_annotation()
-        inflation_narrative.train_sequence_classifier()
+        #inflation_narrative.create_training_data_from_annotation()
+        #inflation_narrative.train_sequence_classifier()
 
 

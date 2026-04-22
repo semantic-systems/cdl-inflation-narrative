@@ -11,6 +11,7 @@ from skmultilearn.model_selection import iterative_train_test_split
 from datasets import Dataset, DatasetDict
 from scipy.stats import entropy
 
+
 # load data given a feature and output designated csv for multi-label classification
 class PrepareData:
     def __init__(self, input_csv_path, output_csv_path, feature_column, label_columns, task_name):
@@ -460,7 +461,7 @@ if __name__ == "__main__":
     label_col = "feature_six"  # Column containing triple annotations
     task_name = "causal_triple_extraction"
     input_csv = "data/annotated/task_2_annotation.csv"
-    output_csv = f"data/preprocessed/task_triples_{task_name}.csv"
+    output_csv = f"data/preprocessed/task_triples_{task_name}_{label_col}.csv"
     
     preparer = PrepareDataTriples(input_csv, output_csv, feature_col, label_col, task_name)
     preparer.preprocess()
