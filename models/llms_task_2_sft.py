@@ -1356,8 +1356,8 @@ class GenerativeTripleExtractor:
 
 # Example usage
 if __name__ == "__main__":
-    task_name = "adjacent_story_classification_greater_than_2_overlap" #"adjacent_event_classification_greater_than_2_overlap"
-    label_col = "feature_six"
+    task_name = "full_story_classification_greater_than_2_overlap" #"adjacent_event_classification_greater_than_2_overlap"
+    label_col = "feature_four"
     
     extractor = GenerativeTripleExtractor(
         task_name=task_name,

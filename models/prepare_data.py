@@ -312,6 +312,7 @@ class PrepareDataTriples:
         col_names = [col for col in df.columns if col.startswith("annotation")]
         
         overlap_triples_list = []
+        all_agreed_triples_list = []
         has_overlap = 0
         no_overlap = 0
         multiple_overlap = 0
@@ -334,26 +335,29 @@ class PrepareDataTriples:
             triple_counter = Counter(all_triples)
             # Get triples that appear at least twice (agreement from 2+ annotators)
             all_agreed_triples = [triple for triple, count in triple_counter.items() if count == 4]
+            all_agreed_triples_list.append(all_agreed_triples)
+            overlap_triples = [triple for triple, count in triple_counter.items() if count >= 2]
             n_all_agreed_triples.append(len(all_agreed_triples))
 
             overlap_counts = [count for triple, count in triple_counter.items()] or [0]
             n_overlap_triples.append(max(overlap_counts))
             triple_entropy.append(entropy(overlap_counts, base=2) if len(overlap_counts) > 1 else 0)
 
-            if not all_agreed_triples:
+            if not overlap_triples:
                 overlap_triples_list.append([])
                 no_overlap += 1
                 winner_type.append("no_winner")
-            elif len(all_agreed_triples) == 1:
-                overlap_triples_list.append(all_agreed_triples)
+            elif len(overlap_triples) == 1:
+                overlap_triples_list.append(overlap_triples)
                 has_overlap += 1
                 winner_type.append("single_winner")
             else:
-                overlap_triples_list.append(all_agreed_triples)
+                overlap_triples_list.append(overlap_triples)
                 multiple_overlap += 1
                 winner_type.append("multiple_winner")
         
-        df["all_agreed_triples"] = overlap_triples_list
+        df["all_agreed_triples"] = all_agreed_triples_list
+        df["overlap_triples"] = overlap_triples_list
         df["n_all_agreed_triples"] = n_all_agreed_triples
         df["winner_type"] = winner_type
         df["n_overlap_triples"] = n_overlap_triples

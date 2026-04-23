@@ -1,3 +1,4 @@
+*.ckpt
 *.csv
 *.out
 .idea/
