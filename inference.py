@@ -1,8 +1,10 @@
 import os
 import json
+import glob
 import re
 import torch
 import pandas as pd
+from tqdm import tqdm
 from pathlib import Path
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from peft import PeftModel
@@ -81,20 +83,19 @@ def classify_narratives(
         one per input text, in the original order.
     """
     model, tokenizer, device = load_narrative_classifier(checkpoint_path)
- 
+    print("narrative identification device: ", device)
+
     # ── Step 1: keyword filter ────────────────────────────────────────────────
     # predictions[i] = final result or None (= needs model inference)
     predictions: list[list[float] | None] = []
     keyword_indices: list[int] = []          # original positions that need inference
     keyword_texts:   list[str]  = []         # corresponding texts
  
-    for i, text in enumerate(texts):
-        if any(kw in text.lower() for kw in ["inflation", "price", "prices"]):
-            predictions.append(None)          # placeholder
-            keyword_indices.append(i)
-            keyword_texts.append(text)
-        else:
-            predictions.append([0.999, 0.001])
+    for i, text in tqdm(enumerate(texts)):
+        predictions.append(None)          # placeholder
+        keyword_indices.append(i)
+        keyword_texts.append(text)
+
  
     # ── Step 2: batched inference for keyword texts ───────────────────────────
     if keyword_texts:
@@ -160,7 +161,7 @@ class TripleExtractorInference:
         self.validate_outputs = bool(self.all_events and self.all_relations)
 
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-
+        print("narrative extraction device: ", self.device)
         self.prompt_template = self._load_prompt_template(prompt_file)
         self.tokenizer = self._load_tokenizer()
         self.model = self._load_model(load_in_4bit)
@@ -267,7 +268,7 @@ class TripleExtractorInference:
         """
         all_results = []
 
-        for start in range(0, len(texts), batch_size):
+        for start in tqdm(range(0, len(texts), batch_size)):
             batch_texts = texts[start : start + batch_size]
             prompts = [self._build_prompt(t) for t in batch_texts]
 
@@ -402,6 +403,7 @@ class TripleExtractorInference:
         ]
 
 
+
 if __name__ == "__main__":
     # download ckpt
     task_1_ckpt_path = "./models/checkpoints/task_1/longformer_mae.ckpt"
@@ -413,32 +415,41 @@ if __name__ == "__main__":
         print(f"Checkpoint 2 not existing, downloading...")
         hf_hub_download(repo_id="tinyfeet/llama_Llama-3.2-1B_dora", local_dir="./models/checkpoints/task_2")
     
-    # test data
-    df = pd.read_csv("./data/annotated/task_1_annotation.csv", index_col=False).iloc[10:30]
-    narratives = df.text.tolist()
+    # sample data
+    # done: 1984 - 1996
+    # ongoing: 1996 - 2000, 2001-2011, 2011-2024
+    years = list(range(2011, 2024))
 
-    # task 1: narrative classification
-    classification_predictions = classify_narratives(texts=narratives, batch_size=4, checkpoint_path=task_1_ckpt_path)
-    inflation_narratives = [text for text, pred in zip(narratives, classification_predictions) if pred[1] > 0.5]
-    df["p_inflation"]     = [pred[1] for pred in classification_predictions]
+    for year in tqdm(years):
+        file = f"./data/DJN/samples/random_samples/{year}.csv"
+        df = pd.read_csv(file, index_col=False)
+        df = df.drop(columns=["Unnamed: 0"], errors="ignore")
+        narratives = df.text.tolist()
 
-    # task 2: narrative extraction
-    vocab_path  = os.path.join(task_2_ckpt_path, "evaluation_results.json")
+        # task 1: narrative classification
+        classification_predictions = classify_narratives(texts=narratives, batch_size=50, checkpoint_path=task_1_ckpt_path)
+        inflation_narratives = [text for text, pred in zip(narratives, classification_predictions) if pred[1] > 0.5]
+        df["p_inflation"]     = [pred[1] for pred in classification_predictions]
 
-    extractor = TripleExtractorInference(
-        checkpoint_path  = task_2_ckpt_path,
-        base_model_name  = "meta-llama/Llama-3.2-1B",
-        prompt_file      = "./models/prompts/prompt_triples.txt",
-        load_in_4bit     = True,
-    )
-    # Batch predictinon
-    batch_results = extractor.predict_batch(inflation_narratives, batch_size=2)
-    # Map triples back to original dataframe rows
-    triples_map = {text: triples for text, triples in zip(inflation_narratives, batch_results)}
-    df["triples"] = df["text"].map(lambda t: json.dumps(triples_map[t]) if t in triples_map else json.dumps([]))
+        # task 2: narrative extraction
+        vocab_path  = os.path.join(task_2_ckpt_path, "evaluation_results.json")
 
-    # Save
-    output_path = "./data/predictions/test_predictions.csv"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    df.to_csv(output_path, index=False)
-    print(f"Saved {len(df)} rows to {output_path}")
+        extractor = TripleExtractorInference(
+            checkpoint_path  = task_2_ckpt_path,
+            base_model_name  = "meta-llama/Llama-3.2-1B",
+            prompt_file      = "./models/prompts/prompt_triples.txt",
+            load_in_4bit     = True,
+        )
+        # Batch predictinon
+        batch_results = extractor.predict_batch(inflation_narratives, batch_size=8)
+        # Map triples back to original dataframe rows
+        triples_map = {text: triples for text, triples in zip(inflation_narratives, batch_results)}
+        df["triples"] = df["text"].map(lambda t: json.dumps(triples_map[t]) if t in triples_map else json.dumps([]))
+        del extractor
+
+        # Save
+        output_path = f"./data/predictions/random_sample/{year}.csv"
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        df.to_csv(output_path, index=False)
+        print(f"Saved {len(df)} rows to {output_path}")
+        print(f"{year}: inflation narratives/ all narratives = {len(inflation_narratives)}/{len(narratives)}")
