@@ -64,6 +64,11 @@ def extract_subject_labels(triples_label_form):
     return {triple[0] for triple in triples_label_form if triple[0] != "Inflation"}
 
 
+def extract_direct_inflation_subject_labels(triples_label_form):
+    """Only subjects from triples where Inflation is the direct object (X -> ... -> Inflation)."""
+    return {triple[0] for triple in triples_label_form if triple[2] == "Inflation"}
+
+
 def extract_object_labels(triples_label_form):
     return {triple[2] for triple in triples_label_form if triple[2] != "Inflation"}
 
@@ -169,6 +174,7 @@ if __name__ == "__main__":
     df = pd.DataFrame(rows)
     df["subject_labels"] = df["triples_label_form"].apply(extract_subject_labels)
     df["object_labels"] = df["triples_label_form"].apply(extract_object_labels)
+    df["direct_inflation_subject_labels"] = df["triples_label_form"].apply(extract_direct_inflation_subject_labels)
 
     def mean_alpha(alpha_dict):
         values = [v for v in alpha_dict.values() if v is not None]
@@ -270,6 +276,56 @@ if __name__ == "__main__":
             raw_str = f"{raw:.4f}" if raw is not None else "N/A"
             print(f"    {label}: alpha={alpha_str}  raw={raw_str}")
 
+    # --- Direct-to-Inflation label agreement ---
+    print("\n--- Agreement: labels directly causing Inflation (X -> Inflation) ---")
+    direct_alpha_store = {}
+    for subset in subsets:
+        key = "-".join(str(a) for a in subset)
+        subj = compute_label_alpha(df, subset, "direct_inflation_subject_labels")
+        subj_raw = compute_label_raw_agreement(df, subset, "direct_inflation_subject_labels")
+        direct_alpha_store[key] = {
+            "subjects": subj,
+            "subjects_mean": compute_overall_alpha(df, subset, "direct_inflation_subject_labels"),
+            "subjects_raw": subj_raw,
+            "subjects_raw_mean": mean_alpha(subj_raw),
+        }
+
+    print("\nDirect-inflation subject agreement means:")
+    for key, val in direct_alpha_store.items():
+        alpha_str = f"{val['subjects_mean']:.4f}" if val["subjects_mean"] is not None else "N/A"
+        raw_str = f"{val['subjects_raw_mean']:.4f}" if val["subjects_raw_mean"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  raw={raw_str}")
+
+    print("\nDirect-inflation subject agreement per label (per setting):")
+    for key, val in direct_alpha_store.items():
+        mean_str = f"{val['subjects_mean']:.4f}" if val["subjects_mean"] is not None else "N/A"
+        raw_mean_str = f"{val['subjects_raw_mean']:.4f}" if val["subjects_raw_mean"] is not None else "N/A"
+        print(f"  {key} (mean alpha: {mean_str}, mean raw: {raw_mean_str}):")
+        for label, score in sorted(val["subjects"].items()):
+            alpha_str = f"{score:.4f}" if score is not None else "N/A"
+            raw = val["subjects_raw"].get(label)
+            raw_str = f"{raw:.4f}" if raw is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}  raw={raw_str}")
+
+    # Also apply merged super-labels to direct-inflation subjects
+    df["direct_inflation_subject_labels_merged"] = df["direct_inflation_subject_labels"].apply(apply_label_groups)
+
+    print("\nDirect-inflation merged super-label agreement means:")
+    direct_merged_alpha_store = {}
+    for subset in subsets:
+        key = "-".join(str(a) for a in subset)
+        subj = compute_label_alpha(df, subset, "direct_inflation_subject_labels_merged")
+        subj_raw = compute_label_raw_agreement(df, subset, "direct_inflation_subject_labels_merged")
+        direct_merged_alpha_store[key] = {
+            "subjects": subj,
+            "subjects_mean": compute_overall_alpha(df, subset, "direct_inflation_subject_labels_merged"),
+            "subjects_raw": subj_raw,
+            "subjects_raw_mean": mean_alpha(subj_raw),
+        }
+        alpha_str = f"{direct_merged_alpha_store[key]['subjects_mean']:.4f}" if direct_merged_alpha_store[key]["subjects_mean"] is not None else "N/A"
+        raw_str = f"{direct_merged_alpha_store[key]['subjects_raw_mean']:.4f}" if direct_merged_alpha_store[key]["subjects_raw_mean"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  raw={raw_str}")
+
     # --- Error analysis: co-occurring labels for focus labels ---
     FOCUS_LABELS = {"Mismanagement", "Demand Shift", "Inflation Expectations", "Transportation Costs", "Government Debt", "Pandemic",
                     "Labor Shortage", "Climate", "Base Effect"}
@@ -304,6 +360,25 @@ if __name__ == "__main__":
     out_df = text_df.join(pivot).reset_index().rename(columns={"item_id": "doc_id"})
     for col in [c for c in out_df.columns if c.startswith("annotator_")]:
         out_df[col] = out_df[col].apply(lambda x: "|".join(sorted(x)) if isinstance(x, set) else "")
+
+    # agreed_labels: labels present in all annotators' subject_labels for each item
+    all_annotators = project_id_list
+    def compute_agreed_labels(item_id, label_col):
+        item_df = df[df["item_id"] == item_id]
+        sets = []
+        for annotator in all_annotators:
+            row = item_df[item_df["annotator"] == annotator]
+            if not row.empty:
+                sets.append(row.iloc[0][label_col])
+        if not sets:
+            return ""
+        agreed = sets[0].intersection(*sets[1:])
+        return "|".join(sorted(agreed))
+
+    item_ids = out_df["doc_id"].tolist()
+    out_df["agreed_labels"] = [compute_agreed_labels(i, "subject_labels") for i in item_ids]
+    out_df["agreed_direct_inflation_labels"] = [compute_agreed_labels(i, "direct_inflation_subject_labels") for i in item_ids]
+
     csv_path = f"./export/annotations-{'-'.join([str(a) for a in project_id_list])}.csv"
     out_df.to_csv(csv_path, index=False, encoding="utf-8")
     print(f"\nSaved annotation data to {csv_path}")
