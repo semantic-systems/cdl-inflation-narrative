@@ -1,4 +1,5 @@
 ﻿import json
+import math
 from collections import Counter
 from itertools import combinations
 from pathlib import Path
@@ -142,6 +143,65 @@ def compute_label_raw_agreement(df, annotator_list, label_side):
     return results
 
 
+def compute_label_ac1(df, annotator_list, label_side):
+    all_item_ids = sorted(df["item_id"].unique())
+    all_labels = sorted({label for labels in df[label_side] for label in labels})
+
+    results = {}
+    m = len(annotator_list)
+    if m < 2:
+        return {label: None for label in all_labels}
+
+    denom_pairs = m * (m - 1) / 2
+
+    for label in all_labels:
+        item_votes = []
+        for item_id in all_item_ids:
+            votes = []
+            for annotator in annotator_list:
+                annotator_df = df[df["annotator"] == annotator].set_index("item_id")
+                if item_id not in annotator_df.index:
+                    votes = []
+                    break
+                label_set = annotator_df.loc[item_id, label_side]
+                votes.append(1 if label in label_set else 0)
+            if len(votes) == m:
+                item_votes.append(votes)
+
+        if not item_votes:
+            results[label] = None
+            continue
+
+        po_terms = []
+        total_ones = 0
+        total_ratings = 0
+        for votes in item_votes:
+            n1 = sum(votes)
+            n0 = m - n1
+            po_item = ((n1 * (n1 - 1) / 2) + (n0 * (n0 - 1) / 2)) / denom_pairs
+            po_terms.append(po_item)
+            total_ones += n1
+            total_ratings += m
+
+        po = float(np.mean(po_terms)) if po_terms else None
+        if po is None:
+            results[label] = None
+            continue
+
+        p1 = total_ones / total_ratings if total_ratings else 0.0
+        p0 = 1.0 - p1
+        pe = (p0 * (1.0 - p0)) + (p1 * (1.0 - p1))
+        denom = 1.0 - pe
+        if denom == 0:
+            results[label] = None
+            continue
+
+        ac1 = (po - pe) / denom
+        results[label] = float(ac1) if np.isfinite(ac1) else None
+
+    return results
+
+
 def compute_overall_alpha(df, annotator_list, label_side):
     all_item_ids = sorted(df["item_id"].unique())
     all_labels = sorted({label for labels in df[label_side] for label in labels})
@@ -169,6 +229,79 @@ def compute_overall_alpha(df, annotator_list, label_side):
         return None
 
 
+def compute_overall_simple_agreement(df, annotator_list, label_side):
+    all_item_ids = sorted(df["item_id"].unique())
+    all_labels = sorted({label for labels in df[label_side] for label in labels})
+
+    agree = 0
+    total = 0
+    for label in all_labels:
+        for item_id in all_item_ids:
+            votes = []
+            for annotator in annotator_list:
+                annotator_df = df[df["annotator"] == annotator].set_index("item_id")
+                if item_id not in annotator_df.index:
+                    votes = []
+                    break
+                label_set = annotator_df.loc[item_id, label_side]
+                votes.append(1 if label in label_set else 0)
+            if len(votes) == len(annotator_list):
+                total += 1
+                if len(set(votes)) == 1:    
+                    agree += 1
+
+    return (agree / total) if total > 0 else None
+
+
+def compute_overall_ac1(df, annotator_list, label_side):
+    all_item_ids = sorted(df["item_id"].unique())
+    all_labels = sorted({label for labels in df[label_side] for label in labels})
+
+    m = len(annotator_list)
+    if m < 2:
+        return None
+
+    denom_pairs = m * (m - 1) / 2
+    po_terms = []
+    total_ones = 0
+    total_ratings = 0
+
+    for label in all_labels:
+        for item_id in all_item_ids:
+            votes = []
+            for annotator in annotator_list:
+                annotator_df = df[df["annotator"] == annotator].set_index("item_id")
+                if item_id not in annotator_df.index:
+                    votes = []
+                    break
+                label_set = annotator_df.loc[item_id, label_side]
+                votes.append(1 if label in label_set else 0)
+
+            if len(votes) != m:
+                continue
+
+            n1 = sum(votes)
+            n0 = m - n1
+            po_item = ((n1 * (n1 - 1) / 2) + (n0 * (n0 - 1) / 2)) / denom_pairs
+            po_terms.append(po_item)
+            total_ones += n1
+            total_ratings += m
+
+    if not po_terms or total_ratings == 0:
+        return None
+
+    po = float(np.mean(po_terms))
+    p1 = total_ones / total_ratings
+    p0 = 1.0 - p1
+    pe = (p0 * (1.0 - p0)) + (p1 * (1.0 - p1))
+    denom = 1.0 - pe
+    if denom == 0:
+        return None
+
+    ac1 = (po - pe) / denom
+    return float(ac1) if np.isfinite(ac1) else None
+
+
 if __name__ == "__main__":
     setup()
 
@@ -186,69 +319,32 @@ if __name__ == "__main__":
         })
 
     df = pd.DataFrame(rows)
-    df["subject_labels"] = df["triples_label_form"].apply(extract_subject_labels)
-    df["object_labels"] = df["triples_label_form"].apply(extract_object_labels)
-    df["inflation_linked_subject_labels"] = df["triples_label_form"].apply(extract_inflation_linked_subject_labels)
 
-    def mean_alpha(alpha_dict):
-        values = [v for v in alpha_dict.values() if v is not None]
-        return float(np.mean(values)) if values else None
+    EXCLUDED_LABELS = {"Base Effect", "Pandemic", "Trade Balance", "Mismanagement"}
+
+    def exclude_labels(label_set):
+        return {label for label in label_set if label not in EXCLUDED_LABELS}
+
+    df["subject_labels"] = df["triples_label_form"].apply(extract_subject_labels).apply(exclude_labels)
+    df["object_labels"] = df["triples_label_form"].apply(extract_object_labels).apply(exclude_labels)
+    df["inflation_linked_subject_labels"] = df["triples_label_form"].apply(extract_inflation_linked_subject_labels).apply(exclude_labels)
 
     subsets = [project_id_list] + [list(c) for c in combinations(project_id_list, len(project_id_list) - 1)]
 
-    alpha_store = {}
-    for subset in subsets:
-        key = "-".join(str(a) for a in subset)
-        subj = compute_label_alpha(df, subset, "subject_labels")
-        obj = compute_label_alpha(df, subset, "object_labels")
-        subj_raw = compute_label_raw_agreement(df, subset, "subject_labels")
-        obj_raw = compute_label_raw_agreement(df, subset, "object_labels")
-        alpha_store[key] = {
-            "subjects": subj,
-            "subjects_mean": compute_overall_alpha(df, subset, "subject_labels"),
-            "subjects_raw": subj_raw,
-            "subjects_raw_mean": mean_alpha(subj_raw),
-            "objects": obj,
-            "objects_mean": compute_overall_alpha(df, subset, "object_labels"),
-            "objects_raw": obj_raw,
-            "objects_raw_mean": mean_alpha(obj_raw),
-        }
-
-    out_path = f"./export/alpha-{'-'.join([str(a) for a in project_id_list])}.json"
-    with open(out_path, "w") as f:
-        json.dump(alpha_store, f)
-    print(f"Saved alpha scores to {out_path}")
-
-    print("\nSubject agreement means:")
-    for key, val in alpha_store.items():
-        alpha_str = f"{val['subjects_mean']:.4f}" if val["subjects_mean"] is not None else "N/A"
-        raw_str = f"{val['subjects_raw_mean']:.4f}" if val["subjects_raw_mean"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  raw={raw_str}")
-
-    print("\nAll subject labels by alpha (per setting):")
-    for key, val in alpha_store.items():
-        scored = [(label, score) for label, score in val["subjects"].items() if score is not None]
-        bottom5 = sorted(scored, key=lambda x: x[1])
-        print(f"  {key}:")
-        for label, score in bottom5:
-            raw = val["subjects_raw"].get(label)
-            raw_str = f"{raw:.4f}" if raw is not None else "N/A"
-            print(f"    {label}: alpha={score:.4f}  raw={raw_str}")
-
     # --- Merged super-label analysis ---
     LABEL_GROUPS = {
-        "Demand": {"Demand Shift", "Demand (residual)", "Pent-up Demand"},
-        "Government": {"Government Debt", "Government Spending"},
-        "Supply/Supply Chain": {"Supply Chain Issues", "Supply (residual)", "Transportation Costs"},
+        "Demand": {"Demand (residual)", "Pent-up Demand", "Demand Shift"},
+        "Government": {"Government Spending", "Government Debt"},
+        "Supply Chain": {"Supply Chain Issues", "Supply (residual)", "Transportation Costs"},
         "Labor": {"Labor Shortage", "Wages"},
-        "Commodity": {"Energy Prices", "Food Prices", "Climate", "Trade Balance", "Exchange Rates"},
-        "Pandemic": {"Pandemic"},
+        "Climate": {"Climate"},
         "War": {"War"},
-        "Monetary": {"Monetary Policy", "Inflation Expectations", "Base Effect"},
+        "Monetary": {"Monetary Policy", "Inflation Expectations", "Exchange Rates"},
         "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
+        "Energy": {"Energy Prices"},
+        "Food": {"Food Prices"},
         "Taxation": {"Tax Increases"},
-        "Market Power": {"Price-Gouging"},
-        "Mismanagement": {"Mismanagement"},
+        "Market Power": {"Price-Gouging"}
     }
 
     def apply_label_groups(label_set):
@@ -260,66 +356,53 @@ if __name__ == "__main__":
 
     df["subject_labels_merged"] = df["subject_labels"].apply(apply_label_groups)
 
+    # Simple frequency count of each merged super-label across all annotations
+    merged_label_counts = Counter(
+        label
+        for label_set in df["subject_labels_merged"]
+        for label in label_set
+    )
+    print("\nMerged super-label counts:")
+    for label, count in sorted(merged_label_counts.items(), key=lambda x: (-x[1], x[0])):
+        print(f"  {label}: {count}")
+
     print("\n--- Merged super-label subject alpha ---")
     merged_alpha_store = {}
     for subset in subsets:
         key = "-".join(str(a) for a in subset)
-        subj = compute_label_alpha(df, subset, "subject_labels_merged")
-        subj_raw = compute_label_raw_agreement(df, subset, "subject_labels_merged")
+        subj_alpha = compute_label_alpha(df, subset, "subject_labels_merged")
+        subj_ac1 = compute_label_ac1(df, subset, "subject_labels_merged")
+        subj_simple = compute_label_raw_agreement(df, subset, "subject_labels_merged")
         merged_alpha_store[key] = {
-            "subjects": subj,
-            "subjects_mean": compute_overall_alpha(df, subset, "subject_labels_merged"),
-            "subjects_raw": subj_raw,
-            "subjects_raw_mean": mean_alpha(subj_raw),
+            "subjects_alpha": subj_alpha,
+            "subjects_ac1": subj_ac1,
+            "subjects_simple_agreement": subj_simple,
+            "subjects_overall_alpha": compute_overall_alpha(df, subset, "subject_labels_merged"),
+            "subjects_overall_ac1": compute_overall_ac1(df, subset, "subject_labels_merged"),
+            "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "subject_labels_merged"),
         }
 
-    print("\nMerged subject agreement means:")
+    print("\nMerged subject overall agreement (across all categories):")
     for key, val in merged_alpha_store.items():
-        alpha_str = f"{val['subjects_mean']:.4f}" if val["subjects_mean"] is not None else "N/A"
-        raw_str = f"{val['subjects_raw_mean']:.4f}" if val["subjects_raw_mean"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  raw={raw_str}")
+        alpha_str = f"{val['subjects_overall_alpha']:.4f}" if val["subjects_overall_alpha"] is not None else "N/A"
+        ac1_str = f"{val['subjects_overall_ac1']:.4f}" if val["subjects_overall_ac1"] is not None else "N/A"
+        simple_str = f"{val['subjects_overall_simple_agreement']:.4f}" if val["subjects_overall_simple_agreement"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
 
     print("\nMerged subject agreement per label (per setting):")
     for key, val in merged_alpha_store.items():
-        mean_str = f"{val['subjects_mean']:.4f}" if val["subjects_mean"] is not None else "N/A"
-        raw_mean_str = f"{val['subjects_raw_mean']:.4f}" if val["subjects_raw_mean"] is not None else "N/A"
-        print(f"  {key} (mean alpha: {mean_str}, mean raw: {raw_mean_str}):")
-        for label, score in sorted(val["subjects"].items()):
-            alpha_str = f"{score:.4f}" if score is not None else "N/A"
-            raw = val["subjects_raw"].get(label)
-            raw_str = f"{raw:.4f}" if raw is not None else "N/A"
-            print(f"    {label}: alpha={alpha_str}  raw={raw_str}")
-
-    # --- Inflation-linked label agreement ---
-    print("\n--- Agreement: labels with a directed path to Inflation in the DAG ---")
-    inflation_linked_alpha_store = {}
-    for subset in subsets:
-        key = "-".join(str(a) for a in subset)
-        subj = compute_label_alpha(df, subset, "inflation_linked_subject_labels")
-        subj_raw = compute_label_raw_agreement(df, subset, "inflation_linked_subject_labels")
-        inflation_linked_alpha_store[key] = {
-            "subjects": subj,
-            "subjects_mean": compute_overall_alpha(df, subset, "inflation_linked_subject_labels"),
-            "subjects_raw": subj_raw,
-            "subjects_raw_mean": mean_alpha(subj_raw),
-        }
-
-    print("\nInflation-linked subject agreement means:")
-    for key, val in inflation_linked_alpha_store.items():
-        alpha_str = f"{val['subjects_mean']:.4f}" if val["subjects_mean"] is not None else "N/A"
-        raw_str = f"{val['subjects_raw_mean']:.4f}" if val["subjects_raw_mean"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  raw={raw_str}")
-
-    print("\nInflation-linked subject agreement per label (per setting):")
-    for key, val in inflation_linked_alpha_store.items():
-        mean_str = f"{val['subjects_mean']:.4f}" if val["subjects_mean"] is not None else "N/A"
-        raw_mean_str = f"{val['subjects_raw_mean']:.4f}" if val["subjects_raw_mean"] is not None else "N/A"
-        print(f"  {key} (mean alpha: {mean_str}, mean raw: {raw_mean_str}):")
-        for label, score in sorted(val["subjects"].items()):
-            alpha_str = f"{score:.4f}" if score is not None else "N/A"
-            raw = val["subjects_raw"].get(label)
-            raw_str = f"{raw:.4f}" if raw is not None else "N/A"
-            print(f"    {label}: alpha={alpha_str}  raw={raw_str}")
+        overall_str = f"{val['subjects_overall_alpha']:.4f}" if val["subjects_overall_alpha"] is not None else "N/A"
+        overall_ac1_str = f"{val['subjects_overall_ac1']:.4f}" if val["subjects_overall_ac1"] is not None else "N/A"
+        overall_simple_str = f"{val['subjects_overall_simple_agreement']:.4f}" if val["subjects_overall_simple_agreement"] is not None else "N/A"
+        print(f"  {key} (overall alpha: {overall_str}, ac1: {overall_ac1_str}, simple: {overall_simple_str}):")
+        for label in sorted(val["subjects_alpha"].keys()):
+            alpha_score = val["subjects_alpha"].get(label)
+            ac1_score = val["subjects_ac1"].get(label)
+            simple_score = val["subjects_simple_agreement"].get(label)
+            alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
+            ac1_str = f"{ac1_score:.4f}" if ac1_score is not None else "N/A"
+            simple_str = f"{simple_score:.4f}" if simple_score is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
 
     # Also apply merged super-labels to inflation-linked subjects
     df["inflation_linked_subject_labels_merged"] = df["inflation_linked_subject_labels"].apply(apply_label_groups)
@@ -328,44 +411,102 @@ if __name__ == "__main__":
     inflation_linked_merged_alpha_store = {}
     for subset in subsets:
         key = "-".join(str(a) for a in subset)
-        subj = compute_label_alpha(df, subset, "inflation_linked_subject_labels_merged")
-        subj_raw = compute_label_raw_agreement(df, subset, "inflation_linked_subject_labels_merged")
+        subj_alpha = compute_label_alpha(df, subset, "inflation_linked_subject_labels_merged")
+        subj_ac1 = compute_label_ac1(df, subset, "inflation_linked_subject_labels_merged")
+        subj_simple = compute_label_raw_agreement(df, subset, "inflation_linked_subject_labels_merged")
         inflation_linked_merged_alpha_store[key] = {
-            "subjects": subj,
-            "subjects_mean": compute_overall_alpha(df, subset, "inflation_linked_subject_labels_merged"),
-            "subjects_raw": subj_raw,
-            "subjects_raw_mean": mean_alpha(subj_raw),
+            "subjects_alpha": subj_alpha,
+            "subjects_ac1": subj_ac1,
+            "subjects_simple_agreement": subj_simple,
+            "subjects_overall_alpha": compute_overall_alpha(df, subset, "inflation_linked_subject_labels_merged"),
+            "subjects_overall_ac1": compute_overall_ac1(df, subset, "inflation_linked_subject_labels_merged"),
+            "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "inflation_linked_subject_labels_merged"),
         }
-        alpha_str = f"{inflation_linked_merged_alpha_store[key]['subjects_mean']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_mean"] is not None else "N/A"
-        raw_str = f"{inflation_linked_merged_alpha_store[key]['subjects_raw_mean']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_raw_mean"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  raw={raw_str}")
+        alpha_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_alpha']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_alpha"] is not None else "N/A"
+        ac1_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_ac1']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_ac1"] is not None else "N/A"
+        simple_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
 
-    # --- Error analysis: co-occurring labels for focus labels ---
-    FOCUS_LABELS = {"Mismanagement", "Demand Shift", "Inflation Expectations", "Transportation Costs", "Government Debt", "Pandemic",
-                    "Labor Shortage", "Climate", "Base Effect"}
+    out_path = f"./export/alpha-super-{'-'.join([str(a) for a in project_id_list])}.json"
+    with open(out_path, "w") as f:
+        json.dump(
+            {
+                "subject_labels_merged": merged_alpha_store,
+                "inflation_linked_subject_labels_merged": inflation_linked_merged_alpha_store,
+            },
+            f,
+        )
+    print(f"Saved super-category alpha scores to {out_path}")
 
+    # --- Co-occurrence of all super-categories for annotators 11/12/13 ---
+    target_annotators = {11, 12, 13}
+    df_target = df[df["annotator"].isin(target_annotators)].copy()
 
-    print("\n--- Error analysis: what do others label when one annotator says X? ---")
-    all_item_ids = sorted(df["item_id"].unique())
+    single_counts = Counter()
+    pair_counts = Counter()
 
-    for focus_label in sorted(FOCUS_LABELS):
-        co_label_counts = {}
-        for item_id in all_item_ids:
-            item_df = df[df["item_id"] == item_id]
-            users_with_label = item_df[item_df["subject_labels"].apply(lambda s: focus_label in s)]["annotator"].tolist()
-            users_without_label = item_df[item_df["subject_labels"].apply(lambda s: focus_label not in s)]["annotator"].tolist()
+    for label_set in df_target["subject_labels_merged"]:
+        labels = sorted(label_set)
+        for label in labels:
+            single_counts[label] += 1
+        for left, right in combinations(labels, 2):
+            pair_counts[(left, right)] += 1
 
-            if not users_with_label or not users_without_label:
-                continue  # skip if all agree or nobody has it
+    print("\n--- Super-category co-occurrence (annotators 11, 12, 13) ---")
+    print("Single-label counts:")
+    for label, count in sorted(single_counts.items(), key=lambda x: (-x[1], x[0])):
+        print(f"  {label}: {count}")
 
-            for annotator in users_without_label:
-                other_labels = item_df[item_df["annotator"] == annotator]["subject_labels"].values[0]
-                for lbl in other_labels:
-                    co_label_counts[lbl] = co_label_counts.get(lbl, 0) + 1
+    print("\nPair co-occurrence counts:")
+    for (left, right), count in sorted(pair_counts.items(), key=lambda x: (-x[1], x[0][0], x[0][1])):
+        print(f"  {left} + {right}: {count}")
 
-        print(f"\n  When one annotator says '{focus_label}', others instead used:")
-        for lbl, count in sorted(co_label_counts.items(), key=lambda x: -x[1]):
-            print(f"    {lbl}: {count}x")
+    # --- Association strength for raw labels (annotators 11/12/13) ---
+    raw_single_counts = Counter()
+    raw_pair_counts = Counter()
+    df_target_raw = df[df["annotator"].isin(target_annotators)].copy()
+    num_observations = len(df_target_raw)
+
+    for label_set in df_target_raw["subject_labels"]:
+        labels = sorted(label_set)
+        for label in labels:
+            raw_single_counts[label] += 1
+        for left, right in combinations(labels, 2):
+            raw_pair_counts[(left, right)] += 1
+
+    association_rows = []
+    for (left, right), pair_count in raw_pair_counts.items():
+        p_ab = pair_count / num_observations
+        p_a = raw_single_counts[left] / num_observations
+        p_b = raw_single_counts[right] / num_observations
+        if p_a == 0 or p_b == 0:
+            continue
+        lift = p_ab / (p_a * p_b)
+        pmi = math.log2(lift) if lift > 0 else None
+        association_rows.append({
+            "label_left": left,
+            "label_right": right,
+            "pair_count": pair_count,
+            "lift": lift,
+            "pmi": pmi,
+        })
+
+    assoc_df = pd.DataFrame(association_rows)
+    if assoc_df.empty:
+        print("\nNo raw-label association pairs found for annotators 11, 12, 13.")
+    else:
+        assoc_df = assoc_df.sort_values(["lift", "pair_count"], ascending=[False, False])
+        print("\n--- Raw-label association strength (annotators 11, 12, 13) ---")
+        print("Top pairs by lift (with PMI):")
+        for _, row in assoc_df.head(30).iterrows():
+            print(
+                f"  {row['label_left']} + {row['label_right']}: "
+                f"count={int(row['pair_count'])}, lift={row['lift']:.3f}, pmi={row['pmi']:.3f}"
+            )
+
+        assoc_out_path = "./export/raw-label-association-11-12-13.csv"
+        assoc_df.to_csv(assoc_out_path, index=False, encoding="utf-8")
+        print(f"Saved raw-label association strengths to {assoc_out_path}")
 
     # --- Save annotated data as CSV ---
     pivot = df.pivot(index="item_id", columns="annotator", values="subject_labels")
