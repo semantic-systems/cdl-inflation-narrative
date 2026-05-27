@@ -1,5 +1,4 @@
 ﻿import json
-import math
 from collections import Counter
 from itertools import combinations
 from pathlib import Path
@@ -476,6 +475,108 @@ def compute_overall_ac1(df, annotator_list, label_side):
     return float(ac1) if np.isfinite(ac1) else None
 
 
+def _alpha_score(alpha_value):
+    return float("-inf") if alpha_value is None else float(alpha_value)
+
+
+def build_label_to_group_map(label_groups):
+    label_to_group = {}
+    for group_name, members in label_groups.items():
+        for member in members:
+            label_to_group[member] = group_name
+    return label_to_group
+
+
+def apply_group_map(label_set, label_to_group):
+    return {label_to_group.get(label, label) for label in label_set}
+
+
+def evaluate_grouping_overall_alpha(df, annotator_list, source_col, label_groups):
+    eval_df = df[["annotator", "item_id", source_col]].copy()
+    label_to_group = build_label_to_group_map(label_groups)
+    eval_df["_grouped_labels"] = eval_df[source_col].apply(lambda s: apply_group_map(s, label_to_group))
+    return compute_overall_alpha(eval_df, annotator_list, "_grouped_labels")
+
+
+def build_label_family_map(theoretical_merge_families):
+    label_family_map = {}
+    for family_name, members in theoretical_merge_families.items():
+        for member in members:
+            label_family_map[member] = family_name
+    return label_family_map
+
+
+def is_theoretically_allowed_merge(left_members, right_members, label_family_map):
+    merged_labels = set(left_members) | set(right_members)
+    families = {label_family_map.get(label, f"__singleton__{label}") for label in merged_labels}
+    return len(families) == 1
+
+
+def greedy_search_optimal_merge_for_alpha(df, annotator_list, source_col, min_gain=1e-12, label_family_map=None):
+    labels = sorted({label for label_set in df[source_col] for label in label_set})
+    if not labels:
+        return {}, None, []
+
+    current_groups = {label: {label} for label in labels}
+    current_alpha = evaluate_grouping_overall_alpha(df, annotator_list, source_col, current_groups)
+    history = [{
+        "step": 0,
+        "merge": None,
+        "alpha": current_alpha,
+        "n_groups": len(current_groups),
+    }]
+
+    step = 0
+    while len(current_groups) > 1:
+        group_names = sorted(current_groups.keys())
+        best_candidate = None
+        best_candidate_alpha = None
+
+        for i, left_group in enumerate(group_names[:-1]):
+            for right_group in group_names[i + 1:]:
+                if label_family_map is not None and not is_theoretically_allowed_merge(
+                    current_groups[left_group],
+                    current_groups[right_group],
+                    label_family_map,
+                ):
+                    continue
+
+                trial_groups = {k: set(v) for k, v in current_groups.items() if k not in {left_group, right_group}}
+                merged_members = set(current_groups[left_group]) | set(current_groups[right_group])
+                merged_name = " + ".join(sorted(merged_members))
+                trial_groups[merged_name] = merged_members
+
+                trial_alpha = evaluate_grouping_overall_alpha(df, annotator_list, source_col, trial_groups)
+
+                if best_candidate is None or _alpha_score(trial_alpha) > _alpha_score(best_candidate_alpha):
+                    best_candidate = (left_group, right_group, merged_name, trial_groups)
+                    best_candidate_alpha = trial_alpha
+
+        if best_candidate is None:
+            break
+
+        alpha_gain = _alpha_score(best_candidate_alpha) - _alpha_score(current_alpha)
+        if alpha_gain <= min_gain:
+            break
+
+        _, _, merged_name, merged_groups = best_candidate
+        current_groups = merged_groups
+        current_alpha = best_candidate_alpha
+        step += 1
+        history.append({
+            "step": step,
+            "merge": merged_name,
+            "alpha": current_alpha,
+            "n_groups": len(current_groups),
+        })
+
+    ordered_groups = {
+        group_name: sorted(members)
+        for group_name, members in sorted(current_groups.items(), key=lambda x: x[0])
+    }
+    return ordered_groups, current_alpha, history
+
+
 if __name__ == "__main__":
     setup()
 
@@ -586,48 +687,70 @@ if __name__ == "__main__":
     for label, count in sorted(merged_label_counts.items(), key=lambda x: (-x[1], x[0])):
         print(f"  {label}: {count}")
 
-    print("\n--- Merged super-label subject alpha ---")
-    merged_alpha_store = {}
-    for subset in subsets:
-        key = "-".join(str(a) for a in subset)
-        subj_alpha = compute_label_alpha(df, subset, "subject_labels_merged")
-        subj_ac1 = compute_label_ac1(df, subset, "subject_labels_merged")
-        subj_simple = compute_label_raw_agreement(df, subset, "subject_labels_merged")
-        merged_alpha_store[key] = {
-            "subjects_alpha": subj_alpha,
-            "subjects_ac1": subj_ac1,
-            "subjects_simple_agreement": subj_simple,
-            "subjects_overall_alpha": compute_overall_alpha(df, subset, "subject_labels_merged"),
-            "subjects_overall_ac1": compute_overall_ac1(df, subset, "subject_labels_merged"),
-            "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "subject_labels_merged"),
-        }
+    THEORETICAL_MERGE_FAMILIES = {
+        "Demand": {"Demand Shift", "Demand (residual)", "Pent-up Demand"},
+        "Government": {"Government Debt", "Government Spending"},
+        "Supply Chain": {"Supply Chain Issues", "Supply (residual)", "Transportation Costs"},
+        "Labor": {"Labor Shortage", "Wages"},
+        "Monetary": {"Monetary Policy", "Inflation Expectations", "Exchange Rates"},
+        "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
+        "Energy": {"Energy Prices"},
+        "Food": {"Food Prices"},
+        "Climate": {"Climate"},
+        "War": {"War"},
+        "Taxation": {"Tax Increases"},
+        "Market Power": {"Price-Gouging"},
+    }
+    theoretical_label_family_map = build_label_family_map(THEORETICAL_MERGE_FAMILIES)
 
-    print("\nMerged subject overall agreement (across all categories):")
-    for key, val in merged_alpha_store.items():
-        alpha_str = f"{val['subjects_overall_alpha']:.4f}" if val["subjects_overall_alpha"] is not None else "N/A"
-        ac1_str = f"{val['subjects_overall_ac1']:.4f}" if val["subjects_overall_ac1"] is not None else "N/A"
-        simple_str = f"{val['subjects_overall_simple_agreement']:.4f}" if val["subjects_overall_simple_agreement"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+    print("\n--- Greedy search for alpha-maximizing inflation-linked merges ---")
+    optimal_groups, optimal_alpha, optimal_history = greedy_search_optimal_merge_for_alpha(
+        df,
+        project_id_list,
+        "inflation_linked_subject_labels",
+        label_family_map=theoretical_label_family_map,
+    )
+    if optimal_alpha is None:
+        print("No inflation-linked labels available for optimization.")
+    else:
+        alpha_str = f"{optimal_alpha:.4f}"
+        print(f"Best overall alpha found (full annotator set): {alpha_str}")
+        print("Optimal groups:")
+        for group_name, members in optimal_groups.items():
+            print(f"  {group_name}: {', '.join(members)}")
+        print("Search path:")
+        for row in optimal_history:
+            row_alpha = row["alpha"]
+            row_alpha_str = f"{row_alpha:.4f}" if row_alpha is not None else "N/A"
+            merge_name = row["merge"] if row["merge"] is not None else "(initial singleton labels)"
+            print(
+                f"  step={row['step']}, groups={row['n_groups']}, alpha={row_alpha_str}, merge={merge_name}"
+            )
 
-    print("\nMerged subject agreement per label (per setting):")
-    for key, val in merged_alpha_store.items():
-        overall_str = f"{val['subjects_overall_alpha']:.4f}" if val["subjects_overall_alpha"] is not None else "N/A"
-        overall_ac1_str = f"{val['subjects_overall_ac1']:.4f}" if val["subjects_overall_ac1"] is not None else "N/A"
-        overall_simple_str = f"{val['subjects_overall_simple_agreement']:.4f}" if val["subjects_overall_simple_agreement"] is not None else "N/A"
-        print(f"  {key} (overall alpha: {overall_str}, ac1: {overall_ac1_str}, simple: {overall_simple_str}):")
-        for label in sorted(val["subjects_alpha"].keys()):
-            alpha_score = val["subjects_alpha"].get(label)
-            ac1_score = val["subjects_ac1"].get(label)
-            simple_score = val["subjects_simple_agreement"].get(label)
-            alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
-            ac1_str = f"{ac1_score:.4f}" if ac1_score is not None else "N/A"
-            simple_str = f"{simple_score:.4f}" if simple_score is not None else "N/A"
-            print(f"    {label}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+    optimal_groups_out_path = f"./export/optimal-merge-inflation-linked-{'-'.join([str(a) for a in project_id_list])}.json"
+    theoretical_merge_families_json = {
+        family_name: sorted(members)
+        for family_name, members in THEORETICAL_MERGE_FAMILIES.items()
+    }
 
-    # Also apply merged super-labels to inflation-linked subjects
+    with open(optimal_groups_out_path, "w") as f:
+        json.dump(
+            {
+                "source_col": "inflation_linked_subject_labels",
+                "annotators": project_id_list,
+                "best_overall_alpha": optimal_alpha,
+                "optimal_groups": optimal_groups,
+                "search_history": optimal_history,
+                "theoretical_merge_families": theoretical_merge_families_json,
+            },
+            f,
+        )
+    print(f"Saved optimal merge search results to {optimal_groups_out_path}")
+
+    # IAA is computed only for inflation-linked merged super-labels.
     df["inflation_linked_subject_labels_merged"] = df["inflation_linked_subject_labels"].apply(apply_label_groups)
 
-    print("\nInflation-linked merged super-label agreement means:")
+    print("\n--- Inflation-linked merged super-label IAA ---")
     inflation_linked_merged_alpha_store = {}
     for subset in subsets:
         key = "-".join(str(a) for a in subset)
@@ -647,51 +770,33 @@ if __name__ == "__main__":
         simple_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
         print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
 
-    # --- One-hop analysis: direct parents of Inflation only ---
-    df["direct_inflation_parents_merged"] = df["direct_inflation_parents"].apply(apply_label_groups)
-
-    print("\n--- ONE-HOP: Direct parents of Inflation (merged super-labels) ---")
-    direct_parents_merged_alpha_store = {}
-    for subset in subsets:
-        key = "-".join(str(a) for a in subset)
-        subj_alpha = compute_label_alpha(df, subset, "direct_inflation_parents_merged")
-        subj_ac1 = compute_label_ac1(df, subset, "direct_inflation_parents_merged")
-        subj_simple = compute_label_raw_agreement(df, subset, "direct_inflation_parents_merged")
-        direct_parents_merged_alpha_store[key] = {
-            "subjects_alpha": subj_alpha,
-            "subjects_ac1": subj_ac1,
-            "subjects_simple_agreement": subj_simple,
-            "subjects_overall_alpha": compute_overall_alpha(df, subset, "direct_inflation_parents_merged"),
-            "subjects_overall_ac1": compute_overall_ac1(df, subset, "direct_inflation_parents_merged"),
-            "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "direct_inflation_parents_merged"),
-        }
-        alpha_str = f"{direct_parents_merged_alpha_store[key]['subjects_overall_alpha']:.4f}" if direct_parents_merged_alpha_store[key]["subjects_overall_alpha"] is not None else "N/A"
-        ac1_str = f"{direct_parents_merged_alpha_store[key]['subjects_overall_ac1']:.4f}" if direct_parents_merged_alpha_store[key]["subjects_overall_ac1"] is not None else "N/A"
-        simple_str = f"{direct_parents_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if direct_parents_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
-
-    print("\nDirect parents agreement per label (per setting):")
-    for key, val in direct_parents_merged_alpha_store.items():
-        overall_str = f"{val['subjects_overall_alpha']:.4f}" if val["subjects_overall_alpha"] is not None else "N/A"
-        overall_ac1_str = f"{val['subjects_overall_ac1']:.4f}" if val["subjects_overall_ac1"] is not None else "N/A"
-        overall_simple_str = f"{val['subjects_overall_simple_agreement']:.4f}" if val["subjects_overall_simple_agreement"] is not None else "N/A"
-        print(f"  {key} (overall alpha: {overall_str}, ac1: {overall_ac1_str}, simple: {overall_simple_str}):")
+    print("\nInflation-linked merged super-label single-label alpha:")
+    for key, val in inflation_linked_merged_alpha_store.items():
+        print(f"  {key}:")
         for label in sorted(val["subjects_alpha"].keys()):
             alpha_score = val["subjects_alpha"].get(label)
-            ac1_score = val["subjects_ac1"].get(label)
-            simple_score = val["subjects_simple_agreement"].get(label)
             alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
-            ac1_str = f"{ac1_score:.4f}" if ac1_score is not None else "N/A"
-            simple_str = f"{simple_score:.4f}" if simple_score is not None else "N/A"
-            print(f"    {label}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+            print(f"    {label}: alpha={alpha_str}")
+
+    inflation_linked_single_alpha_store = {}
+    for subset in subsets:
+        key = "-".join(str(a) for a in subset)
+        inflation_linked_single_alpha_store[key] = compute_label_alpha(df, subset, "inflation_linked_subject_labels")
+
+    print("\nInflation-linked single-label alpha (non-merged labels):")
+    for key, label_alpha in inflation_linked_single_alpha_store.items():
+        print(f"  {key}:")
+        for label in sorted(label_alpha.keys()):
+            alpha_score = label_alpha.get(label)
+            alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}")
 
     out_path = f"./export/alpha-super-{'-'.join([str(a) for a in project_id_list])}.json"
     with open(out_path, "w") as f:
         json.dump(
             {
-                "subject_labels_merged": merged_alpha_store,
                 "inflation_linked_subject_labels_merged": inflation_linked_merged_alpha_store,
-                "direct_inflation_parents_merged": direct_parents_merged_alpha_store,
+                "inflation_linked_subject_labels_single_alpha": inflation_linked_single_alpha_store,
             },
             f,
         )
@@ -719,53 +824,6 @@ if __name__ == "__main__":
     print("\nPair co-occurrence counts:")
     for (left, right), count in sorted(pair_counts.items(), key=lambda x: (-x[1], x[0][0], x[0][1])):
         print(f"  {left} + {right}: {count}")
-
-    # --- Association strength for raw labels (annotators 11/12/13) ---
-    raw_single_counts = Counter()
-    raw_pair_counts = Counter()
-    df_target_raw = df[df["annotator"].isin(target_annotators)].copy()
-    num_observations = len(df_target_raw)
-
-    for label_set in df_target_raw["subject_labels"]:
-        labels = sorted(label_set)
-        for label in labels:
-            raw_single_counts[label] += 1
-        for left, right in combinations(labels, 2):
-            raw_pair_counts[(left, right)] += 1
-
-    association_rows = []
-    for (left, right), pair_count in raw_pair_counts.items():
-        p_ab = pair_count / num_observations
-        p_a = raw_single_counts[left] / num_observations
-        p_b = raw_single_counts[right] / num_observations
-        if p_a == 0 or p_b == 0:
-            continue
-        lift = p_ab / (p_a * p_b)
-        pmi = math.log2(lift) if lift > 0 else None
-        association_rows.append({
-            "label_left": left,
-            "label_right": right,
-            "pair_count": pair_count,
-            "lift": lift,
-            "pmi": pmi,
-        })
-
-    assoc_df = pd.DataFrame(association_rows)
-    if assoc_df.empty:
-        print("\nNo raw-label association pairs found for annotators 11, 12, 13.")
-    else:
-        assoc_df = assoc_df.sort_values(["lift", "pair_count"], ascending=[False, False])
-        print("\n--- Raw-label association strength (annotators 11, 12, 13) ---")
-        print("Top pairs by lift (with PMI):")
-        for _, row in assoc_df.head(30).iterrows():
-            print(
-                f"  {row['label_left']} + {row['label_right']}: "
-                f"count={int(row['pair_count'])}, lift={row['lift']:.3f}, pmi={row['pmi']:.3f}"
-            )
-
-        assoc_out_path = "./export/raw-label-association-11-12-13.csv"
-        assoc_df.to_csv(assoc_out_path, index=False, encoding="utf-8")
-        print(f"Saved raw-label association strengths to {assoc_out_path}")
 
     # --- Save annotated data as CSV ---
     pivot = df.pivot(index="item_id", columns="annotator", values="subject_labels")
