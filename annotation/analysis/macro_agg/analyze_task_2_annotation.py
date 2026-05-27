@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import krippendorff
+from scipy.stats import chi2
 
 
 
@@ -49,6 +50,13 @@ def get_triples(results):
         relation_surface_form = triple[1]
         triples_surface_form.append((subj_surface_form, relation_surface_form, obj_surface_form))
 
+    triples_label_form_raw = []
+    for triple in triples:
+        subj_label_form_raw = get_label_from_id(triple[0], results)
+        obj_label_form_raw = get_label_from_id(triple[2], results)
+        relation_label_form = triple[1]
+        triples_label_form_raw.append((subj_label_form_raw, relation_label_form, obj_label_form_raw))
+
     triples_label_form = []
     event_remapping = {"Russia-Ukraine War": "War", "Energy Crisis": "Energy Prices", "House Costs": "Housing Costs"}
     for triple in triples:
@@ -59,7 +67,7 @@ def get_triples(results):
         relation_label_form = triple[1]
         triples_label_form.append((subj_label_form, relation_label_form, obj_label_form))
 
-    return triples, triples_surface_form, triples_label_form
+    return triples, triples_surface_form, triples_label_form_raw, triples_label_form
 
 
 def extract_subject_labels(triples_label_form):
@@ -84,8 +92,174 @@ def extract_inflation_linked_subject_labels(triples_label_form):
     return inflation_linked_labels
 
 
+def extract_direct_inflation_parents(triples_label_form):
+    """Only direct parents of Inflation (one-hop), non-Inflation labels."""
+    parent_map = {}
+    for subject_label, _, object_label in triples_label_form:
+        parent_map.setdefault(object_label, set()).add(subject_label)
+    
+    return parent_map.get("Inflation", set())
+
+
 def extract_object_labels(triples_label_form):
     return {triple[2] for triple in triples_label_form if triple[2] != "Inflation"}
+
+
+def print_label_distribution_descriptives(df, label_col, title):
+    print(f"\n{title}")
+
+    pooled_counts = Counter(
+        label
+        for label_set in df[label_col]
+        for label in label_set
+    )
+    pooled_total = sum(pooled_counts.values())
+
+    print(f"All annotators pooled (total label assignments: {pooled_total}):")
+    for label, count in sorted(pooled_counts.items(), key=lambda x: (-x[1], x[0])):
+        share = (count / pooled_total * 100.0) if pooled_total else 0.0
+        print(f"  {label}: count={count}, share={share:.2f}%")
+
+    print("By annotator:")
+    for annotator in sorted(df["annotator"].unique()):
+        annotator_df = df[df["annotator"] == annotator]
+        annotator_counts = Counter(
+            label
+            for label_set in annotator_df[label_col]
+            for label in label_set
+        )
+        annotator_total = sum(annotator_counts.values())
+        print(f"  Annotator {annotator} (total label assignments: {annotator_total}):")
+        for label, count in sorted(annotator_counts.items(), key=lambda x: (-x[1], x[0])):
+            share = (count / annotator_total * 100.0) if annotator_total else 0.0
+            print(f"    {label}: count={count}, share={share:.2f}%")
+
+
+def chi_square_independence_stat(contingency):
+    grand_total = contingency.sum()
+    if grand_total == 0:
+        return 0.0
+
+    row_sums = contingency.sum(axis=1, keepdims=True)
+    col_sums = contingency.sum(axis=0, keepdims=True)
+    expected = row_sums @ col_sums / grand_total
+    valid = expected > 0
+
+    chi2 = np.sum(((contingency - expected) ** 2)[valid] / expected[valid])
+    return float(chi2)
+
+
+def chi_square_sf(chi2_stat, dof):
+    """Asymptotic right-tail p-value for chi-square using SciPy."""
+    if dof <= 0:
+        return None
+    if chi2_stat <= 0:
+        return 1.0
+    return float(chi2.sf(chi2_stat, dof))
+
+
+def build_assignment_contingency(df, label_col):
+    label_assignments = []
+    for _, row in df.iterrows():
+        annotator = row["annotator"]
+        for label in row[label_col]:
+            label_assignments.append((annotator, label))
+
+    if not label_assignments:
+        return [], [], np.zeros((0, 0), dtype=float)
+
+    annotators = sorted({annotator for annotator, _ in label_assignments})
+    labels = sorted({label for _, label in label_assignments})
+    annotator_to_idx = {annotator: i for i, annotator in enumerate(annotators)}
+    label_to_idx = {label: j for j, label in enumerate(labels)}
+
+    annotator_idx = np.array([annotator_to_idx[a] for a, _ in label_assignments], dtype=int)
+    label_idx = np.array([label_to_idx[l] for _, l in label_assignments], dtype=int)
+
+    contingency = np.zeros((len(annotators), len(labels)), dtype=float)
+    np.add.at(contingency, (annotator_idx, label_idx), 1)
+    return annotators, labels, contingency
+
+
+def print_label_assignment_contingency_table(df, label_col, title, out_csv_path=None):
+    annotators, labels, contingency = build_assignment_contingency(df, label_col)
+
+    print(f"\n{title}")
+    if contingency.size == 0:
+        print("No label assignments available for contingency table.")
+        return
+
+    contingency_df = pd.DataFrame(contingency.astype(int), index=annotators, columns=labels)
+    contingency_df["row_total"] = contingency_df.sum(axis=1)
+    col_totals = contingency_df.sum(axis=0)
+    contingency_df.loc["col_total"] = col_totals
+    print(contingency_df.to_string())
+
+    if out_csv_path is not None:
+        contingency_df.to_csv(out_csv_path, encoding="utf-8")
+        print(f"Saved contingency table to {out_csv_path}")
+
+
+def print_label_distribution_difference_test(df, label_col, title):
+    annotators, labels, contingency = build_assignment_contingency(df, label_col)
+    if contingency.size == 0:
+        print(f"\n{title}")
+        print("No label assignments available for distribution-difference test.")
+        return
+
+    n_annotators = len(annotators)
+    n_labels = len(labels)
+
+    chi2_obs = chi_square_independence_stat(contingency)
+    dof = (n_annotators - 1) * (n_labels - 1)
+    p_value = chi_square_sf(chi2_obs, dof)
+
+    print(f"\n{title}")
+    print(
+        "Asymptotic chi-square test (H0: annotator and label are independent): "
+        f"chi2={chi2_obs:.4f}, dof={dof}, p={p_value:.6f}"
+    )
+    if p_value < 0.05:
+        print("Result: reject H0 at 5% level; label distributions differ across annotators.")
+    else:
+        print("Result: fail to reject H0 at 5% level; no strong evidence of distribution differences.")
+
+
+def print_single_label_chi_tests(df, label_col, title):
+    print(f"\n{title}")
+
+    annotators = sorted(df["annotator"].unique())
+    labels = sorted({label for label_set in df[label_col] for label in label_set})
+    if not labels:
+        print("No labels available for single-label chi-square tests.")
+        return
+
+    annotator_to_idx = {annotator: i for i, annotator in enumerate(annotators)}
+    obs_annotator_idx = np.array([annotator_to_idx[a] for a in df["annotator"]], dtype=int)
+    n_annotators = len(annotators)
+    dof = n_annotators - 1
+
+    results = []
+    for label in labels:
+        present = np.array([1 if label in label_set else 0 for label_set in df[label_col]], dtype=float)
+        totals = np.bincount(obs_annotator_idx, minlength=n_annotators).astype(float)
+        present_counts = np.bincount(obs_annotator_idx, weights=present, minlength=n_annotators)
+        absent_counts = totals - present_counts
+        contingency = np.column_stack([present_counts, absent_counts])
+
+        chi2_obs = chi_square_independence_stat(contingency)
+        p_value = chi_square_sf(chi2_obs, dof)
+        results.append((label, chi2_obs, p_value, present_counts, totals))
+
+    for label, chi2_obs, p_value, present_counts, totals in sorted(results, key=lambda x: (x[2], -x[1], x[0])):
+        shares = [
+            f"{annotator}:{int(present_counts[i])}/{int(totals[i])} ({(present_counts[i] / totals[i] * 100.0) if totals[i] else 0.0:.1f}%)"
+            for i, annotator in enumerate(annotators)
+        ]
+        print(
+            f"  {label}: chi2={chi2_obs:.4f}, dof={dof}, p={p_value:.6f}, "
+            f"per-annotator={'; '.join(shares)}"
+        )
 
 
 def compute_label_alpha(df, annotator_list, label_side):
@@ -310,11 +484,12 @@ if __name__ == "__main__":
 
     rows = []
     for ann in project_annotations:
-        _, _, triples_label_form = get_triples(ann["annotations"][0]["result"])
+        _, _, triples_label_form_raw, triples_label_form = get_triples(ann["annotations"][0]["result"])
         rows.append({
             "annotator": ann["project"],
             "item_id": ann["data"]["inner_id"],
             "text": ann["data"]["text"],
+            "triples_label_form_raw": triples_label_form_raw,
             "triples_label_form": triples_label_form,
         })
 
@@ -325,16 +500,61 @@ if __name__ == "__main__":
     def exclude_labels(label_set):
         return {label for label in label_set if label not in EXCLUDED_LABELS}
 
+    df["subject_labels_raw"] = df["triples_label_form_raw"].apply(extract_subject_labels).apply(exclude_labels)
     df["subject_labels"] = df["triples_label_form"].apply(extract_subject_labels).apply(exclude_labels)
     df["object_labels"] = df["triples_label_form"].apply(extract_object_labels).apply(exclude_labels)
     df["inflation_linked_subject_labels"] = df["triples_label_form"].apply(extract_inflation_linked_subject_labels).apply(exclude_labels)
+    df["direct_inflation_parents"] = df["triples_label_form"].apply(extract_direct_inflation_parents).apply(exclude_labels)
+
+    print_label_distribution_descriptives(
+        df,
+        "subject_labels_raw",
+        "Raw subject-label distribution across all four annotators",
+    )
+    print_label_assignment_contingency_table(
+        df,
+        "subject_labels_raw",
+        "Raw subject-label contingency table (annotator x label)",
+        f"./export/contingency-raw-{'-'.join([str(a) for a in project_id_list])}.csv",
+    )
+    print_label_distribution_difference_test(
+        df,
+        "subject_labels_raw",
+        "Raw subject-label distribution difference test across annotators",
+    )
+    print_single_label_chi_tests(
+        df,
+        "subject_labels_raw",
+        "Raw single-label chi-square tests across annotators",
+    )
+    print_label_distribution_descriptives(
+        df,
+        "subject_labels",
+        "Mapped subject-label distribution across all four annotators",
+    )
+    print_label_assignment_contingency_table(
+        df,
+        "subject_labels",
+        "Mapped subject-label contingency table (annotator x label)",
+        f"./export/contingency-mapped-{'-'.join([str(a) for a in project_id_list])}.csv",
+    )
+    print_label_distribution_difference_test(
+        df,
+        "subject_labels",
+        "Mapped subject-label distribution difference test across annotators",
+    )
+    print_single_label_chi_tests(
+        df,
+        "subject_labels",
+        "Mapped single-label chi-square tests across annotators",
+    )
 
     subsets = [project_id_list] + [list(c) for c in combinations(project_id_list, len(project_id_list) - 1)]
 
     # --- Merged super-label analysis ---
     LABEL_GROUPS = {
         "Demand": {"Demand (residual)", "Pent-up Demand", "Demand Shift"},
-        "Government": {"Government Spending", "Government Debt"},
+        "Government": { "Government Debt", "Government Spending"},
         "Supply Chain": {"Supply Chain Issues", "Supply (residual)", "Transportation Costs"},
         "Labor": {"Labor Shortage", "Wages"},
         "Climate": {"Climate"},
@@ -427,12 +647,51 @@ if __name__ == "__main__":
         simple_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
         print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
 
+    # --- One-hop analysis: direct parents of Inflation only ---
+    df["direct_inflation_parents_merged"] = df["direct_inflation_parents"].apply(apply_label_groups)
+
+    print("\n--- ONE-HOP: Direct parents of Inflation (merged super-labels) ---")
+    direct_parents_merged_alpha_store = {}
+    for subset in subsets:
+        key = "-".join(str(a) for a in subset)
+        subj_alpha = compute_label_alpha(df, subset, "direct_inflation_parents_merged")
+        subj_ac1 = compute_label_ac1(df, subset, "direct_inflation_parents_merged")
+        subj_simple = compute_label_raw_agreement(df, subset, "direct_inflation_parents_merged")
+        direct_parents_merged_alpha_store[key] = {
+            "subjects_alpha": subj_alpha,
+            "subjects_ac1": subj_ac1,
+            "subjects_simple_agreement": subj_simple,
+            "subjects_overall_alpha": compute_overall_alpha(df, subset, "direct_inflation_parents_merged"),
+            "subjects_overall_ac1": compute_overall_ac1(df, subset, "direct_inflation_parents_merged"),
+            "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "direct_inflation_parents_merged"),
+        }
+        alpha_str = f"{direct_parents_merged_alpha_store[key]['subjects_overall_alpha']:.4f}" if direct_parents_merged_alpha_store[key]["subjects_overall_alpha"] is not None else "N/A"
+        ac1_str = f"{direct_parents_merged_alpha_store[key]['subjects_overall_ac1']:.4f}" if direct_parents_merged_alpha_store[key]["subjects_overall_ac1"] is not None else "N/A"
+        simple_str = f"{direct_parents_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if direct_parents_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+
+    print("\nDirect parents agreement per label (per setting):")
+    for key, val in direct_parents_merged_alpha_store.items():
+        overall_str = f"{val['subjects_overall_alpha']:.4f}" if val["subjects_overall_alpha"] is not None else "N/A"
+        overall_ac1_str = f"{val['subjects_overall_ac1']:.4f}" if val["subjects_overall_ac1"] is not None else "N/A"
+        overall_simple_str = f"{val['subjects_overall_simple_agreement']:.4f}" if val["subjects_overall_simple_agreement"] is not None else "N/A"
+        print(f"  {key} (overall alpha: {overall_str}, ac1: {overall_ac1_str}, simple: {overall_simple_str}):")
+        for label in sorted(val["subjects_alpha"].keys()):
+            alpha_score = val["subjects_alpha"].get(label)
+            ac1_score = val["subjects_ac1"].get(label)
+            simple_score = val["subjects_simple_agreement"].get(label)
+            alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
+            ac1_str = f"{ac1_score:.4f}" if ac1_score is not None else "N/A"
+            simple_str = f"{simple_score:.4f}" if simple_score is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+
     out_path = f"./export/alpha-super-{'-'.join([str(a) for a in project_id_list])}.json"
     with open(out_path, "w") as f:
         json.dump(
             {
                 "subject_labels_merged": merged_alpha_store,
                 "inflation_linked_subject_labels_merged": inflation_linked_merged_alpha_store,
+                "direct_inflation_parents_merged": direct_parents_merged_alpha_store,
             },
             f,
         )
