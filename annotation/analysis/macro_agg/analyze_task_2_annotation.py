@@ -1,4 +1,5 @@
 ﻿import json
+import importlib
 from collections import Counter
 from itertools import combinations
 from pathlib import Path
@@ -132,6 +133,58 @@ def print_label_distribution_descriptives(df, label_col, title):
         for label, count in sorted(annotator_counts.items(), key=lambda x: (-x[1], x[0])):
             share = (count / annotator_total * 100.0) if annotator_total else 0.0
             print(f"    {label}: count={count}, share={share:.2f}%")
+
+
+def plot_label_frequency_histogram(df, label_col, title, out_html_path):
+    try:
+        px = importlib.import_module("plotly.express")
+    except ModuleNotFoundError:
+        print(f"\n{title}")
+        print("Plotly is not installed; skipping histogram export.")
+        return
+
+    assignments = [
+        {
+            "annotator": str(row["annotator"]),
+            "label": label,
+        }
+        for _, row in df.iterrows()
+        for label in row[label_col]
+    ]
+
+    print(f"\n{title}")
+    if not assignments:
+        print("No label assignments available for histogram.")
+        return
+
+    plot_df = pd.DataFrame(assignments)
+    fig = px.histogram(
+        plot_df,
+        x="label",
+        color="annotator",
+        barmode="group",
+        histfunc="count",
+        category_orders={
+            "label": plot_df["label"].value_counts().index.tolist(),
+            "annotator": sorted(plot_df["annotator"].unique()),
+        },
+        labels={
+            "label": "Label",
+            "annotator": "Annotator",
+            "count": "Frequency",
+        },
+        title=title,
+    )
+    fig.update_layout(
+        xaxis_title="Label",
+        yaxis_title="Frequency",
+        legend_title_text="Annotator",
+    )
+    fig.update_xaxes(tickangle=45)
+    fig.write_html(out_html_path)
+    print(f"Saved histogram to {out_html_path}")
+
+
 
 
 def chi_square_independence_stat(contingency):
@@ -612,6 +665,12 @@ if __name__ == "__main__":
         "subject_labels_raw",
         "Raw subject-label distribution across all four annotators",
     )
+    plot_label_frequency_histogram(
+        df,
+        "subject_labels_raw",
+        "Raw subject-label frequency histogram across annotators",
+        f"./export/subject-label-frequency-raw-{'-'.join([str(a) for a in project_id_list])}.html",
+    )
     print_label_assignment_contingency_table(
         df,
         "subject_labels_raw",
@@ -632,6 +691,12 @@ if __name__ == "__main__":
         df,
         "subject_labels",
         "Mapped subject-label distribution across all four annotators",
+    )
+    plot_label_frequency_histogram(
+        df,
+        "subject_labels",
+        "Mapped subject-label frequency histogram across annotators",
+        f"./export/subject-label-frequency-mapped-{'-'.join([str(a) for a in project_id_list])}.html",
     )
     print_label_assignment_contingency_table(
         df,
@@ -859,4 +924,7 @@ if __name__ == "__main__":
     csv_path = f"./export/annotations-{'-'.join([str(a) for a in project_id_list])}.csv"
     out_df.to_csv(csv_path, index=False, encoding="utf-8")
     print(f"\nSaved annotation data to {csv_path}")
+
+
+
 
