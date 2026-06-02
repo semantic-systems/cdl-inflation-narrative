@@ -136,12 +136,11 @@ def print_label_distribution_descriptives(df, label_col, title):
 
 
 def plot_label_frequency_histogram(df, label_col, title, out_html_path):
+    out_pdf_path = Path(out_html_path).with_suffix(".pdf")
     try:
         px = importlib.import_module("plotly.express")
     except ModuleNotFoundError:
-        print(f"\n{title}")
-        print("Plotly is not installed; skipping histogram export.")
-        return
+        px = None
 
     assignments = [
         {
@@ -158,31 +157,145 @@ def plot_label_frequency_histogram(df, label_col, title, out_html_path):
         return
 
     plot_df = pd.DataFrame(assignments)
-    fig = px.histogram(
-        plot_df,
-        x="label",
-        color="annotator",
-        barmode="group",
-        histfunc="count",
-        category_orders={
-            "label": plot_df["label"].value_counts().index.tolist(),
-            "annotator": sorted(plot_df["annotator"].unique()),
-        },
-        labels={
-            "label": "Label",
-            "annotator": "Annotator",
-            "count": "Frequency",
-        },
-        title=title,
+    plot_df["share"] = plot_df.groupby("annotator")["label"].transform("count")
+    plot_df["share"] = 1.0 / plot_df["share"]
+    plot_df = (
+        plot_df.groupby(["label", "annotator"], as_index=False)["share"]
+        .sum()
     )
-    fig.update_layout(
-        xaxis_title="Label",
-        yaxis_title="Frequency",
-        legend_title_text="Annotator",
-    )
-    fig.update_xaxes(tickangle=45)
-    fig.write_html(out_html_path)
-    print(f"Saved histogram to {out_html_path}")
+
+    label_order = plot_df.groupby("label")["share"].sum().sort_values(ascending=False).index.tolist()
+    annotator_order = sorted(plot_df["annotator"].unique())
+
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        plt = None
+
+    if plt is not None:
+        pivot = plot_df.pivot(index="label", columns="annotator", values="share").reindex(label_order).fillna(0.0)
+        fig, ax = plt.subplots(figsize=(max(10, 0.75 * len(label_order)), 6))
+        x = np.arange(len(label_order))
+        bar_width = 0.8 / max(1, len(annotator_order))
+
+        for idx, annotator in enumerate(annotator_order):
+            offsets = x - 0.4 + bar_width / 2 + idx * bar_width
+            values = pivot[annotator].to_numpy() if annotator in pivot.columns else np.zeros(len(label_order))
+            ax.bar(offsets, values * 100.0, width=bar_width, label=str(annotator))
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(label_order, rotation=45, ha="right")
+        ax.set_xlabel("Label")
+        ax.set_ylabel("Share of label assignments (%)")
+        ax.set_title(title)
+        ax.legend(title="Annotator", frameon=False, ncol=min(4, len(annotator_order)))
+        ax.set_ylim(0, max(100.0, (pivot.max().max() if not pivot.empty else 0.0) * 100.0 * 1.1))
+        fig.tight_layout()
+        fig.savefig(out_pdf_path, bbox_inches="tight")
+        plt.close(fig)
+        print(f"Saved histogram to {out_pdf_path}")
+    else:
+        print("Matplotlib is not installed; skipping PDF export.")
+
+    if px is not None:
+        fig = px.histogram(
+            plot_df,
+            x="label",
+            y="share",
+            color="annotator",
+            barmode="group",
+            histfunc="sum",
+            category_orders={
+                "label": label_order,
+                "annotator": annotator_order,
+            },
+            labels={
+                "label": "Label",
+                "annotator": "Annotator",
+                "share": "Share",
+            },
+            title=title,
+        )
+        fig.update_layout(
+            xaxis_title="Label",
+            yaxis_title="Share of label assignments (%)",
+            legend_title_text="Annotator",
+        )
+        fig.update_xaxes(tickangle=45)
+        fig.write_html(out_html_path)
+        print(f"Saved histogram to {out_html_path}")
+    else:
+        print("Plotly is not installed; skipping HTML export.")
+
+
+def plot_overall_alpha_by_subset(alpha_store, title, out_html_path):
+    out_pdf_path = Path(out_html_path).with_suffix(".pdf")
+
+    rows = []
+    for subset_key, metrics in alpha_store.items():
+        alpha_value = metrics.get("subjects_overall_alpha")
+        if alpha_value is not None:
+            rows.append({"subset": subset_key, "alpha": alpha_value})
+
+    print(f"\n{title}")
+    if not rows:
+        print("No overall alpha values available for plotting.")
+        return
+
+    def _subset_sort_key(subset_key):
+        parts = subset_key.split("-")
+        return (-len(parts), subset_key)
+
+    plot_df = pd.DataFrame(rows)
+    subset_order = sorted(plot_df["subset"].tolist(), key=_subset_sort_key)
+    plot_df["subset"] = pd.Categorical(plot_df["subset"], categories=subset_order, ordered=True)
+    plot_df = plot_df.sort_values("subset")
+
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        plt = None
+
+    if plt is not None:
+        fig, ax = plt.subplots(figsize=(max(8, 1.8 * len(subset_order)), 5))
+        x = np.arange(len(plot_df))
+        y = plot_df["alpha"].to_numpy(dtype=float)
+        ax.bar(x, y, width=0.6)
+        ax.axhline(0.0, color="black", linewidth=0.8)
+        ax.set_xticks(x)
+        ax.set_xticklabels(plot_df["subset"].astype(str).tolist(), rotation=35, ha="right")
+        ax.set_xlabel("Annotator subset")
+        ax.set_ylabel("Krippendorff alpha")
+        ax.set_title(title)
+        ymin = min(-0.1, float(np.min(y)) - 0.05)
+        ymax = max(1.0, float(np.max(y)) + 0.05)
+        ax.set_ylim(ymin, ymax)
+        fig.tight_layout()
+        fig.savefig(out_pdf_path, bbox_inches="tight")
+        plt.close(fig)
+        print(f"Saved alpha plot to {out_pdf_path}")
+    else:
+        print("Matplotlib is not installed; skipping PDF alpha plot export.")
+
+    try:
+        px = importlib.import_module("plotly.express")
+    except ModuleNotFoundError:
+        px = None
+
+    if px is not None:
+        fig = px.bar(
+            plot_df,
+            x="subset",
+            y="alpha",
+            category_orders={"subset": subset_order},
+            labels={"subset": "Annotator subset", "alpha": "Krippendorff alpha"},
+            title=title,
+        )
+        fig.update_layout(yaxis_title="Krippendorff alpha")
+        fig.write_html(out_html_path)
+        print(f"Saved alpha plot to {out_html_path}")
+    else:
+        print("Plotly is not installed; skipping HTML alpha plot export.")
 
 
 
@@ -528,108 +641,6 @@ def compute_overall_ac1(df, annotator_list, label_side):
     return float(ac1) if np.isfinite(ac1) else None
 
 
-def _alpha_score(alpha_value):
-    return float("-inf") if alpha_value is None else float(alpha_value)
-
-
-def build_label_to_group_map(label_groups):
-    label_to_group = {}
-    for group_name, members in label_groups.items():
-        for member in members:
-            label_to_group[member] = group_name
-    return label_to_group
-
-
-def apply_group_map(label_set, label_to_group):
-    return {label_to_group.get(label, label) for label in label_set}
-
-
-def evaluate_grouping_overall_alpha(df, annotator_list, source_col, label_groups):
-    eval_df = df[["annotator", "item_id", source_col]].copy()
-    label_to_group = build_label_to_group_map(label_groups)
-    eval_df["_grouped_labels"] = eval_df[source_col].apply(lambda s: apply_group_map(s, label_to_group))
-    return compute_overall_alpha(eval_df, annotator_list, "_grouped_labels")
-
-
-def build_label_family_map(theoretical_merge_families):
-    label_family_map = {}
-    for family_name, members in theoretical_merge_families.items():
-        for member in members:
-            label_family_map[member] = family_name
-    return label_family_map
-
-
-def is_theoretically_allowed_merge(left_members, right_members, label_family_map):
-    merged_labels = set(left_members) | set(right_members)
-    families = {label_family_map.get(label, f"__singleton__{label}") for label in merged_labels}
-    return len(families) == 1
-
-
-def greedy_search_optimal_merge_for_alpha(df, annotator_list, source_col, min_gain=1e-12, label_family_map=None):
-    labels = sorted({label for label_set in df[source_col] for label in label_set})
-    if not labels:
-        return {}, None, []
-
-    current_groups = {label: {label} for label in labels}
-    current_alpha = evaluate_grouping_overall_alpha(df, annotator_list, source_col, current_groups)
-    history = [{
-        "step": 0,
-        "merge": None,
-        "alpha": current_alpha,
-        "n_groups": len(current_groups),
-    }]
-
-    step = 0
-    while len(current_groups) > 1:
-        group_names = sorted(current_groups.keys())
-        best_candidate = None
-        best_candidate_alpha = None
-
-        for i, left_group in enumerate(group_names[:-1]):
-            for right_group in group_names[i + 1:]:
-                if label_family_map is not None and not is_theoretically_allowed_merge(
-                    current_groups[left_group],
-                    current_groups[right_group],
-                    label_family_map,
-                ):
-                    continue
-
-                trial_groups = {k: set(v) for k, v in current_groups.items() if k not in {left_group, right_group}}
-                merged_members = set(current_groups[left_group]) | set(current_groups[right_group])
-                merged_name = " + ".join(sorted(merged_members))
-                trial_groups[merged_name] = merged_members
-
-                trial_alpha = evaluate_grouping_overall_alpha(df, annotator_list, source_col, trial_groups)
-
-                if best_candidate is None or _alpha_score(trial_alpha) > _alpha_score(best_candidate_alpha):
-                    best_candidate = (left_group, right_group, merged_name, trial_groups)
-                    best_candidate_alpha = trial_alpha
-
-        if best_candidate is None:
-            break
-
-        alpha_gain = _alpha_score(best_candidate_alpha) - _alpha_score(current_alpha)
-        if alpha_gain <= min_gain:
-            break
-
-        _, _, merged_name, merged_groups = best_candidate
-        current_groups = merged_groups
-        current_alpha = best_candidate_alpha
-        step += 1
-        history.append({
-            "step": step,
-            "merge": merged_name,
-            "alpha": current_alpha,
-            "n_groups": len(current_groups),
-        })
-
-    ordered_groups = {
-        group_name: sorted(members)
-        for group_name, members in sorted(current_groups.items(), key=lambda x: x[0])
-    }
-    return ordered_groups, current_alpha, history
-
-
 if __name__ == "__main__":
     setup()
 
@@ -725,7 +736,8 @@ if __name__ == "__main__":
         "Labor": {"Labor Shortage", "Wages"},
         "Climate": {"Climate"},
         "War": {"War"},
-        "Monetary": {"Monetary Policy", "Inflation Expectations", "Exchange Rates"},
+        "Monetary": {"Monetary Policy", "Exchange Rates"},
+        "Inflation Expectations": {"Inflation Expectations"},
         "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
         "Energy": {"Energy Prices"},
         "Food": {"Food Prices"},
@@ -733,12 +745,59 @@ if __name__ == "__main__":
         "Market Power": {"Price-Gouging"}
     }
 
+    # --- Reduced Macroeconomic Super-label Analysis ---
+    REDUCED_LABEL_GROUPS = {
+        "Aggregate Demand": {
+            "Demand (residual)", "Pent-up Demand", "Demand Shift",
+            "Government Debt", "Government Spending"
+        },
+        "Tax Increases": {
+            "Tax Increases"
+        },
+        "Exogenous Supply Shocks": {
+            "Supply Chain Issues", "Supply (residual)", "Transportation Costs",
+            "Energy Prices", "Food Prices", 
+        },
+        "War": {
+            "War"
+        },
+        "Climate": {
+            "Climate"
+        },
+        "Labor Market Dynamics": {
+            "Labor Shortage", "Wages"
+        },
+        "Structural Costs & Frictions": {
+            "Housing Costs", "Medical Costs",
+            "Education Costs"
+        },
+        
+        "Market Power": {
+            "Price-Gouging"
+        },
+        "Monetary Dynamics & Expectations": {
+            "Monetary Policy", "Inflation Expectations", "Exchange Rates"
+        }
+    }
+
+    def build_label_to_group_map(label_groups):
+        label_to_group = {}
+        for group_name, members in label_groups.items():
+            for member in members:
+                label_to_group[member] = group_name
+        return label_to_group
+
+    def apply_group_map(label_set, label_to_group):
+        return {label_to_group.get(label, label) for label in label_set}
+
+    label_to_super_group = build_label_to_group_map(LABEL_GROUPS)
+    label_to_reduced_group = build_label_to_group_map(REDUCED_LABEL_GROUPS)
+
     def apply_label_groups(label_set):
-        merged = set()
-        for label in label_set:
-            group = next((g for g, members in LABEL_GROUPS.items() if label in members), label)
-            merged.add(group)
-        return merged
+        return apply_group_map(label_set, label_to_super_group)
+
+    def apply_reduced_label_groups(label_set):
+        return apply_group_map(label_set, label_to_reduced_group)
 
     df["subject_labels_merged"] = df["subject_labels"].apply(apply_label_groups)
 
@@ -752,68 +811,19 @@ if __name__ == "__main__":
     for label, count in sorted(merged_label_counts.items(), key=lambda x: (-x[1], x[0])):
         print(f"  {label}: {count}")
 
-    THEORETICAL_MERGE_FAMILIES = {
-        "Demand": {"Demand Shift", "Demand (residual)", "Pent-up Demand"},
-        "Government": {"Government Debt", "Government Spending"},
-        "Supply Chain": {"Supply Chain Issues", "Supply (residual)", "Transportation Costs"},
-        "Labor": {"Labor Shortage", "Wages"},
-        "Monetary": {"Monetary Policy", "Inflation Expectations", "Exchange Rates"},
-        "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
-        "Energy": {"Energy Prices"},
-        "Food": {"Food Prices"},
-        "Climate": {"Climate"},
-        "War": {"War"},
-        "Taxation": {"Tax Increases"},
-        "Market Power": {"Price-Gouging"},
-    }
-    theoretical_label_family_map = build_label_family_map(THEORETICAL_MERGE_FAMILIES)
-
-    print("\n--- Greedy search for alpha-maximizing inflation-linked merges ---")
-    optimal_groups, optimal_alpha, optimal_history = greedy_search_optimal_merge_for_alpha(
-        df,
-        project_id_list,
-        "inflation_linked_subject_labels",
-        label_family_map=theoretical_label_family_map,
+    df["subject_labels_reduced_merged"] = df["subject_labels"].apply(apply_reduced_label_groups)
+    reduced_label_counts = Counter(
+        label
+        for label_set in df["subject_labels_reduced_merged"]
+        for label in label_set
     )
-    if optimal_alpha is None:
-        print("No inflation-linked labels available for optimization.")
-    else:
-        alpha_str = f"{optimal_alpha:.4f}"
-        print(f"Best overall alpha found (full annotator set): {alpha_str}")
-        print("Optimal groups:")
-        for group_name, members in optimal_groups.items():
-            print(f"  {group_name}: {', '.join(members)}")
-        print("Search path:")
-        for row in optimal_history:
-            row_alpha = row["alpha"]
-            row_alpha_str = f"{row_alpha:.4f}" if row_alpha is not None else "N/A"
-            merge_name = row["merge"] if row["merge"] is not None else "(initial singleton labels)"
-            print(
-                f"  step={row['step']}, groups={row['n_groups']}, alpha={row_alpha_str}, merge={merge_name}"
-            )
-
-    optimal_groups_out_path = f"./export/optimal-merge-inflation-linked-{'-'.join([str(a) for a in project_id_list])}.json"
-    theoretical_merge_families_json = {
-        family_name: sorted(members)
-        for family_name, members in THEORETICAL_MERGE_FAMILIES.items()
-    }
-
-    with open(optimal_groups_out_path, "w") as f:
-        json.dump(
-            {
-                "source_col": "inflation_linked_subject_labels",
-                "annotators": project_id_list,
-                "best_overall_alpha": optimal_alpha,
-                "optimal_groups": optimal_groups,
-                "search_history": optimal_history,
-                "theoretical_merge_families": theoretical_merge_families_json,
-            },
-            f,
-        )
-    print(f"Saved optimal merge search results to {optimal_groups_out_path}")
+    print("\nReduced merged super-label counts:")
+    for label, count in sorted(reduced_label_counts.items(), key=lambda x: (-x[1], x[0])):
+        print(f"  {label}: {count}")
 
     # IAA is computed only for inflation-linked merged super-labels.
     df["inflation_linked_subject_labels_merged"] = df["inflation_linked_subject_labels"].apply(apply_label_groups)
+    df["inflation_linked_subject_labels_reduced_merged"] = df["inflation_linked_subject_labels"].apply(apply_reduced_label_groups)
 
     print("\n--- Inflation-linked merged super-label IAA ---")
     inflation_linked_merged_alpha_store = {}
@@ -843,6 +853,45 @@ if __name__ == "__main__":
             alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
             print(f"    {label}: alpha={alpha_str}")
 
+    print("\n--- Inflation-linked reduced merged super-label IAA ---")
+    inflation_linked_reduced_merged_alpha_store = {}
+    for subset in subsets:
+        key = "-".join(str(a) for a in subset)
+        subj_alpha = compute_label_alpha(df, subset, "inflation_linked_subject_labels_reduced_merged")
+        subj_ac1 = compute_label_ac1(df, subset, "inflation_linked_subject_labels_reduced_merged")
+        subj_simple = compute_label_raw_agreement(df, subset, "inflation_linked_subject_labels_reduced_merged")
+        inflation_linked_reduced_merged_alpha_store[key] = {
+            "subjects_alpha": subj_alpha,
+            "subjects_ac1": subj_ac1,
+            "subjects_simple_agreement": subj_simple,
+            "subjects_overall_alpha": compute_overall_alpha(df, subset, "inflation_linked_subject_labels_reduced_merged"),
+            "subjects_overall_ac1": compute_overall_ac1(df, subset, "inflation_linked_subject_labels_reduced_merged"),
+            "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "inflation_linked_subject_labels_reduced_merged"),
+        }
+        alpha_str = f"{inflation_linked_reduced_merged_alpha_store[key]['subjects_overall_alpha']:.4f}" if inflation_linked_reduced_merged_alpha_store[key]["subjects_overall_alpha"] is not None else "N/A"
+        ac1_str = f"{inflation_linked_reduced_merged_alpha_store[key]['subjects_overall_ac1']:.4f}" if inflation_linked_reduced_merged_alpha_store[key]["subjects_overall_ac1"] is not None else "N/A"
+        simple_str = f"{inflation_linked_reduced_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if inflation_linked_reduced_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+
+    print("\nInflation-linked reduced merged super-label single-label alpha:")
+    for key, val in inflation_linked_reduced_merged_alpha_store.items():
+        print(f"  {key}:")
+        for label in sorted(val["subjects_alpha"].keys()):
+            alpha_score = val["subjects_alpha"].get(label)
+            alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}")
+
+    plot_overall_alpha_by_subset(
+        inflation_linked_merged_alpha_store,
+        "Overall Krippendorff alpha by annotator subset (inflation-linked merged super-labels)",
+        f"./export/alpha-overall-inflation-linked-merged-{'-'.join([str(a) for a in project_id_list])}.html",
+    )
+    plot_overall_alpha_by_subset(
+        inflation_linked_reduced_merged_alpha_store,
+        "Overall Krippendorff alpha by annotator subset (inflation-linked reduced merged super-labels)",
+        f"./export/alpha-overall-inflation-linked-reduced-{'-'.join([str(a) for a in project_id_list])}.html",
+    )
+
     inflation_linked_single_alpha_store = {}
     for subset in subsets:
         key = "-".join(str(a) for a in subset)
@@ -861,7 +910,10 @@ if __name__ == "__main__":
         json.dump(
             {
                 "inflation_linked_subject_labels_merged": inflation_linked_merged_alpha_store,
+                "inflation_linked_subject_labels_reduced_merged": inflation_linked_reduced_merged_alpha_store,
                 "inflation_linked_subject_labels_single_alpha": inflation_linked_single_alpha_store,
+                "label_groups": {k: sorted(v) for k, v in LABEL_GROUPS.items()},
+                "reduced_label_groups": {k: sorted(v) for k, v in REDUCED_LABEL_GROUPS.items()},
             },
             f,
         )
@@ -924,6 +976,22 @@ if __name__ == "__main__":
     csv_path = f"./export/annotations-{'-'.join([str(a) for a in project_id_list])}.csv"
     out_df.to_csv(csv_path, index=False, encoding="utf-8")
     print(f"\nSaved annotation data to {csv_path}")
+
+    # Final compact export: text + agreed annotations for three (super-)label variants.
+    category_out_df = out_df[["doc_id", "text"]].copy()
+    category_out_df["annotations_single_labels"] = [
+        compute_agreed_labels(i, "inflation_linked_subject_labels") for i in item_ids
+    ]
+    category_out_df["annotations_super_labels"] = [
+        compute_agreed_labels(i, "inflation_linked_subject_labels_merged") for i in item_ids
+    ]
+    category_out_df["annotations_reduced_super_labels"] = [
+        compute_agreed_labels(i, "inflation_linked_subject_labels_reduced_merged") for i in item_ids
+    ]
+
+    category_csv_path = f"./export/annotations-three-category-superlabels-{'-'.join([str(a) for a in project_id_list])}.csv"
+    category_out_df.to_csv(category_csv_path, index=False, encoding="utf-8")
+    print(f"Saved three-category super-label annotation data to {category_csv_path}")
 
 
 
