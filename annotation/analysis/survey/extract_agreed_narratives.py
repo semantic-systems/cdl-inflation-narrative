@@ -422,6 +422,7 @@ def parse_annotation_from_spans(spans_json):
     except:
         return []
 
+
 df_compatible["Annotation_Events"] = df_compatible["Annotation"].apply(parse_annotation)
 df_compatible["Annotation_Events_Spans"] = df_compatible[f"agreed_{focus_feature}_spans"].apply(parse_annotation_from_spans)
 
