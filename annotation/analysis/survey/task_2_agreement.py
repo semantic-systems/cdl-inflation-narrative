@@ -177,6 +177,17 @@ def get_feature_seven(row, event_category):
     return high_level_event_graph
 
 
+def get_event_alpha(row):
+    # Extract all unique events from all triples (simple event set)
+    all_events = set()
+    for triple in row["triples_label_form"]:
+        all_events.add(triple[0])
+        all_events.add(triple[2])
+    # Remove Inflation if present
+    all_events.discard("Inflation")
+    return all_events if all_events else "*"
+
+
 def low_level_event_to_high_level_event_map(event: str, event_category: dict):
     reverse_event_category = {v: key for key, value in event_category.items() for v in value}
     return reverse_event_category.get(event, event)
@@ -306,13 +317,15 @@ if __name__ == "__main__":
     df_task2_annotation["feature_five"] = df_task2_annotation.apply(get_feature_five, event_category=event_category, axis=1)
     df_task2_annotation["feature_six"] = df_task2_annotation.apply(get_feature_six, axis=1)
     df_task2_annotation["feature_seven"] = df_task2_annotation.apply(get_feature_seven, event_category=event_category, axis=1)
+    df_task2_annotation["event_alpha"] = df_task2_annotation.apply(get_event_alpha, axis=1)
+    
 
     df_task2_annotation.to_csv("./export/task_2_annotation_survey.csv", index=False, encoding = "utf-8")
     df_task2_annotation.to_pickle("./export/task_2_annotation_survey.pkl")
     
     # Initialize variables for IAA computation
     annotator_list = sorted(df_task2_annotation["annotator"].unique().tolist())
-    feature_cols = ["feature_one", "feature_two", "feature_four", "feature_five", "feature_six", "feature_seven"]
+    feature_cols = ["feature_one", "feature_two", "feature_four", "feature_five", "feature_six", "feature_seven", "event_alpha"]
     empty_graph_indicator = "*"
     alpha_store = {feature: {"lenient": None, "moderate": None, "strict": None} for feature in feature_cols}
 
@@ -322,7 +335,8 @@ if __name__ == "__main__":
                       "feature_four": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
                       "feature_five": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
                       "feature_six": {"graph_type": nx.DiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
-                      "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}}}
+                      "feature_seven": {"graph_type": nx.MultiDiGraph, "graph_distance_metric": {"lenient": graph_overlap_metric, "moderate": graph_edit_distance, "strict": nominal_metric}},
+                      "event_alpha": {"graph_type": nx.Graph, "graph_distance_metric": {"lenient": node_overlap_metric, "moderate": jaccard_distance, "strict": nominal_metric}}}
 
     forced = args.forced
     for feature_column, configs in configurations.items():
