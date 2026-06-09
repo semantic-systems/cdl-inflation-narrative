@@ -641,6 +641,99 @@ def compute_overall_ac1(df, annotator_list, label_side):
     return float(ac1) if np.isfinite(ac1) else None
 
 
+def compute_label_free_marginal_kappa(df, annotator_list, label_side):
+    """Per-label Randolph free-marginal multirater kappa using statsmodels.
+
+    Returns a dict mapping label -> kappa (or None if not computable).
+    """
+    try:
+        from statsmodels.stats.inter_rater import fleiss_kappa
+    except Exception:
+        return {label: None for label in sorted({label for labels in df[label_side] for label in labels})}
+
+    all_item_ids = sorted(df["item_id"].unique())
+    all_labels = sorted({label for labels in df[label_side] for label in labels})
+
+    m = len(annotator_list)
+    results = {}
+    if m < 2:
+        return {label: None for label in all_labels}
+
+    for label in all_labels:
+        rows = []
+        for item_id in all_item_ids:
+            votes = []
+            for annotator in annotator_list:
+                annotator_df = df[df["annotator"] == annotator].set_index("item_id")
+                if item_id not in annotator_df.index:
+                    votes = []
+                    break
+                label_set = annotator_df.loc[item_id, label_side]
+                votes.append(1 if label in label_set else 0)
+            if len(votes) != m:
+                continue
+            present = int(sum(votes))
+            absent = m - present
+            rows.append([present, absent])
+
+        if not rows:
+            results[label] = None
+            continue
+
+        table = np.array(rows, dtype=int)
+        try:
+            k = fleiss_kappa(table, method="randolph")
+            results[label] = float(k) if np.isfinite(k) else None
+        except Exception:
+            results[label] = None
+
+    return results
+
+
+def compute_overall_free_marginal_kappa(df, annotator_list, label_side):
+    """Attempt an overall free-marginal kappa by treating each label as a separate binary category
+    and stacking item-label pairs as "subjects". Returns a single kappa float or None.
+    """
+    try:
+        from statsmodels.stats.inter_rater import fleiss_kappa
+    except Exception:
+        return None
+
+    all_item_ids = sorted(df["item_id"].unique())
+    all_labels = sorted({label for labels in df[label_side] for label in labels})
+    m = len(annotator_list)
+    if m < 2 or not all_labels:
+        return None
+
+    rows = []
+    # For each (item, label) pair, count how many annotators selected the label (present) and absent
+    for label in all_labels:
+        for item_id in all_item_ids:
+            votes = []
+            for annotator in annotator_list:
+                annotator_df = df[df["annotator"] == annotator].set_index("item_id")
+                if item_id not in annotator_df.index:
+                    votes = []
+                    break
+                label_set = annotator_df.loc[item_id, label_side]
+                votes.append(1 if label in label_set else 0)
+            if len(votes) != m:
+                continue
+            present = int(sum(votes))
+            absent = m - present
+            rows.append([present, absent])
+
+    if not rows:
+        return None
+
+    table = np.array(rows, dtype=int)
+    try:
+        k = fleiss_kappa(table, method="randolph")
+        return float(k) if np.isfinite(k) else None
+    except Exception:
+        return None
+
+
 if __name__ == "__main__":
     setup()
 
@@ -660,7 +753,7 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(rows)
 
-    EXCLUDED_LABELS = {"Base Effect", "Pandemic", "Trade Balance", "Mismanagement"}
+    EXCLUDED_LABELS = {"Base Effect", "Pandemic", "Trade Balance", "Mismanagement", "Inflation Expectations"}
 
     def exclude_labels(label_set):
         return {label for label in label_set if label not in EXCLUDED_LABELS}
@@ -736,14 +829,45 @@ if __name__ == "__main__":
         "Labor": {"Labor Shortage", "Wages"},
         "Climate": {"Climate"},
         "War": {"War"},
-        "Monetary": {"Monetary Policy", "Exchange Rates"},
-        "Inflation Expectations": {"Inflation Expectations"},
+        "Monetary": {"Monetary Policy"}, # exchange rates
+        #"Inflation Expectations": {"Inflation Expectations"},
+        "Exchange Rates": {"Exchange Rates"},
         "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
         "Energy": {"Energy Prices"},
         "Food": {"Food Prices"},
         "Taxation": {"Tax Increases"},
         "Market Power": {"Price-Gouging"}
     }
+    
+    LABEL_GROUPS = {
+    "Fiscal Policy & Government Action": [
+        "Government Debt", "Government Spending", "Tax Increases"
+    ],
+    "Private Demand Shocks": [
+        "Pent-up Demand", "Demand Shift", "Demand (residual)"
+    ],
+    "Exogenous Supply & Commodity Shocks": [
+        "Supply Chain Issues", "Supply (residual)", "Transportation Costs",
+        "Energy Prices", "Food Prices"
+    ],
+    "External / Geopolitical Shocks": [
+        "War", "Climate", "Exchange Rates"
+    ],
+    "Labor Market Dynamics": [
+        "Labor Shortage", "Wages"
+    ],
+    "Micro-Frictions": [
+        "Housing Costs", "Medical Costs", "Education Costs"
+    ],
+    
+    "Market Power": [
+        "Price-Gouging"
+    ],
+    
+    "Monetary Policy": [
+        "Monetary Policy"
+    ]
+}
 
     # --- Reduced Macroeconomic Super-label Analysis ---
     REDUCED_LABEL_GROUPS = {
@@ -775,9 +899,13 @@ if __name__ == "__main__":
         "Market Power": {
             "Price-Gouging"
         },
-        "Monetary Dynamics & Expectations": {
-            "Monetary Policy", "Inflation Expectations", "Exchange Rates"
-        }
+        "Monetary Policy": {
+            "Monetary Policy"
+        }, 
+        
+        "Exchange Rates": {
+            "Exchange Rates"
+        },
     }
 
     def build_label_to_group_map(label_groups):
@@ -832,18 +960,23 @@ if __name__ == "__main__":
         subj_alpha = compute_label_alpha(df, subset, "inflation_linked_subject_labels_merged")
         subj_ac1 = compute_label_ac1(df, subset, "inflation_linked_subject_labels_merged")
         subj_simple = compute_label_raw_agreement(df, subset, "inflation_linked_subject_labels_merged")
+        subj_fm_kappa = compute_label_free_marginal_kappa(df, subset, "inflation_linked_subject_labels_merged")
+        subj_overall_fm = compute_overall_free_marginal_kappa(df, subset, "inflation_linked_subject_labels_merged")
         inflation_linked_merged_alpha_store[key] = {
             "subjects_alpha": subj_alpha,
             "subjects_ac1": subj_ac1,
             "subjects_simple_agreement": subj_simple,
+            "subjects_free_marginal_kappa": subj_fm_kappa,
             "subjects_overall_alpha": compute_overall_alpha(df, subset, "inflation_linked_subject_labels_merged"),
             "subjects_overall_ac1": compute_overall_ac1(df, subset, "inflation_linked_subject_labels_merged"),
             "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "inflation_linked_subject_labels_merged"),
+            "subjects_overall_free_marginal_kappa": subj_overall_fm,
         }
         alpha_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_alpha']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_alpha"] is not None else "N/A"
         ac1_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_ac1']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_ac1"] is not None else "N/A"
         simple_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+        fm_str = f"{inflation_linked_merged_alpha_store[key]['subjects_overall_free_marginal_kappa']:.4f}" if inflation_linked_merged_alpha_store[key]["subjects_overall_free_marginal_kappa"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}  fm_kappa={fm_str}")
 
     print("\nInflation-linked merged super-label single-label alpha:")
     for key, val in inflation_linked_merged_alpha_store.items():
@@ -851,7 +984,11 @@ if __name__ == "__main__":
         for label in sorted(val["subjects_alpha"].keys()):
             alpha_score = val["subjects_alpha"].get(label)
             alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
-            print(f"    {label}: alpha={alpha_str}")
+            fm_score = None
+            if val.get("subjects_free_marginal_kappa"):
+                fm_score = val["subjects_free_marginal_kappa"].get(label)
+            fm_str = f"{fm_score:.4f}" if fm_score is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}  fm_kappa={fm_str}")
 
     print("\n--- Inflation-linked reduced merged super-label IAA ---")
     inflation_linked_reduced_merged_alpha_store = {}
@@ -860,18 +997,23 @@ if __name__ == "__main__":
         subj_alpha = compute_label_alpha(df, subset, "inflation_linked_subject_labels_reduced_merged")
         subj_ac1 = compute_label_ac1(df, subset, "inflation_linked_subject_labels_reduced_merged")
         subj_simple = compute_label_raw_agreement(df, subset, "inflation_linked_subject_labels_reduced_merged")
+        subj_fm_kappa = compute_label_free_marginal_kappa(df, subset, "inflation_linked_subject_labels_reduced_merged")
+        subj_overall_fm = compute_overall_free_marginal_kappa(df, subset, "inflation_linked_subject_labels_reduced_merged")
         inflation_linked_reduced_merged_alpha_store[key] = {
             "subjects_alpha": subj_alpha,
             "subjects_ac1": subj_ac1,
             "subjects_simple_agreement": subj_simple,
+            "subjects_free_marginal_kappa": subj_fm_kappa,
             "subjects_overall_alpha": compute_overall_alpha(df, subset, "inflation_linked_subject_labels_reduced_merged"),
             "subjects_overall_ac1": compute_overall_ac1(df, subset, "inflation_linked_subject_labels_reduced_merged"),
             "subjects_overall_simple_agreement": compute_overall_simple_agreement(df, subset, "inflation_linked_subject_labels_reduced_merged"),
+            "subjects_overall_free_marginal_kappa": subj_overall_fm,
         }
         alpha_str = f"{inflation_linked_reduced_merged_alpha_store[key]['subjects_overall_alpha']:.4f}" if inflation_linked_reduced_merged_alpha_store[key]["subjects_overall_alpha"] is not None else "N/A"
         ac1_str = f"{inflation_linked_reduced_merged_alpha_store[key]['subjects_overall_ac1']:.4f}" if inflation_linked_reduced_merged_alpha_store[key]["subjects_overall_ac1"] is not None else "N/A"
         simple_str = f"{inflation_linked_reduced_merged_alpha_store[key]['subjects_overall_simple_agreement']:.4f}" if inflation_linked_reduced_merged_alpha_store[key]["subjects_overall_simple_agreement"] is not None else "N/A"
-        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}")
+        fm_str = f"{inflation_linked_reduced_merged_alpha_store[key]['subjects_overall_free_marginal_kappa']:.4f}" if inflation_linked_reduced_merged_alpha_store[key]["subjects_overall_free_marginal_kappa"] is not None else "N/A"
+        print(f"  {key}: alpha={alpha_str}  ac1={ac1_str}  simple={simple_str}  fm_kappa={fm_str}")
 
     print("\nInflation-linked reduced merged super-label single-label alpha:")
     for key, val in inflation_linked_reduced_merged_alpha_store.items():
@@ -879,23 +1021,21 @@ if __name__ == "__main__":
         for label in sorted(val["subjects_alpha"].keys()):
             alpha_score = val["subjects_alpha"].get(label)
             alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
-            print(f"    {label}: alpha={alpha_str}")
-
-    plot_overall_alpha_by_subset(
-        inflation_linked_merged_alpha_store,
-        "Overall Krippendorff alpha by annotator subset (inflation-linked merged super-labels)",
-        f"./export/alpha-overall-inflation-linked-merged-{'-'.join([str(a) for a in project_id_list])}.html",
-    )
-    plot_overall_alpha_by_subset(
-        inflation_linked_reduced_merged_alpha_store,
-        "Overall Krippendorff alpha by annotator subset (inflation-linked reduced merged super-labels)",
-        f"./export/alpha-overall-inflation-linked-reduced-{'-'.join([str(a) for a in project_id_list])}.html",
-    )
+            fm_score = None
+            if val.get("subjects_free_marginal_kappa"):
+                fm_score = val["subjects_free_marginal_kappa"].get(label)
+            fm_str = f"{fm_score:.4f}" if fm_score is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}  fm_kappa={fm_str}")
 
     inflation_linked_single_alpha_store = {}
     for subset in subsets:
         key = "-".join(str(a) for a in subset)
         inflation_linked_single_alpha_store[key] = compute_label_alpha(df, subset, "inflation_linked_subject_labels")
+
+    inflation_linked_single_kappa_store = {}
+    for subset in subsets:
+        key = "-".join(str(a) for a in subset)
+        inflation_linked_single_kappa_store[key] = compute_label_free_marginal_kappa(df, subset, "inflation_linked_subject_labels")
 
     print("\nInflation-linked single-label alpha (non-merged labels):")
     for key, label_alpha in inflation_linked_single_alpha_store.items():
@@ -903,7 +1043,11 @@ if __name__ == "__main__":
         for label in sorted(label_alpha.keys()):
             alpha_score = label_alpha.get(label)
             alpha_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
-            print(f"    {label}: alpha={alpha_str}")
+            kappa_score = None
+            if inflation_linked_single_kappa_store.get(key):
+                kappa_score = inflation_linked_single_kappa_store[key].get(label)
+            kappa_str = f"{kappa_score:.4f}" if kappa_score is not None else "N/A"
+            print(f"    {label}: alpha={alpha_str}  fm_kappa={kappa_str}")
 
     out_path = f"./export/alpha-super-{'-'.join([str(a) for a in project_id_list])}.json"
     with open(out_path, "w") as f:
@@ -911,36 +1055,14 @@ if __name__ == "__main__":
             {
                 "inflation_linked_subject_labels_merged": inflation_linked_merged_alpha_store,
                 "inflation_linked_subject_labels_reduced_merged": inflation_linked_reduced_merged_alpha_store,
-                "inflation_linked_subject_labels_single_alpha": inflation_linked_single_alpha_store,
+                    "inflation_linked_subject_labels_single_alpha": inflation_linked_single_alpha_store,
+                    "inflation_linked_subject_labels_single_kappa": inflation_linked_single_kappa_store,
                 "label_groups": {k: sorted(v) for k, v in LABEL_GROUPS.items()},
                 "reduced_label_groups": {k: sorted(v) for k, v in REDUCED_LABEL_GROUPS.items()},
             },
             f,
         )
     print(f"Saved super-category alpha scores to {out_path}")
-
-    # --- Co-occurrence of all super-categories for annotators 11/12/13 ---
-    target_annotators = {11, 12, 13}
-    df_target = df[df["annotator"].isin(target_annotators)].copy()
-
-    single_counts = Counter()
-    pair_counts = Counter()
-
-    for label_set in df_target["subject_labels_merged"]:
-        labels = sorted(label_set)
-        for label in labels:
-            single_counts[label] += 1
-        for left, right in combinations(labels, 2):
-            pair_counts[(left, right)] += 1
-
-    print("\n--- Super-category co-occurrence (annotators 11, 12, 13) ---")
-    print("Single-label counts:")
-    for label, count in sorted(single_counts.items(), key=lambda x: (-x[1], x[0])):
-        print(f"  {label}: {count}")
-
-    print("\nPair co-occurrence counts:")
-    for (left, right), count in sorted(pair_counts.items(), key=lambda x: (-x[1], x[0][0], x[0][1])):
-        print(f"  {left} + {right}: {count}")
 
     # --- Save annotated data as CSV ---
     pivot = df.pivot(index="item_id", columns="annotator", values="subject_labels")
@@ -951,7 +1073,7 @@ if __name__ == "__main__":
         out_df[col] = out_df[col].apply(lambda x: "|".join(sorted(x)) if isinstance(x, set) else "")
 
     # agreed_labels: labels selected by at least 3 annotators for each item
-    all_annotators = project_id_list
+    all_annotators = [11, 12, 13]
     min_votes_for_agreement = 3
 
     def compute_agreed_labels(item_id, label_col):
