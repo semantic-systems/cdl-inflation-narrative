@@ -743,6 +743,26 @@ if __name__ == "__main__":
     rows = []
     for ann in project_annotations:
         _, _, triples_label_form_raw, triples_label_form = get_triples(ann["annotations"][0]["result"])
+
+        def _relation_direction(rel):
+            if isinstance(rel, (list, tuple, set)):
+                if "Increases" in rel:
+                    return "increase"
+                if "Decreases" in rel:
+                    return "decrease"
+                return None
+            if isinstance(rel, str):
+                if rel == "Increases":
+                    return "increase"
+                if rel == "Decreases":
+                    return "decrease"
+            return None
+
+        # Keep both increases and decreases; append direction to subject labels.
+        # Keep original subject/object labels unchanged; do not append direction to labels.
+        triples_label_form_raw = [(subj, rel, obj) for subj, rel, obj in triples_label_form_raw]
+        triples_label_form = [(subj, rel, obj) for subj, rel, obj in triples_label_form]
+
         rows.append({
             "annotator": ann["project"],
             "item_id": ann["data"]["inner_id"],
@@ -763,6 +783,72 @@ if __name__ == "__main__":
     df["object_labels"] = df["triples_label_form"].apply(extract_object_labels).apply(exclude_labels)
     df["inflation_linked_subject_labels"] = df["triples_label_form"].apply(extract_inflation_linked_subject_labels).apply(exclude_labels)
     df["direct_inflation_parents"] = df["triples_label_form"].apply(extract_direct_inflation_parents).apply(exclude_labels)
+
+    # --- Per-annotator, per-document majority relation direction (increase/decrease) ---
+    def _rel_dir(rel):
+        if isinstance(rel, (list, tuple, set)):
+            if "Increases" in rel:
+                return "increase"
+            if "Decreases" in rel:
+                return "decrease"
+            return None
+        if isinstance(rel, str):
+            if rel == "Increases":
+                return "increase"
+            if rel == "Decreases":
+                return "decrease"
+        return None
+
+    def _majority_direction_for_triples(triples):
+        # triples: list of (subject, relation, object)
+        dirs = [d for (_, rel, _) in triples for d in (_rel_dir(rel),) if d is not None]
+        if not dirs:
+            return set()
+        counts = Counter(dirs)
+        common = counts.most_common()
+        if len(common) == 1:
+            return {common[0][0]}
+        # handle tie: if top two equal, return empty set (no majority)
+        if common[0][1] == common[1][1]:
+            return set()
+        return {common[0][0]}
+
+    # One label per doc per annotator: {'increase'} or {'decrease'} or empty set
+    df["event_relation_direction_label"] = df["triples_label_form"].apply(_majority_direction_for_triples)
+
+    # Diagnostics for the derived direction label (same pipeline as other label analyses)
+    print_label_distribution_descriptives(
+        df,
+        "event_relation_direction_label",
+        "Event relation direction (majority per doc per annotator)",
+    )
+    plot_label_frequency_histogram(
+        df,
+        "event_relation_direction_label",
+        "Event relation direction frequency histogram",
+        f"./export/event-direction-frequency-{'-'.join([str(a) for a in project_id_list])}.html",
+    )
+    print_label_assignment_contingency_table(
+        df,
+        "event_relation_direction_label",
+        "Event relation direction contingency table (annotator x label)",
+        f"./export/event-direction-contingency-{'-'.join([str(a) for a in project_id_list])}.csv",
+    )
+    print_label_distribution_difference_test(
+        df,
+        "event_relation_direction_label",
+        "Event relation direction distribution difference test across annotators",
+    )
+    print_single_label_chi_tests(
+        df,
+        "event_relation_direction_label",
+        "Event relation direction single-label chi-square tests across annotators",
+    )
+
+    all_ann = sorted(df["annotator"].unique())
+    overall_simple = compute_overall_simple_agreement(df, all_ann, "event_relation_direction_label")
+    overall_simple_str = f"{overall_simple:.4f}" if overall_simple is not None else "N/A"
+    print(f"\nOverall simple agreement for event direction (all annotators): {overall_simple_str}")
 
     print_label_distribution_descriptives(
         df,
@@ -989,6 +1075,41 @@ if __name__ == "__main__":
                 fm_score = val["subjects_free_marginal_kappa"].get(label)
             fm_str = f"{fm_score:.4f}" if fm_score is not None else "N/A"
             print(f"    {label}: alpha={alpha_str}  fm_kappa={fm_str}")
+
+    # --- Event direction kappa (free-marginal) per subset ---
+    event_direction_kappa_store = {}
+    for subset in subsets:
+        key = "-".join(str(a) for a in subset)
+        per_label_kappa = compute_label_free_marginal_kappa(df, subset, "event_relation_direction_label")
+        overall_kappa = compute_overall_free_marginal_kappa(df, subset, "event_relation_direction_label")
+        per_label_alpha = compute_label_alpha(df, subset, "event_relation_direction_label")
+        overall_alpha = compute_overall_alpha(df, subset, "event_relation_direction_label")
+        overall_simple = compute_overall_simple_agreement(df, subset, "event_relation_direction_label")
+        event_direction_kappa_store[key] = {
+            "per_label": per_label_kappa,
+            "overall_free_marginal_kappa": overall_kappa,
+            "per_label_alpha": per_label_alpha,
+            "overall_alpha": overall_alpha,
+            "overall_simple": overall_simple,
+        }
+
+    print("\nEvent relation direction free-marginal kappa:")
+    for key, val in event_direction_kappa_store.items():
+        overall = val.get("overall_free_marginal_kappa")
+        overall_str = f"{overall:.4f}" if overall is not None else "N/A"
+        overall_alpha = val.get("overall_alpha")
+        overall_alpha_str = f"{overall_alpha:.4f}" if overall_alpha is not None else "N/A"
+        overall_simple = val.get("overall_simple")
+        overall_simple_str = f"{overall_simple:.4f}" if overall_simple is not None else "N/A"
+        print(f"  {key}: overall_fm_kappa={overall_str}  overall_alpha={overall_alpha_str}  overall_simple={overall_simple_str}")
+        per_label = val.get("per_label") or {}
+        per_label_alpha = val.get("per_label_alpha") or {}
+        for label in sorted(set(list(per_label.keys()) + list(per_label_alpha.keys()))):
+            score = per_label.get(label)
+            score_str = f"{score:.4f}" if score is not None else "N/A"
+            alpha_score = per_label_alpha.get(label)
+            alpha_score_str = f"{alpha_score:.4f}" if alpha_score is not None else "N/A"
+            print(f"    {label}: fm_kappa={score_str}  alpha={alpha_score_str}")
 
     print("\n--- Inflation-linked reduced merged super-label IAA ---")
     inflation_linked_reduced_merged_alpha_store = {}
