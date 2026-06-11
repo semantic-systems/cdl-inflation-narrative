@@ -6,7 +6,6 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import krippendorff
-from scipy.stats import chi2
 
 
 
@@ -300,131 +299,7 @@ def plot_overall_alpha_by_subset(alpha_store, title, out_html_path):
 
 
 
-def chi_square_independence_stat(contingency):
-    grand_total = contingency.sum()
-    if grand_total == 0:
-        return 0.0
 
-    row_sums = contingency.sum(axis=1, keepdims=True)
-    col_sums = contingency.sum(axis=0, keepdims=True)
-    expected = row_sums @ col_sums / grand_total
-    valid = expected > 0
-
-    chi2 = np.sum(((contingency - expected) ** 2)[valid] / expected[valid])
-    return float(chi2)
-
-
-def chi_square_sf(chi2_stat, dof):
-    """Asymptotic right-tail p-value for chi-square using SciPy."""
-    if dof <= 0:
-        return None
-    if chi2_stat <= 0:
-        return 1.0
-    return float(chi2.sf(chi2_stat, dof))
-
-
-def build_assignment_contingency(df, label_col):
-    label_assignments = []
-    for _, row in df.iterrows():
-        annotator = row["annotator"]
-        for label in row[label_col]:
-            label_assignments.append((annotator, label))
-
-    if not label_assignments:
-        return [], [], np.zeros((0, 0), dtype=float)
-
-    annotators = sorted({annotator for annotator, _ in label_assignments})
-    labels = sorted({label for _, label in label_assignments})
-    annotator_to_idx = {annotator: i for i, annotator in enumerate(annotators)}
-    label_to_idx = {label: j for j, label in enumerate(labels)}
-
-    annotator_idx = np.array([annotator_to_idx[a] for a, _ in label_assignments], dtype=int)
-    label_idx = np.array([label_to_idx[l] for _, l in label_assignments], dtype=int)
-
-    contingency = np.zeros((len(annotators), len(labels)), dtype=float)
-    np.add.at(contingency, (annotator_idx, label_idx), 1)
-    return annotators, labels, contingency
-
-
-def print_label_assignment_contingency_table(df, label_col, title, out_csv_path=None):
-    annotators, labels, contingency = build_assignment_contingency(df, label_col)
-
-    print(f"\n{title}")
-    if contingency.size == 0:
-        print("No label assignments available for contingency table.")
-        return
-
-    contingency_df = pd.DataFrame(contingency.astype(int), index=annotators, columns=labels)
-    contingency_df["row_total"] = contingency_df.sum(axis=1)
-    col_totals = contingency_df.sum(axis=0)
-    contingency_df.loc["col_total"] = col_totals
-    print(contingency_df.to_string())
-
-    if out_csv_path is not None:
-        contingency_df.to_csv(out_csv_path, encoding="utf-8")
-        print(f"Saved contingency table to {out_csv_path}")
-
-
-def print_label_distribution_difference_test(df, label_col, title):
-    annotators, labels, contingency = build_assignment_contingency(df, label_col)
-    if contingency.size == 0:
-        print(f"\n{title}")
-        print("No label assignments available for distribution-difference test.")
-        return
-
-    n_annotators = len(annotators)
-    n_labels = len(labels)
-
-    chi2_obs = chi_square_independence_stat(contingency)
-    dof = (n_annotators - 1) * (n_labels - 1)
-    p_value = chi_square_sf(chi2_obs, dof)
-
-    print(f"\n{title}")
-    print(
-        "Asymptotic chi-square test (H0: annotator and label are independent): "
-        f"chi2={chi2_obs:.4f}, dof={dof}, p={p_value:.6f}"
-    )
-    if p_value < 0.05:
-        print("Result: reject H0 at 5% level; label distributions differ across annotators.")
-    else:
-        print("Result: fail to reject H0 at 5% level; no strong evidence of distribution differences.")
-
-
-def print_single_label_chi_tests(df, label_col, title):
-    print(f"\n{title}")
-
-    annotators = sorted(df["annotator"].unique())
-    labels = sorted({label for label_set in df[label_col] for label in label_set})
-    if not labels:
-        print("No labels available for single-label chi-square tests.")
-        return
-
-    annotator_to_idx = {annotator: i for i, annotator in enumerate(annotators)}
-    obs_annotator_idx = np.array([annotator_to_idx[a] for a in df["annotator"]], dtype=int)
-    n_annotators = len(annotators)
-    dof = n_annotators - 1
-
-    results = []
-    for label in labels:
-        present = np.array([1 if label in label_set else 0 for label_set in df[label_col]], dtype=float)
-        totals = np.bincount(obs_annotator_idx, minlength=n_annotators).astype(float)
-        present_counts = np.bincount(obs_annotator_idx, weights=present, minlength=n_annotators)
-        absent_counts = totals - present_counts
-        contingency = np.column_stack([present_counts, absent_counts])
-
-        chi2_obs = chi_square_independence_stat(contingency)
-        p_value = chi_square_sf(chi2_obs, dof)
-        results.append((label, chi2_obs, p_value, present_counts, totals))
-
-    for label, chi2_obs, p_value, present_counts, totals in sorted(results, key=lambda x: (x[2], -x[1], x[0])):
-        shares = [
-            f"{annotator}:{int(present_counts[i])}/{int(totals[i])} ({(present_counts[i] / totals[i] * 100.0) if totals[i] else 0.0:.1f}%)"
-            for i, annotator in enumerate(annotators)
-        ]
-        print(
-            f"  {label}: chi2={chi2_obs:.4f}, dof={dof}, p={p_value:.6f}, "
-            f"per-annotator={'; '.join(shares)}"
-        )
 
 
 def compute_label_alpha(df, annotator_list, label_side):
@@ -773,11 +648,7 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(rows)
 
-<<<<<<< HEAD
     EXCLUDED_LABELS = {"Base Effect", "Pandemic", "Trade Balance", "Mismanagement", "Price-Gouging", "Inflation Expectations"}
-=======
-    EXCLUDED_LABELS = {"Base Effect", "Pandemic", "Trade Balance", "Mismanagement", "Inflation Expectations"}
->>>>>>> 12289c4d0bbc92d43d77991ff8470f49bd7085ad
 
     def exclude_labels(label_set):
         return {label for label in label_set if label not in EXCLUDED_LABELS}
@@ -832,22 +703,8 @@ if __name__ == "__main__":
         "Event relation direction frequency histogram",
         f"./export/event-direction-frequency-{'-'.join([str(a) for a in project_id_list])}.html",
     )
-    print_label_assignment_contingency_table(
-        df,
-        "event_relation_direction_label",
-        "Event relation direction contingency table (annotator x label)",
-        f"./export/event-direction-contingency-{'-'.join([str(a) for a in project_id_list])}.csv",
-    )
-    print_label_distribution_difference_test(
-        df,
-        "event_relation_direction_label",
-        "Event relation direction distribution difference test across annotators",
-    )
-    print_single_label_chi_tests(
-        df,
-        "event_relation_direction_label",
-        "Event relation direction single-label chi-square tests across annotators",
-    )
+    # Contingency table output removed.
+    # Co-occurrence / contingency diagnostics removed.
 
     all_ann = sorted(df["annotator"].unique())
     overall_simple = compute_overall_simple_agreement(df, all_ann, "event_relation_direction_label")
@@ -865,22 +722,8 @@ if __name__ == "__main__":
         "Raw subject-label frequency histogram across annotators",
         f"./export/subject-label-frequency-raw-{'-'.join([str(a) for a in project_id_list])}.html",
     )
-    print_label_assignment_contingency_table(
-        df,
-        "subject_labels_raw",
-        "Raw subject-label contingency table (annotator x label)",
-        f"./export/contingency-raw-{'-'.join([str(a) for a in project_id_list])}.csv",
-    )
-    print_label_distribution_difference_test(
-        df,
-        "subject_labels_raw",
-        "Raw subject-label distribution difference test across annotators",
-    )
-    print_single_label_chi_tests(
-        df,
-        "subject_labels_raw",
-        "Raw single-label chi-square tests across annotators",
-    )
+    # Contingency table output removed.
+    # Co-occurrence / contingency diagnostics removed.
     print_label_distribution_descriptives(
         df,
         "subject_labels",
@@ -892,22 +735,8 @@ if __name__ == "__main__":
         "Mapped subject-label frequency histogram across annotators",
         f"./export/subject-label-frequency-mapped-{'-'.join([str(a) for a in project_id_list])}.html",
     )
-    print_label_assignment_contingency_table(
-        df,
-        "subject_labels",
-        "Mapped subject-label contingency table (annotator x label)",
-        f"./export/contingency-mapped-{'-'.join([str(a) for a in project_id_list])}.csv",
-    )
-    print_label_distribution_difference_test(
-        df,
-        "subject_labels",
-        "Mapped subject-label distribution difference test across annotators",
-    )
-    print_single_label_chi_tests(
-        df,
-        "subject_labels",
-        "Mapped single-label chi-square tests across annotators",
-    )
+    # Contingency table output removed.
+    # Co-occurrence / contingency diagnostics removed.
 
     subsets = [project_id_list] + [list(c) for c in combinations(project_id_list, len(project_id_list) - 1)]
 
@@ -919,7 +748,7 @@ if __name__ == "__main__":
         "Labor": {"Labor Shortage", "Wages"},
         "Climate": {"Climate"},
         "War": {"War"},
-        "Monetary": {"Monetary Policy"}, # exchange rates
+        "Monetary Policy": {"Monetary Policy"}, # exchange rates
         #"Inflation Expectations": {"Inflation Expectations"},
         "Exchange Rates": {"Exchange Rates"},
         "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
@@ -960,10 +789,15 @@ if __name__ == "__main__":
 
     # --- Reduced Macroeconomic Super-label Analysis ---
     REDUCED_LABEL_GROUPS = {
-        "Aggregate Demand": {
-            "Demand (residual)", "Pent-up Demand", "Demand Shift",
+
+        "Demand": {
+            "Pent-up Demand", "Demand Shift", "Demand (residual)"
+        },
+
+        "Fiscal Policy & Government Debt": {
             "Government Debt", "Government Spending"
         },
+
         "Tax Increases": {
             "Tax Increases"
         },
@@ -988,20 +822,10 @@ if __name__ == "__main__":
         "Exchange Rates": {
             "Exchange Rates"
         },
-<<<<<<< HEAD
 
-        "Monetary Dynamics": {
-            "Monetary Policy"
-        }
-=======
         "Monetary Policy": {
             "Monetary Policy"
-        }, 
-        
-        "Exchange Rates": {
-            "Exchange Rates"
-        },
->>>>>>> 12289c4d0bbc92d43d77991ff8470f49bd7085ad
+        }
     }
 
     def build_label_to_group_map(label_groups):
