@@ -660,7 +660,7 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(rows)
 
-    EXCLUDED_LABELS = {"Base Effect", "Pandemic", "Trade Balance", "Mismanagement"}
+    EXCLUDED_LABELS = {"Base Effect", "Pandemic", "Trade Balance", "Mismanagement", "Price-Gouging", "Inflation Expectations"}
 
     def exclude_labels(label_set):
         return {label for label in label_set if label not in EXCLUDED_LABELS}
@@ -741,8 +741,7 @@ if __name__ == "__main__":
         "Input Costs": {"Housing Costs", "Medical Costs", "Education Costs"},
         "Energy": {"Energy Prices"},
         "Food": {"Food Prices"},
-        "Taxation": {"Tax Increases"},
-        "Market Power": {"Price-Gouging"}
+        "Taxation": {"Tax Increases"}
     }
 
     # --- Reduced Macroeconomic Super-label Analysis ---
@@ -772,11 +771,12 @@ if __name__ == "__main__":
             "Education Costs"
         },
         
-        "Market Power": {
-            "Price-Gouging"
+        "Exchange Rates": {
+            "Exchange Rates"
         },
-        "Monetary Dynamics & Expectations": {
-            "Monetary Policy", "Inflation Expectations", "Exchange Rates"
+
+        "Monetary Dynamics": {
+            "Monetary Policy"
         }
     }
 
@@ -977,7 +977,7 @@ if __name__ == "__main__":
     out_df.to_csv(csv_path, index=False, encoding="utf-8")
     print(f"\nSaved annotation data to {csv_path}")
 
-    # Final compact export: text + agreed annotations for three (super-)label variants.
+    # Final compact export: only 3-of-4 agreed annotations for three (super-)label variants.
     category_out_df = out_df[["doc_id", "text"]].copy()
     category_out_df["annotations_single_labels"] = [
         compute_agreed_labels(i, "inflation_linked_subject_labels") for i in item_ids
