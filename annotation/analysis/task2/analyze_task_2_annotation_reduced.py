@@ -404,9 +404,6 @@ if __name__ == "__main__":
     for feature_column, configs in configurations.items():
         graph_type = configs["graph_type"]
         for metric_type, metric in configs["graph_distance_metric"].items():
-            if feature_column == "feature_four" or feature_column == "feature_six" or feature_column == "feature_eight":
-                if metric_type == "moderate":
-                    continue
             alpha = compute_iaa(df=df_task2_annotation, project_id_list=project_id_list,
                                 feature_column=feature_column, annotator_list=annotator_list,
                                 empty_graph_indicator=empty_graph_indicator,
