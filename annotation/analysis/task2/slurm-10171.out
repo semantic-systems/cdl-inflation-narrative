@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.11/site-packages/requests/models.py", line 1116, in json
+    return complexjson.loads(self.text, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.11/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.11/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.11/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/task2/analyze_task_2_annotation_reduced.py", line 340, in <module>
+    project_annotations = get_task_2_annotation_json(project_id_list)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/task2/analyze_task_2_annotation_reduced.py", line 104, in get_task_2_annotation_json
+    project_annotations.extend(export_project_to_json(project_id))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/task2/analyze_task_2_annotation_reduced.py", line 90, in export_project_to_json
+    export = response.json()
+             ^^^^^^^^^^^^^^^
+  File "/storage/weinig/anaconda3/envs/cdl/lib/python3.11/site-packages/requests/models.py", line 1120, in json
+    raise RequestsJSONDecodeError(e.msg, e.doc, e.pos)
+requests.exceptions.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
