@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/task2/analyze_task_2_annotation_reduced.py", line 349, in <module>
+    project_annotations = get_task_2_annotation_json(project_id_list)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/storage/weinig/cdl-inflation-narrative/annotation/analysis/task2/analyze_task_2_annotation_reduced.py", line 109, in get_task_2_annotation_json
+    raise FileNotFoundError(
+FileNotFoundError: Missing local export files: export/annotation_task2_project_11.json, export/annotation_task2_project_12.json, export/annotation_task2_project_13.json, export/annotation_task2_project_14.json.
+The script no longer downloads exports automatically — please place the JSON files in './export/' before running.
