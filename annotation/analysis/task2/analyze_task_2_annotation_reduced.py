@@ -96,12 +96,21 @@ def export_project_to_json(project_id, write_to_dist=True):
 
 def get_task_2_annotation_json(project_id_list):
     project_annotations = []
+    missing_files = []
     for project_id in project_id_list:
-        if Path(f'./export/annotation_task2_project_{project_id}.json').exists():
-            with open(f'./export/annotation_task2_project_{project_id}.json', "r") as f:
+        path = Path(f'./export/annotation_task2_project_{project_id}.json')
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
                 project_annotations.extend(json.load(f))
         else:
-            project_annotations.extend(export_project_to_json(project_id))
+            missing_files.append(str(path))
+
+    if missing_files:
+        raise FileNotFoundError(
+            f"Missing local export files: {', '.join(missing_files)}.\n"
+            "The script no longer downloads exports automatically — please place the JSON files in './export/' before running."
+        )
+
     return project_annotations
 
 
