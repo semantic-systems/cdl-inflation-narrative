@@ -1,0 +1,508 @@
+
+Event relation direction (majority per doc per annotator)
+All annotators pooled (total label assignments: 374):
+  increase: count=329, share=87.97%
+  decrease: count=45, share=12.03%
+By annotator:
+  Annotator 11 (total label assignments: 99):
+    increase: count=89, share=89.90%
+    decrease: count=10, share=10.10%
+  Annotator 12 (total label assignments: 95):
+    increase: count=84, share=88.42%
+    decrease: count=11, share=11.58%
+  Annotator 13 (total label assignments: 88):
+    increase: count=78, share=88.64%
+    decrease: count=10, share=11.36%
+  Annotator 14 (total label assignments: 92):
+    increase: count=78, share=84.78%
+    decrease: count=14, share=15.22%
+
+Event relation direction frequency histogram
+Matplotlib is not installed; skipping PDF export.
+Plotly is not installed; skipping HTML export.
+
+Overall simple agreement for event direction (all annotators): 0.7019
+
+Raw subject-label distribution across all four annotators
+All annotators pooled (total label assignments: 897):
+  Energy Prices: count=159, share=17.73%
+  Monetary Policy: count=109, share=12.15%
+  Food Prices: count=85, share=9.48%
+  Supply (residual): count=81, share=9.03%
+  Wages: count=75, share=8.36%
+  Supply Chain Issues: count=58, share=6.47%
+  Demand (residual): count=50, share=5.57%
+  Labor Shortage: count=39, share=4.35%
+  Exchange Rates: count=36, share=4.01%
+  Government Spending: count=29, share=3.23%
+  War: count=29, share=3.23%
+  Tax Increases: count=28, share=3.12%
+  Pent-up Demand: count=27, share=3.01%
+  Climate: count=24, share=2.68%
+  Demand Shift: count=19, share=2.12%
+  Transportation Costs: count=19, share=2.12%
+  Medical Costs: count=11, share=1.23%
+  Government Debt: count=8, share=0.89%
+  Education Costs: count=7, share=0.78%
+  Housing Costs: count=4, share=0.45%
+By annotator:
+  Annotator 11 (total label assignments: 210):
+    Energy Prices: count=37, share=17.62%
+    Food Prices: count=23, share=10.95%
+    Monetary Policy: count=22, share=10.48%
+    Wages: count=21, share=10.00%
+    Supply (residual): count=15, share=7.14%
+    Supply Chain Issues: count=15, share=7.14%
+    Labor Shortage: count=12, share=5.71%
+    War: count=9, share=4.29%
+    Exchange Rates: count=8, share=3.81%
+    Government Spending: count=7, share=3.33%
+    Climate: count=6, share=2.86%
+    Pent-up Demand: count=6, share=2.86%
+    Tax Increases: count=6, share=2.86%
+    Demand (residual): count=5, share=2.38%
+    Demand Shift: count=4, share=1.90%
+    Government Debt: count=4, share=1.90%
+    Medical Costs: count=4, share=1.90%
+    Transportation Costs: count=4, share=1.90%
+    Education Costs: count=2, share=0.95%
+  Annotator 12 (total label assignments: 252):
+    Energy Prices: count=44, share=17.46%
+    Monetary Policy: count=30, share=11.90%
+    Food Prices: count=27, share=10.71%
+    Supply (residual): count=27, share=10.71%
+    Demand (residual): count=17, share=6.75%
+    Wages: count=17, share=6.75%
+    Supply Chain Issues: count=15, share=5.95%
+    Labor Shortage: count=11, share=4.37%
+    Exchange Rates: count=10, share=3.97%
+    Climate: count=8, share=3.17%
+    Tax Increases: count=8, share=3.17%
+    Government Spending: count=7, share=2.78%
+    Pent-up Demand: count=6, share=2.38%
+    Transportation Costs: count=6, share=2.38%
+    War: count=6, share=2.38%
+    Demand Shift: count=4, share=1.59%
+    Medical Costs: count=4, share=1.59%
+    Education Costs: count=2, share=0.79%
+    Housing Costs: count=2, share=0.79%
+    Government Debt: count=1, share=0.40%
+  Annotator 13 (total label assignments: 243):
+    Energy Prices: count=40, share=16.46%
+    Demand (residual): count=25, share=10.29%
+    Monetary Policy: count=25, share=10.29%
+    Supply (residual): count=23, share=9.47%
+    Wages: count=22, share=9.05%
+    Food Prices: count=20, share=8.23%
+    Supply Chain Issues: count=15, share=6.17%
+    Exchange Rates: count=10, share=4.12%
+    Government Spending: count=9, share=3.70%
+    Pent-up Demand: count=9, share=3.70%
+    Tax Increases: count=9, share=3.70%
+    War: count=9, share=3.70%
+    Labor Shortage: count=8, share=3.29%
+    Climate: count=5, share=2.06%
+    Demand Shift: count=4, share=1.65%
+    Transportation Costs: count=3, share=1.23%
+    Education Costs: count=2, share=0.82%
+    Government Debt: count=2, share=0.82%
+    Medical Costs: count=2, share=0.82%
+    Housing Costs: count=1, share=0.41%
+  Annotator 14 (total label assignments: 192):
+    Energy Prices: count=38, share=19.79%
+    Monetary Policy: count=32, share=16.67%
+    Supply (residual): count=16, share=8.33%
+    Food Prices: count=15, share=7.81%
+    Wages: count=15, share=7.81%
+    Supply Chain Issues: count=13, share=6.77%
+    Exchange Rates: count=8, share=4.17%
+    Labor Shortage: count=8, share=4.17%
+    Demand Shift: count=7, share=3.65%
+    Government Spending: count=6, share=3.12%
+    Pent-up Demand: count=6, share=3.12%
+    Transportation Costs: count=6, share=3.12%
+    Climate: count=5, share=2.60%
+    Tax Increases: count=5, share=2.60%
+    War: count=5, share=2.60%
+    Demand (residual): count=3, share=1.56%
+    Education Costs: count=1, share=0.52%
+    Government Debt: count=1, share=0.52%
+    Housing Costs: count=1, share=0.52%
+    Medical Costs: count=1, share=0.52%
+
+Raw subject-label frequency histogram across annotators
+Matplotlib is not installed; skipping PDF export.
+Plotly is not installed; skipping HTML export.
+
+Mapped subject-label distribution across all four annotators
+All annotators pooled (total label assignments: 897):
+  Energy Prices: count=159, share=17.73%
+  Monetary Policy: count=109, share=12.15%
+  Food Prices: count=85, share=9.48%
+  Supply (residual): count=81, share=9.03%
+  Wages: count=75, share=8.36%
+  Supply Chain Issues: count=58, share=6.47%
+  Demand (residual): count=50, share=5.57%
+  Labor Shortage: count=39, share=4.35%
+  Exchange Rates: count=36, share=4.01%
+  Government Spending: count=29, share=3.23%
+  War: count=29, share=3.23%
+  Tax Increases: count=28, share=3.12%
+  Pent-up Demand: count=27, share=3.01%
+  Climate: count=24, share=2.68%
+  Demand Shift: count=19, share=2.12%
+  Transportation Costs: count=19, share=2.12%
+  Medical Costs: count=11, share=1.23%
+  Government Debt: count=8, share=0.89%
+  Education Costs: count=7, share=0.78%
+  Housing Costs: count=4, share=0.45%
+By annotator:
+  Annotator 11 (total label assignments: 210):
+    Energy Prices: count=37, share=17.62%
+    Food Prices: count=23, share=10.95%
+    Monetary Policy: count=22, share=10.48%
+    Wages: count=21, share=10.00%
+    Supply (residual): count=15, share=7.14%
+    Supply Chain Issues: count=15, share=7.14%
+    Labor Shortage: count=12, share=5.71%
+    War: count=9, share=4.29%
+    Exchange Rates: count=8, share=3.81%
+    Government Spending: count=7, share=3.33%
+    Climate: count=6, share=2.86%
+    Pent-up Demand: count=6, share=2.86%
+    Tax Increases: count=6, share=2.86%
+    Demand (residual): count=5, share=2.38%
+    Demand Shift: count=4, share=1.90%
+    Government Debt: count=4, share=1.90%
+    Medical Costs: count=4, share=1.90%
+    Transportation Costs: count=4, share=1.90%
+    Education Costs: count=2, share=0.95%
+  Annotator 12 (total label assignments: 252):
+    Energy Prices: count=44, share=17.46%
+    Monetary Policy: count=30, share=11.90%
+    Food Prices: count=27, share=10.71%
+    Supply (residual): count=27, share=10.71%
+    Demand (residual): count=17, share=6.75%
+    Wages: count=17, share=6.75%
+    Supply Chain Issues: count=15, share=5.95%
+    Labor Shortage: count=11, share=4.37%
+    Exchange Rates: count=10, share=3.97%
+    Climate: count=8, share=3.17%
+    Tax Increases: count=8, share=3.17%
+    Government Spending: count=7, share=2.78%
+    Pent-up Demand: count=6, share=2.38%
+    Transportation Costs: count=6, share=2.38%
+    War: count=6, share=2.38%
+    Demand Shift: count=4, share=1.59%
+    Medical Costs: count=4, share=1.59%
+    Education Costs: count=2, share=0.79%
+    Housing Costs: count=2, share=0.79%
+    Government Debt: count=1, share=0.40%
+  Annotator 13 (total label assignments: 243):
+    Energy Prices: count=40, share=16.46%
+    Demand (residual): count=25, share=10.29%
+    Monetary Policy: count=25, share=10.29%
+    Supply (residual): count=23, share=9.47%
+    Wages: count=22, share=9.05%
+    Food Prices: count=20, share=8.23%
+    Supply Chain Issues: count=15, share=6.17%
+    Exchange Rates: count=10, share=4.12%
+    Government Spending: count=9, share=3.70%
+    Pent-up Demand: count=9, share=3.70%
+    Tax Increases: count=9, share=3.70%
+    War: count=9, share=3.70%
+    Labor Shortage: count=8, share=3.29%
+    Climate: count=5, share=2.06%
+    Demand Shift: count=4, share=1.65%
+    Transportation Costs: count=3, share=1.23%
+    Education Costs: count=2, share=0.82%
+    Government Debt: count=2, share=0.82%
+    Medical Costs: count=2, share=0.82%
+    Housing Costs: count=1, share=0.41%
+  Annotator 14 (total label assignments: 192):
+    Energy Prices: count=38, share=19.79%
+    Monetary Policy: count=32, share=16.67%
+    Supply (residual): count=16, share=8.33%
+    Food Prices: count=15, share=7.81%
+    Wages: count=15, share=7.81%
+    Supply Chain Issues: count=13, share=6.77%
+    Exchange Rates: count=8, share=4.17%
+    Labor Shortage: count=8, share=4.17%
+    Demand Shift: count=7, share=3.65%
+    Government Spending: count=6, share=3.12%
+    Pent-up Demand: count=6, share=3.12%
+    Transportation Costs: count=6, share=3.12%
+    Climate: count=5, share=2.60%
+    Tax Increases: count=5, share=2.60%
+    War: count=5, share=2.60%
+    Demand (residual): count=3, share=1.56%
+    Education Costs: count=1, share=0.52%
+    Government Debt: count=1, share=0.52%
+    Housing Costs: count=1, share=0.52%
+    Medical Costs: count=1, share=0.52%
+
+Mapped subject-label frequency histogram across annotators
+Matplotlib is not installed; skipping PDF export.
+Plotly is not installed; skipping HTML export.
+
+Merged super-label counts:
+  Exogenous Supply & Commodity Shocks: 247
+  Monetary Policy: 109
+  Labor Market Dynamics: 95
+  Private Demand Shocks: 87
+  External / Geopolitical Shocks: 85
+  Fiscal Policy & Government Action: 62
+  Micro-Frictions: 20
+
+Reduced merged super-label counts:
+  Exogenous Supply Shocks: 247
+  Monetary Policy: 109
+  Labor Market Dynamics: 95
+  Demand: 87
+  Fiscal Policy & Government Debt: 37
+  Exchange Rates: 36
+  War: 29
+  Tax Increases: 28
+  Climate: 24
+  Structural Costs & Frictions: 20
+
+--- Inflation-linked merged super-label IAA ---
+  11-12-13-14: alpha=0.6606  ac1=0.8101  simple=0.7775  fm_kappa=N/A
+  11-12-13: alpha=0.7116  ac1=0.8296  simple=0.8393  fm_kappa=N/A
+  11-12-14: alpha=0.6867  ac1=0.8286  simple=0.8338  fm_kappa=N/A
+  11-13-14: alpha=0.6113  ac1=0.7920  simple=0.7967  fm_kappa=N/A
+  12-13-14: alpha=0.6297  ac1=0.7908  simple=0.7995  fm_kappa=N/A
+
+Inflation-linked merged super-label single-label alpha:
+  11-12-13-14:
+    Exogenous Supply & Commodity Shocks: alpha=0.6818  fm_kappa=N/A
+    External / Geopolitical Shocks: alpha=0.6192  fm_kappa=N/A
+    Fiscal Policy & Government Action: alpha=0.5081  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7375  fm_kappa=N/A
+    Micro-Frictions: alpha=0.6507  fm_kappa=N/A
+    Monetary Policy: alpha=0.5285  fm_kappa=N/A
+    Private Demand Shocks: alpha=0.5157  fm_kappa=N/A
+  11-12-13:
+    Exogenous Supply & Commodity Shocks: alpha=0.7213  fm_kappa=N/A
+    External / Geopolitical Shocks: alpha=0.6744  fm_kappa=N/A
+    Fiscal Policy & Government Action: alpha=0.6202  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7528  fm_kappa=N/A
+    Micro-Frictions: alpha=0.8237  fm_kappa=N/A
+    Monetary Policy: alpha=0.6012  fm_kappa=N/A
+    Private Demand Shocks: alpha=0.5689  fm_kappa=N/A
+  11-12-14:
+    Exogenous Supply & Commodity Shocks: alpha=0.6963  fm_kappa=N/A
+    External / Geopolitical Shocks: alpha=0.6411  fm_kappa=N/A
+    Fiscal Policy & Government Action: alpha=0.5160  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7960  fm_kappa=N/A
+    Micro-Frictions: alpha=0.6510  fm_kappa=N/A
+    Monetary Policy: alpha=0.5346  fm_kappa=N/A
+    Private Demand Shocks: alpha=0.5561  fm_kappa=N/A
+  11-13-14:
+    Exogenous Supply & Commodity Shocks: alpha=0.6904  fm_kappa=N/A
+    External / Geopolitical Shocks: alpha=0.5356  fm_kappa=N/A
+    Fiscal Policy & Government Action: alpha=0.4154  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.6879  fm_kappa=N/A
+    Micro-Frictions: alpha=0.5199  fm_kappa=N/A
+    Monetary Policy: alpha=0.4972  fm_kappa=N/A
+    Private Demand Shocks: alpha=0.4223  fm_kappa=N/A
+  12-13-14:
+    Exogenous Supply & Commodity Shocks: alpha=0.6188  fm_kappa=N/A
+    External / Geopolitical Shocks: alpha=0.6200  fm_kappa=N/A
+    Fiscal Policy & Government Action: alpha=0.4725  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7127  fm_kappa=N/A
+    Micro-Frictions: alpha=0.5527  fm_kappa=N/A
+    Monetary Policy: alpha=0.4842  fm_kappa=N/A
+    Private Demand Shocks: alpha=0.5074  fm_kappa=N/A
+
+Event relation direction free-marginal kappa:
+  11-12-13-14: overall_fm_kappa=N/A  overall_alpha=0.6798  overall_simple=0.7019
+    decrease: fm_kappa=N/A  alpha=0.3786
+    increase: fm_kappa=N/A  alpha=0.4055
+  11-12-13: overall_fm_kappa=N/A  overall_alpha=0.7029  overall_simple=0.7788
+    decrease: fm_kappa=N/A  alpha=0.3931
+    increase: fm_kappa=N/A  alpha=0.4109
+  11-12-14: overall_fm_kappa=N/A  overall_alpha=0.7100  overall_simple=0.7837
+    decrease: fm_kappa=N/A  alpha=0.4226
+    increase: fm_kappa=N/A  alpha=0.4516
+  11-13-14: overall_fm_kappa=N/A  overall_alpha=0.6181  overall_simple=0.7163
+    decrease: fm_kappa=N/A  alpha=0.2432
+    increase: fm_kappa=N/A  alpha=0.3179
+  12-13-14: overall_fm_kappa=N/A  overall_alpha=0.6884  overall_simple=0.7692
+    decrease: fm_kappa=N/A  alpha=0.4547
+    increase: fm_kappa=N/A  alpha=0.4421
+
+--- Inflation-linked reduced merged super-label IAA ---
+  11-12-13-14: alpha=0.6736  ac1=0.8753  simple=0.8346  fm_kappa=N/A
+  11-12-13: alpha=0.7173  ac1=0.8857  simple=0.8779  fm_kappa=N/A
+  11-12-14: alpha=0.6972  ac1=0.8875  simple=0.8769  fm_kappa=N/A
+  11-13-14: alpha=0.6309  ac1=0.8652  simple=0.8519  fm_kappa=N/A
+  12-13-14: alpha=0.6464  ac1=0.8631  simple=0.8519  fm_kappa=N/A
+
+Inflation-linked reduced merged super-label single-label alpha:
+  11-12-13-14:
+    Climate: alpha=0.6489  fm_kappa=N/A
+    Demand: alpha=0.5157  fm_kappa=N/A
+    Exchange Rates: alpha=0.5954  fm_kappa=N/A
+    Exogenous Supply Shocks: alpha=0.6818  fm_kappa=N/A
+    Fiscal Policy & Government Debt: alpha=0.4180  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7375  fm_kappa=N/A
+    Monetary Policy: alpha=0.5285  fm_kappa=N/A
+    Structural Costs & Frictions: alpha=0.6507  fm_kappa=N/A
+    Tax Increases: alpha=0.6444  fm_kappa=N/A
+    War: alpha=0.5390  fm_kappa=N/A
+  11-12-13:
+    Climate: alpha=0.6648  fm_kappa=N/A
+    Demand: alpha=0.5689  fm_kappa=N/A
+    Exchange Rates: alpha=0.5958  fm_kappa=N/A
+    Exogenous Supply Shocks: alpha=0.7213  fm_kappa=N/A
+    Fiscal Policy & Government Debt: alpha=0.5221  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7528  fm_kappa=N/A
+    Monetary Policy: alpha=0.6012  fm_kappa=N/A
+    Structural Costs & Frictions: alpha=0.8237  fm_kappa=N/A
+    Tax Increases: alpha=0.7193  fm_kappa=N/A
+    War: alpha=0.6257  fm_kappa=N/A
+  11-12-14:
+    Climate: alpha=0.6279  fm_kappa=N/A
+    Demand: alpha=0.5561  fm_kappa=N/A
+    Exchange Rates: alpha=0.6099  fm_kappa=N/A
+    Exogenous Supply Shocks: alpha=0.6963  fm_kappa=N/A
+    Fiscal Policy & Government Debt: alpha=0.4145  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7960  fm_kappa=N/A
+    Monetary Policy: alpha=0.5346  fm_kappa=N/A
+    Structural Costs & Frictions: alpha=0.6510  fm_kappa=N/A
+    Tax Increases: alpha=0.7062  fm_kappa=N/A
+    War: alpha=0.5299  fm_kappa=N/A
+  11-13-14:
+    Climate: alpha=0.7018  fm_kappa=N/A
+    Demand: alpha=0.4223  fm_kappa=N/A
+    Exchange Rates: alpha=0.4799  fm_kappa=N/A
+    Exogenous Supply Shocks: alpha=0.6904  fm_kappa=N/A
+    Fiscal Policy & Government Debt: alpha=0.3558  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.6879  fm_kappa=N/A
+    Monetary Policy: alpha=0.4972  fm_kappa=N/A
+    Structural Costs & Frictions: alpha=0.5199  fm_kappa=N/A
+    Tax Increases: alpha=0.5531  fm_kappa=N/A
+    War: alpha=0.5125  fm_kappa=N/A
+  12-13-14:
+    Climate: alpha=0.6060  fm_kappa=N/A
+    Demand: alpha=0.5074  fm_kappa=N/A
+    Exchange Rates: alpha=0.6871  fm_kappa=N/A
+    Exogenous Supply Shocks: alpha=0.6188  fm_kappa=N/A
+    Fiscal Policy & Government Debt: alpha=0.3726  fm_kappa=N/A
+    Labor Market Dynamics: alpha=0.7127  fm_kappa=N/A
+    Monetary Policy: alpha=0.4842  fm_kappa=N/A
+    Structural Costs & Frictions: alpha=0.5527  fm_kappa=N/A
+    Tax Increases: alpha=0.5929  fm_kappa=N/A
+    War: alpha=0.4711  fm_kappa=N/A
+
+Inflation-linked single-label alpha (non-merged labels):
+  11-12-13-14:
+    Climate: alpha=0.6489  fm_kappa=N/A
+    Demand (residual): alpha=0.3380  fm_kappa=N/A
+    Demand Shift: alpha=0.1638  fm_kappa=N/A
+    Education Costs: alpha=0.8550  fm_kappa=N/A
+    Energy Prices: alpha=0.7806  fm_kappa=N/A
+    Exchange Rates: alpha=0.5954  fm_kappa=N/A
+    Food Prices: alpha=0.6686  fm_kappa=N/A
+    Government Debt: alpha=0.2371  fm_kappa=N/A
+    Government Spending: alpha=0.3960  fm_kappa=N/A
+    Housing Costs: alpha=0.3285  fm_kappa=N/A
+    Labor Shortage: alpha=0.5570  fm_kappa=N/A
+    Medical Costs: alpha=0.5963  fm_kappa=N/A
+    Monetary Policy: alpha=0.5285  fm_kappa=N/A
+    Pent-up Demand: alpha=0.5362  fm_kappa=N/A
+    Supply (residual): alpha=0.3179  fm_kappa=N/A
+    Supply Chain Issues: alpha=0.7393  fm_kappa=N/A
+    Tax Increases: alpha=0.6444  fm_kappa=N/A
+    Transportation Costs: alpha=0.3049  fm_kappa=N/A
+    Wages: alpha=0.7293  fm_kappa=N/A
+    War: alpha=0.5390  fm_kappa=N/A
+  11-12-13:
+    Climate: alpha=0.6648  fm_kappa=N/A
+    Demand (residual): alpha=0.4461  fm_kappa=N/A
+    Demand Shift: alpha=0.1546  fm_kappa=N/A
+    Education Costs: alpha=1.0000  fm_kappa=N/A
+    Energy Prices: alpha=0.7819  fm_kappa=N/A
+    Exchange Rates: alpha=0.5958  fm_kappa=N/A
+    Food Prices: alpha=0.6935  fm_kappa=N/A
+    Government Debt: alpha=0.2717  fm_kappa=N/A
+    Government Spending: alpha=0.4385  fm_kappa=N/A
+    Housing Costs: alpha=0.3290  fm_kappa=N/A
+    Labor Shortage: alpha=0.4853  fm_kappa=N/A
+    Medical Costs: alpha=0.7940  fm_kappa=N/A
+    Monetary Policy: alpha=0.6012  fm_kappa=N/A
+    Pent-up Demand: alpha=0.5740  fm_kappa=N/A
+    Supply (residual): alpha=0.3981  fm_kappa=N/A
+    Supply Chain Issues: alpha=0.7412  fm_kappa=N/A
+    Tax Increases: alpha=0.7193  fm_kappa=N/A
+    Transportation Costs: alpha=0.4817  fm_kappa=N/A
+    Wages: alpha=0.7500  fm_kappa=N/A
+    War: alpha=0.6257  fm_kappa=N/A
+  11-12-14:
+    Climate: alpha=0.6279  fm_kappa=N/A
+    Demand (residual): alpha=0.3065  fm_kappa=N/A
+    Demand Shift: alpha=0.2546  fm_kappa=N/A
+    Education Costs: alpha=0.7974  fm_kappa=N/A
+    Energy Prices: alpha=0.8092  fm_kappa=N/A
+    Exchange Rates: alpha=0.6099  fm_kappa=N/A
+    Food Prices: alpha=0.7026  fm_kappa=N/A
+    Government Debt: alpha=0.3224  fm_kappa=N/A
+    Government Spending: alpha=0.4142  fm_kappa=N/A
+    Housing Costs: alpha=0.3290  fm_kappa=N/A
+    Labor Shortage: alpha=0.7858  fm_kappa=N/A
+    Medical Costs: alpha=0.6579  fm_kappa=N/A
+    Monetary Policy: alpha=0.5346  fm_kappa=N/A
+    Pent-up Demand: alpha=0.7062  fm_kappa=N/A
+    Supply (residual): alpha=0.2725  fm_kappa=N/A
+    Supply Chain Issues: alpha=0.7761  fm_kappa=N/A
+    Tax Increases: alpha=0.7062  fm_kappa=N/A
+    Transportation Costs: alpha=0.4090  fm_kappa=N/A
+    Wages: alpha=0.7430  fm_kappa=N/A
+    War: alpha=0.5299  fm_kappa=N/A
+  11-13-14:
+    Climate: alpha=0.7018  fm_kappa=N/A
+    Demand (residual): alpha=0.2280  fm_kappa=N/A
+    Demand Shift: alpha=0.1199  fm_kappa=N/A
+    Education Costs: alpha=0.7974  fm_kappa=N/A
+    Energy Prices: alpha=0.7621  fm_kappa=N/A
+    Exchange Rates: alpha=0.4799  fm_kappa=N/A
+    Food Prices: alpha=0.6875  fm_kappa=N/A
+    Government Debt: alpha=0.2717  fm_kappa=N/A
+    Government Spending: alpha=0.3176  fm_kappa=N/A
+    Housing Costs: alpha=-0.0032  fm_kappa=N/A
+    Labor Shortage: alpha=0.4342  fm_kappa=N/A
+    Medical Costs: alpha=0.4173  fm_kappa=N/A
+    Monetary Policy: alpha=0.4972  fm_kappa=N/A
+    Pent-up Demand: alpha=0.4675  fm_kappa=N/A
+    Supply (residual): alpha=0.3224  fm_kappa=N/A
+    Supply Chain Issues: alpha=0.7481  fm_kappa=N/A
+    Tax Increases: alpha=0.5531  fm_kappa=N/A
+    Transportation Costs: alpha=0.1361  fm_kappa=N/A
+    Wages: alpha=0.6963  fm_kappa=N/A
+    War: alpha=0.5125  fm_kappa=N/A
+  12-13-14:
+    Climate: alpha=0.6060  fm_kappa=N/A
+    Demand (residual): alpha=0.3144  fm_kappa=N/A
+    Demand Shift: alpha=0.1199  fm_kappa=N/A
+    Education Costs: alpha=0.7974  fm_kappa=N/A
+    Energy Prices: alpha=0.7690  fm_kappa=N/A
+    Exchange Rates: alpha=0.6871  fm_kappa=N/A
+    Food Prices: alpha=0.5886  fm_kappa=N/A
+    Government Debt: alpha=-0.0097  fm_kappa=N/A
+    Government Spending: alpha=0.4150  fm_kappa=N/A
+    Housing Costs: alpha=0.4951  fm_kappa=N/A
+    Labor Shortage: alpha=0.4981  fm_kappa=N/A
+    Medical Costs: alpha=0.4173  fm_kappa=N/A
+    Monetary Policy: alpha=0.4842  fm_kappa=N/A
+    Pent-up Demand: alpha=0.4142  fm_kappa=N/A
+    Supply (residual): alpha=0.2750  fm_kappa=N/A
+    Supply Chain Issues: alpha=0.6921  fm_kappa=N/A
+    Tax Increases: alpha=0.5929  fm_kappa=N/A
+    Transportation Costs: alpha=0.1800  fm_kappa=N/A
+    Wages: alpha=0.7281  fm_kappa=N/A
+    War: alpha=0.4711  fm_kappa=N/A
+Saved super-category alpha scores to ./export/alpha-super-11-12-13-14.json
+
+Saved annotation data to ./export/annotations-11-12-13-14.csv
+Saved three-category super-label annotation data to ./export/annotations-three-category-superlabels-11-12-13-14.csv
