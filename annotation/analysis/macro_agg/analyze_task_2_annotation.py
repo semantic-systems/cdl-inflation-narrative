@@ -1029,7 +1029,7 @@ if __name__ == "__main__":
 
     # agreed_labels: labels selected by at least 3 annotators for each item
     all_annotators = [11, 12, 13]
-    min_votes_for_agreement = 3
+    min_votes_for_agreement = 2
 
     def compute_agreed_labels(item_id, label_col):
         item_df = df[df["item_id"] == item_id]
