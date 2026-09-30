@@ -1054,22 +1054,66 @@ if __name__ == "__main__":
     out_df.to_csv(csv_path, index=False, encoding="utf-8")
     print(f"\nSaved annotation data to {csv_path}")
 
-    # Final compact export: only 3-of-4 agreed annotations for three (super-)label variants.
-    category_out_df = out_df[["doc_id", "text"]].copy()
-    category_out_df["annotations_single_labels"] = [
-        compute_agreed_labels(i, "inflation_linked_subject_labels") for i in item_ids
-    ]
-    category_out_df["annotations_super_labels"] = [
-        compute_agreed_labels(i, "inflation_linked_subject_labels_merged") for i in item_ids
-    ]
-    category_out_df["annotations_reduced_super_labels"] = [
-        compute_agreed_labels(i, "inflation_linked_subject_labels_reduced_merged") for i in item_ids
-    ]
+    # --- Per-annotator export for meta annotation ---
+    # Exports every annotation of ANNOTATORS (not only the agreed ones) for all three
+    # (super-)label variants, and flags the documents where the annotators share no label.
+    ANNOTATORS = [11, 12, 13]
+    MIN_VOTES_FOR_AGREEMENT = 2            # a label counts as agreed if >= 2 annotators chose it
+    META_LEVEL = "reduced_super_labels"    # label variant used to decide whether meta annotation is needed
 
-    category_csv_path = f"./export/annotations-three-category-superlabels-{'-'.join([str(a) for a in project_id_list])}.csv"
+    LABEL_VARIANTS = {
+        "single_labels": "inflation_linked_subject_labels",
+        "super_labels": "inflation_linked_subject_labels_merged",
+        "reduced_super_labels": "inflation_linked_subject_labels_reduced_merged",
+    }
+
+    def format_label_set(x):
+        """Set -> 'A|B' ('' = annotator chose no label); anything else (not annotated) -> NaN."""
+        return "|".join(sorted(x)) if isinstance(x, (set, frozenset)) else np.nan
+
+    meta_df = df[df["annotator"].isin(ANNOTATORS)]
+    category_out_df = (
+        meta_df.drop_duplicates("item_id")
+        .set_index("item_id")[["text"]]
+        .sort_index()
+    )
+
+    # One column per annotator and label variant, e.g. annotator_11_reduced_super_labels
+    for suffix, col in LABEL_VARIANTS.items():
+        wide = meta_df.pivot(index="item_id", columns="annotator", values=col)
+        for annotator in ANNOTATORS:
+            values = wide[annotator] if annotator in wide.columns else pd.Series(np.nan, index=wide.index, dtype=object)
+            category_out_df[f"annotator_{annotator}_{suffix}"] = values.apply(format_label_set)
+
+    def agreement_info(item_id):
+        """Agreement of ANNOTATORS on the META_LEVEL labels for one document."""
+        label_sets = meta_df.loc[meta_df["item_id"] == item_id, LABEL_VARIANTS[META_LEVEL]].tolist()
+        votes = Counter(label for label_set in label_sets for label in label_set)
+        agreed = {label for label, count in votes.items() if count >= MIN_VOTES_FOR_AGREEMENT}
+        n_empty = sum(len(label_set) == 0 for label_set in label_sets)
+
+        if agreed:
+            status = "agreement"
+        elif n_empty >= MIN_VOTES_FOR_AGREEMENT:
+            status = "agreement_no_label"   # majority agrees there is no inflation cause
+        else:
+            status = "no_agreement"         # no label shared by a majority -> meta annotation
+
+        return len(label_sets), "|".join(sorted(agreed)), status
+
+    info = [agreement_info(i) for i in category_out_df.index]
+    category_out_df["n_annotators"] = [n for n, _, _ in info]
+    category_out_df[f"agreed_{META_LEVEL}"] = [a for _, a, _ in info]
+    category_out_df["agreement_status"] = [s for _, _, s in info]
+    category_out_df["needs_meta_annotation"] = category_out_df["agreement_status"] == "no_agreement"
+    category_out_df["meta_annotation"] = ""  # to be filled by the meta annotator
+
+    category_out_df = category_out_df.reset_index().rename(columns={"item_id": "doc_id"})
+
+    print("\nAgreement status (per-annotator export):")
+    print(category_out_df["agreement_status"].value_counts().to_string())
+    print(f"Documents needing meta annotation: {int(category_out_df['needs_meta_annotation'].sum())}")
+
+    category_csv_path = f"./export/annotations-per-annotator-{'-'.join([str(a) for a in ANNOTATORS])}.csv"
     category_out_df.to_csv(category_csv_path, index=False, encoding="utf-8")
-    print(f"Saved three-category super-label annotation data to {category_csv_path}")
-
-
-
-
+    print(f"Saved per-annotator annotation data to {category_csv_path}")
